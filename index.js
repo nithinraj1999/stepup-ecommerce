@@ -15,4 +15,4 @@ app.use(express.static(__dirname + "/public"));
 app.use("/", userRoute);
 app.use("/admin", adminRoute);
 
-app.listen(3000, () => console.log("Running.....http://localhost:3000"));
+app.listen(3000, () => console.log("Running....http://localhost:3000"));

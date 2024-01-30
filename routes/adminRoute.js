@@ -13,6 +13,9 @@ adminRoute.get("/user",adminController.loadUser)
 adminRoute.post("/user",adminController.restrict)
 
 adminRoute.get("/category",adminController.loadCategory)
+adminRoute.post("/category",adminController.addCategory)
+
+adminRoute.get("/editcategory",adminController.loadEditCategory)
 
 
 module.exports = adminRoute 

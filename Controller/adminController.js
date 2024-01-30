@@ -1,5 +1,5 @@
 const userModel = require("../Models/userModel")
-
+const category = require("../Models/categoryModel")
 const loginLoad = (req, res) => {
   res.render("adminLogin");
 };
@@ -41,9 +41,32 @@ const restrict = async (req,res)=>{
 }
 
 const loadCategory = (req,res)=>{
-  res.render("category")
+    
+    res.render("category")
+}
+
+const addCategory = async (req,res)=>{
+    const {maincategory} = req.body
+    const {subcategory} =req.body
+    const {description} =req.body
+    
+    const categoryCollection = new category({
+        name:maincategory,
+        subcategory:subcategory,
+        description:description
+    })
+    await categoryCollection.save()
+    
+    res.render("category")
+
+}
+
+const loadEditCategory = async (req,res)=>{
+    const find = await category.find({})
+    console.log(find);
+    res.render("editCategory",{find})
 }
 
 
 
-module.exports = { loginLoad,verifyLogin,loadUser,restrict,loadCategory};
+module.exports = { loginLoad,verifyLogin,loadUser,restrict,loadCategory,addCategory,loadEditCategory};
