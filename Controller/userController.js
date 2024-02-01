@@ -23,7 +23,7 @@ const signup = async (req,res)=>{
     })
 
     await userDOC.save()
-  
+    
     const otp = otpGenerator.generate(4,{
         upperCaseAlphabets:false,
         lowerCaseAlphabets:false,
@@ -52,20 +52,14 @@ const signup = async (req,res)=>{
 async function main() {
   // send mail with defined transport object
  try{
-    
     const info = await transporter.sendMail({
     from:  process.env.MAIL_USER, // sender address
     to: req.body.email, // list of receivers
     subject: "Here is your OTP", // Subject line
     text: otp, // plain text body
-   
   });
-
   console.log("Message sent: %s", info.messageId);
- 
- 
 }
-
 catch(error){
   console.log(error);
 }
@@ -75,7 +69,6 @@ main().catch(console.error);
   res.render("login")
 }
 }
-
 
 const loadOTP = (req,res)=>{
   res.render("otp-verification")
@@ -87,17 +80,15 @@ const verifyOTP = async (req,res)=>{
    const found = await otpModel.findOne({ email: { $eq: email } })
    const otp = found.otp
    if(found){
-    if(otp == req.body.otp){
-     
-    console.log(found);
-    res.render("home")
+    if(otp == req.body.otp){     
+     console.log(found);
+     res.render("home")
    }else{
     res.render("otp-verification",{email})
    }
    }else{
     res.render("login")
    }
-    
 }
 
 const loadLogin = (req,res)=>{

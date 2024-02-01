@@ -12,6 +12,10 @@ const categorySchema = mongoose.Schema({
     description:{
         type:String,
         required:true
+    },
+    isBlock:{
+        type:Boolean,
+        default:false
     }
 })
 

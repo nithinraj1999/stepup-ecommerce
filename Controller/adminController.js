@@ -6,8 +6,8 @@ const loginLoad = (req, res) => {
 
 
 const verifyLogin = async (req,res)=>{
-  let email = req.body.email
-  let password = req.body.password
+  let {email} = req.body
+  let {password} = req.body
   const find = await userModel.findOne({email:email,isAdmin:true})
   if(find) {
     if(find.password == password){
@@ -41,7 +41,6 @@ const restrict = async (req,res)=>{
 }
 
 const loadCategory = (req,res)=>{
-    
     res.render("category")
 }
 
@@ -56,17 +55,57 @@ const addCategory = async (req,res)=>{
         description:description
     })
     await categoryCollection.save()
-    
     res.render("category")
-
 }
 
+
+
 const loadEditCategory = async (req,res)=>{
-    const find = await category.find({})
-    console.log(find);
+    const find = await category.find({});
     res.render("editCategory",{find})
 }
 
 
 
-module.exports = { loginLoad,verifyLogin,loadUser,restrict,loadCategory,addCategory,loadEditCategory};
+const editCategory = async (req,res)=>{ 
+  const find = await category.find({});
+  const {action} = req.body
+  const id = req.query.id 
+  if(action ==="block"){
+    await category.updateOne({_id:id},{$set:{isBlock:true}})
+    res.render("editCategory",{find})
+  }else if(action === "unblock"){
+   await category.updateOne({_id:id},{$set:{isBlock:false}})
+    res.render("editCategory",{find})
+  }else if(action === "delete"){
+    await category.deleteOne({_id:id})
+     res.render("editCategory",{find})
+  }else if(action === "update"){
+    const find = await category.findOne({_id:id})
+    // res.render("updateCategory",{find})    
+    res.redirect(`/admin/updatecategory?id=${id}`)
+  }else{  
+    console.log("unknown button clicked");
+  }
+}
+
+const loadUpdateCategory = async (req,res)=>{
+   const id = req.query.id 
+   const find = await category.findOne({_id:id})
+   res.render("updateCategory",{find})
+}
+
+const updateCategory = async(req,res)=>{ 
+  const id = req.query.id
+  const {maincategory} = req.body
+  const {subcategory} = req.body 
+  const {description} = req.body 
+
+  await category.updateOne({_id:id},{$set:{name:maincategory,subcategory:subcategory,description:description}})
+
+  res.redirect("/admin/editcategory")
+}
+
+
+
+module.exports = { loginLoad,verifyLogin,loadUser,restrict,loadCategory,addCategory,loadEditCategory,editCategory,loadUpdateCategory,updateCategory};

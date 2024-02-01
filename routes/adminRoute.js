@@ -13,9 +13,12 @@ adminRoute.get("/user",adminController.loadUser)
 adminRoute.post("/user",adminController.restrict)
 
 adminRoute.get("/category",adminController.loadCategory)
-adminRoute.post("/category",adminController.addCategory)
+ adminRoute.post("/category",adminController.addCategory)
 
 adminRoute.get("/editcategory",adminController.loadEditCategory)
+adminRoute.post("/editcategory",adminController.editCategory) 
 
-
-module.exports = adminRoute 
+adminRoute.get("/updatecategory",adminController.loadUpdateCategory)
+adminRoute.post("/updatecategory",adminController.updateCategory)
+ 
+module.exports = adminRoute  
