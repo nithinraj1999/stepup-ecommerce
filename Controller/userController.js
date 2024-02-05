@@ -2,6 +2,7 @@ const otpGenerator = require("otp-generator")
 const userModel = require("../Models/userModel")
 const otpModel = require("../Models/otpModel")
 const nodemailer = require("nodemailer")
+const productModel = require("../Models/productModel")
 require('dotenv').config()
 
 const loadHomePage = (req,res)=>{
@@ -13,16 +14,16 @@ const loadsignup = (req,res)=>{
 }
 
 const signup = async (req,res)=>{
-  const email = req.body.email
+  const {email} = req.body
   const checkEmail = await userModel.find({email:email})
   if(checkEmail==0){
-    const userDOC = new userModel({
+    const userDoc = new userModel({
         name:req.body.name,
         email:req.body.email,
         password:req.body.password
     })
 
-    await userDOC.save()
+    await userDoc.save()
     
     const otp = otpGenerator.generate(4,{
         upperCaseAlphabets:false,
@@ -34,13 +35,15 @@ const signup = async (req,res)=>{
       email:req.body.email,
       otp:otp
     })
+
     await otpDOC.save()    
     res.render("otp-verification",{email})
-      const transporter = nodemailer.createTransport({
-  host:process.env.MAIL_HOST,
-  port: process.env.SMTP_PORT,
-  secure: false,
-  auth: {
+
+    const transporter = nodemailer.createTransport({
+    host:process.env.MAIL_HOST,
+    port: process.env.SMTP_PORT,
+    secure: false,
+    auth: {
     // TODO: replace `user` and `pass` values from <https://forwardemail.net>
     user:  process.env.MAIL_USER,
     pass:  process.env.MAIL_PASS,
@@ -72,23 +75,27 @@ main().catch(console.error);
 
 const loadOTP = (req,res)=>{
   res.render("otp-verification")
-
 }
 
 const verifyOTP = async (req,res)=>{
-   const email = req.query.email
-   const found = await otpModel.findOne({ email: { $eq: email } })
-   const otp = found.otp
-   if(found){
-    if(otp == req.body.otp){     
-     console.log(found);
-     res.render("home")
-   }else{
-    res.render("otp-verification",{email})
-   }
-   }else{
-    res.render("login")
-   }
+  try{
+    const {email} = req.query
+    const found = await otpModel.findOne({ email: { $eq: email } })
+    const otp = found.otp
+    if(found){
+     if(otp == req.body.otp){  
+       await userModel.updateOne({email:email},{$set:{isVerified:true}})
+       res.render("home")
+    }else{
+     res.render("otp-verification",{email})
+    }
+    }else{
+     res.render("login")
+    }
+  }catch(error){
+    console.log(error);
+  }
+   
 }
 
 const loadLogin = (req,res)=>{
@@ -96,18 +103,53 @@ const loadLogin = (req,res)=>{
 }
 
 const verifyLogin = async(req,res)=>{
-  email = req.body.loginEmail
-  pass = req.body.loginPassword
-  const found = await userModel.findOne({email:email})
-  if(found.password ==pass){
-    res.redirect("/")
-  }else{
-    res.redirect("/login")
-  } 
+  try{
+    
+      email = req.body.loginEmail
+      pass = req.body.loginPassword
+      const found = await userModel.findOne({email:email,isBlock:false,isAdmin:false,isVerified:true})
+      if(found){
+        if(found.password ==pass){
+        res.redirect("/")
+        }else{
+        res.redirect("/login")
+      }
+    }else{
+      res.redirect("/login")
+    }
+      }catch(error){
+      console.log(error);
+    }
+  
 }
 
+const loadProductList = async (req,res)=>{
+  const find = await productModel.find({}).populate("subcategory_id")
+  console.log(find);
+  res.render("productList",{find})
+}
 
+const loadMen = async (req,res)=>{
+   const find = await productModel.find({}).populate("subcategory_id")
+  res.render("mensProducts",{find})
+}
+
+const loadWomen = async (req,res)=>{
+   const find = await productModel.find({}).populate("subcategory_id")
+  res.render("womensProducts",{find})
+}
+const loadKids = async (req,res)=>{
+   const find = await productModel.find({}).populate("subcategory_id")
+  res.render("kidsProducts",{find})
+}
+
+const loadProductDetails = async(req,res)=>{
+  console.log(req.query.id);
+  const find = await  productModel.findOne({_id:req.query.id}).populate("subcategory_id")
+  console.log(find);
+  res.render("productDetails",{find})
+}
 
   
 
-module.exports = {loadHomePage,loadsignup,signup,loadOTP,verifyOTP,loadLogin,verifyLogin}
+module.exports = {loadHomePage,loadsignup,signup,loadOTP,verifyOTP,loadLogin,verifyLogin,loadProductList,loadMen,loadWomen,loadKids,loadProductDetails}

@@ -104,7 +104,7 @@
             </a>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" href="">
+            <a class="nav-link" href="/admin/addproduct">
               <span class="menu-icon">
                 <i class="mdi mdi-table-large"></i>
               </span>
@@ -268,7 +268,7 @@
               <li class="nav-item dropdown">
                 <a class="nav-link" id="profileDropdown" href="#" data-toggle="dropdown">
                   <div class="navbar-profile">
-                    <img class="img-xs rounded-circle" src="../../assets/images/faces/face15.jpg" alt="">
+                    <img class="img-xs rounded-circle" src="../../assets2/images/faces/face15.jpg" alt="">
                     <p class="mb-0 d-none d-sm-block navbar-profile-name">Henry Klein</p>
                     <i class="mdi mdi-menu-down d-none d-sm-block"></i>
                   </div>
@@ -310,7 +310,7 @@
         <!-- partial -->
         <div class="main-panel">
           <div class="content-wrapper">
-            <table class="table .table-striped">
+            <!-- <table class="table .table-striped">
               <thead>
                 <tr>
                   <th scope="col">#</th>
@@ -342,6 +342,43 @@
                     <td><button type="submit" name="action" value="update" class="btn btn-primary">Update</button></td>
                     </form>
                     <form method="post" action="/admin/editcategory?id=<%=cate._id %>">
+                    <td><button type="submit" name="action" value="delete" class="btn btn-danger">Delete</button></td>
+                    </form>
+                    
+                  </tr>
+                <% }) %>
+                
+              </tbody>
+            </table> -->
+            <table class="table .table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Subcategory</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% find.forEach((cate)=>{ %>
+                  <tr>
+                    <th scope="row"></th>
+                    <td><%=cate.name %></td>
+                    <td><%=cate.subcategory %></td>
+                    <td><%=cate.description %></td>
+                    <% if(cate.isBlock  == false){ %>
+                    <td>isActive</td>
+                    <% } else { %>
+                      <td>block</td>
+                     <% } %>
+                    <form method="post" action="/admin/editcategory?id=<%=cate._id %>">
+                    <td><button type="submit" name="action" value="block" class="btn btn-warning">Block</button></td>
+                    
+                    <td><button type="submit" name="action" value="unblock" class="btn btn-success">Unblock</button></td>
+                   
+                    <td><button type="submit" name="action" value="update" class="btn btn-primary">Update</button></td>
+                    
                     <td><button type="submit" name="action" value="delete" class="btn btn-danger">Delete</button></td>
                     </form>
                     
