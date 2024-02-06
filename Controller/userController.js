@@ -84,8 +84,8 @@ const loadOTP = (req,res)=>{
 const verifyOTP = async (req,res)=>{
   try{
     const {email} = req.query
-    const found = await otpModel.findOne({ email: { $eq: email } })
-    const otp = found.otp
+    const found = await otpModel.find({ email: { $eq: email } }).sort({_id:-1}).limit(1)
+    const otp = found[0].otp 
     if(found){
      if(otp == req.body.otp){  
        await userModel.updateOne({email:email},{$set:{isVerified:true}})
