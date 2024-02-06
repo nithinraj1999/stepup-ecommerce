@@ -580,7 +580,12 @@
 							    			<label for="register-user-name-2">Enter the otp sent to your email *</label>
 							    			<input type="text" class="form-control" id="register-user-name-2" name="otp" required>
 							    		</div><!-- End .form-group -->
-                                        		    		
+                                        
+                                            <div>
+                                                <a type="submit" href="/otp-verification?email=<%=email %>">Resend OTP</a>
+                                            </div>	
+                                       
+                                        	
 							    		<div class="form-footer">
 							    			<button type="submit" class="btn btn-outline-primary-2">
 			                					<span>Verify</span>

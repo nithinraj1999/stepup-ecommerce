@@ -20,61 +20,65 @@ const signup = async (req,res)=>{
     const userDoc = new userModel({
         name:req.body.name,
         email:req.body.email,
+        phone:req.body.phone,
         password:req.body.password
     })
 
     await userDoc.save()
-    
-    const otp = otpGenerator.generate(4,{
-        upperCaseAlphabets:false,
-        lowerCaseAlphabets:false,
-        specialChars:false
-    })
-
-    const otpDOC = new otpModel({
-      email:req.body.email,
-      otp:otp
-    })
-
-    await otpDOC.save()    
+    await otp(email)
     res.render("otp-verification",{email})
+//     const otp = otpGenerator.generate(4,{
+//         upperCaseAlphabets:false,
+//         lowerCaseAlphabets:false,
+//         specialChars:false
+//     })
 
-    const transporter = nodemailer.createTransport({
-    host:process.env.MAIL_HOST,
-    port: process.env.SMTP_PORT,
-    secure: false,
-    auth: {
-    // TODO: replace `user` and `pass` values from <https://forwardemail.net>
-    user:  process.env.MAIL_USER,
-    pass:  process.env.MAIL_PASS,
-  },
-});
+//     const otpDOC = new otpModel({
+//       email:req.body.email,
+//       otp:otp
+//     })
+
+//     await otpDOC.save()    
+//     res.render("otp-verification",{email})
+
+//     const transporter = nodemailer.createTransport({
+//     host:process.env.MAIL_HOST,
+//     port: process.env.SMTP_PORT,
+//     secure: false,
+//     auth: {
+//     // TODO: replace `user` and `pass` values from <https://forwardemail.net>
+//     user:  process.env.MAIL_USER,
+//     pass:  process.env.MAIL_PASS,
+//   },
+// });
 
 
-// async..await is not allowed in global scope, must use a wrapper
-async function main() {
-  // send mail with defined transport object
- try{
-    const info = await transporter.sendMail({
-    from:  process.env.MAIL_USER, // sender address
-    to: req.body.email, // list of receivers
-    subject: "Here is your OTP", // Subject line
-    text: otp, // plain text body
-  });
-  console.log("Message sent: %s", info.messageId);
-}
-catch(error){
-  console.log(error);
-}
-}
-main().catch(console.error);
+// // async..await is not allowed in global scope, must use a wrapper
+// async function main() {
+//   // send mail with defined transport object
+//  try{
+//     const info = await transporter.sendMail({
+//     from:  process.env.MAIL_USER, // sender address
+//     to: req.body.email, // list of receivers
+//     subject: "Here is your OTP", // Subject line
+//     text: otp, // plain text body
+//   });
+//   console.log("Message sent: %s", info.messageId);
+// }
+// catch(error){
+//   console.log(error);
+// }
+// }
+// main().catch(console.error);
 }else{
   res.render("login")
 }
 }
 
 const loadOTP = (req,res)=>{
-  res.render("otp-verification")
+  const {email} = req.query
+  otp(email)
+  res.render("otp-verification",{email})
 }
 
 const verifyOTP = async (req,res)=>{
@@ -171,6 +175,53 @@ const loadProductDetails = async(req,res)=>{
     res.render("productDetails",{find})
 }
 
-  
+
+
+//==========================================function for send OTP==========================
+  async function otp(email){
+      const otp = otpGenerator.generate(4,{
+        upperCaseAlphabets:false,
+        lowerCaseAlphabets:false,
+        specialChars:false
+    })
+
+    const otpDOC = new otpModel({
+      email:email,
+      otp:otp
+    })
+
+    await otpDOC.save()    
+    
+
+    const transporter = nodemailer.createTransport({
+    host:process.env.MAIL_HOST,
+    port: process.env.SMTP_PORT,
+    secure: false,
+    auth: {
+    // TODO: replace `user` and `pass` values from <https://forwardemail.net>
+    user:  process.env.MAIL_USER,
+    pass:  process.env.MAIL_PASS,
+  },
+});
+
+
+// async..await is not allowed in global scope, must use a wrapper
+async function main() {
+  // send mail with defined transport object
+ try{
+    const info = await transporter.sendMail({
+    from:  process.env.MAIL_USER, // sender address
+    to: email, // list of receivers
+    subject: "Here is your OTP", // Subject line
+    text: otp, // plain text body
+  });
+  console.log("Message sent: %s", info.messageId);
+}
+catch(error){
+  console.log(error);
+}
+}
+main().catch(console.error);
+  }
 
 module.exports = {loadHomePage,loadsignup,signup,loadOTP,verifyOTP,loadLogin,verifyLogin,loadProductList,loadMen,loadWomen,loadKids,loadProductDetails}
