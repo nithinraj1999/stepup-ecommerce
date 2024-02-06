@@ -181,4 +181,9 @@ const productImages = await Promise.all(req.files.map(async (file) => {
 
 
 
+
+
+
+
+
 module.exports = { loginLoad,verifyLogin,loadUser,restrict,loadCategory,addCategory,loadEditCategory,editCategory,loadUpdateCategory,updateCategory,loadAddProduct,addProduct};

@@ -320,21 +320,21 @@
                 <div class="row g-3">
                   <div class="col">
                     <label for="exampleFormControlTextarea1" class="form-label">Product Name</label>
-                    <input type="text" class="form-control" name="name"  aria-label="First name">
+                    <input type="text" class="form-control" required name="name"  aria-label="First name">
                   </div>
                   <div class="col">
                     <label for="exampleFormControlTextarea1" class="form-label">Product Manufacturer</label>
-                    <input type="text" class="form-control" name="manufacturer" aria-label="Last name">
+                    <input type="text" class="form-control" required  name="manufacturer" aria-label="Last name">
                   </div>
                   <div class="col">
                     <label for="exampleFormControlTextarea1" class="form-label">Product Price</label>
-                    <input type="text" class="form-control" name="price" aria-label="Last name">
+                    <input type="text" class="form-control"required name="price" aria-label="Last name">
                   </div>
                 </div>
               </div>
               <div class="mb-3">
                 <label for="exampleFormControlTextarea1" class="form-label">Product description</label>
-                <textarea class="form-control"required pattern="^\S.*$" name="description" id="exampleFormControlTextarea1" rows="3"></textarea>
+                <textarea class="form-control" required pattern="^\S.*$" name="description" id="exampleFormControlTextarea1" rows="3"></textarea>
               </div>
               <div class="mb-3" style="display: flex;">
                 <div style="margin-right: 10px;">
@@ -359,7 +359,7 @@
                
                   <div class="col">
                       <label for="quantity">Quantity:</label>
-                      <input type="number" class="form-control w-25" id="quantity" name="quantity" min="1" max="10" value="1">
+                      <input type="number" required class="form-control w-25" id="quantity" name="quantity" min="1" max="10" value="1">
                   </div>
            
 
@@ -367,7 +367,7 @@
             <div class="row g-3">
               <div class="col">
                 <label for="exampleFormControlTextarea1" class="form-label">Product image 1</label>
-                <input type="file" class="form-control" name="avatar" multiple >
+                <input type="file" class="form-control" required name="avatar" multiple >
               </div>
               
                 

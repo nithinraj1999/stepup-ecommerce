@@ -2,6 +2,7 @@ const express = require("express");
 const adminController = require("../Controller/adminController")
 const bodyParser = require("body-parser")
 const adminRoute = express();
+const validate = require("../validation/validation")
 const multer = require("multer")
 
 const path = require('path');
@@ -22,6 +23,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage:storage});
 
+
+
 adminRoute.use(bodyParser.json());
 adminRoute.use(bodyParser.urlencoded({ extended: true }));
 
@@ -41,6 +44,9 @@ adminRoute.get("/updatecategory",adminController.loadUpdateCategory)
 adminRoute.post("/updatecategory",adminController.updateCategory)
 
 adminRoute.get("/addproduct",adminController.loadAddProduct)
-adminRoute.post("/addproduct",upload.array("avatar",4),adminController.addProduct)
+adminRoute.post("/addproduct",upload.array("avatar",4),validate.userValidationRules(),validate.validate,adminController.addProduct)
+
+
+
 
 module.exports = adminRoute   

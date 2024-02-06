@@ -125,29 +125,50 @@ const verifyLogin = async(req,res)=>{
 
 const loadProductList = async (req,res)=>{
   const find = await productModel.find({}).populate("subcategory_id")
-  console.log(find);
   res.render("productList",{find})
 }
 
 const loadMen = async (req,res)=>{
-   const find = await productModel.find({}).populate("subcategory_id")
-  res.render("mensProducts",{find})
-}
+   
+  const find = await productModel.find({}).populate({
+    path: 'subcategory_id',
+    match: { 'name': 'Men' } // Filter subcategory documents
+  });
+
+  // Filter out documents where subcategory is null or didn't match the condition
+  const filteredFind = find.filter(item => item.subcategory_id !== null);
+
+  res.render("mensProducts", { find: filteredFind });
+};
+  
 
 const loadWomen = async (req,res)=>{
-   const find = await productModel.find({}).populate("subcategory_id")
-  res.render("womensProducts",{find})
+   const find = await productModel.find({}).populate({
+    path: 'subcategory_id',
+    match: { 'name': 'Women' } // Filter subcategory documents
+  });
+
+  // Filter out documents where subcategory is null or didn't match the condition
+  const filteredFind = find.filter(item => item.subcategory_id !== null);
+
+  res.render("womensProducts", { find: filteredFind });
+  
 }
 const loadKids = async (req,res)=>{
-   const find = await productModel.find({}).populate("subcategory_id")
-  res.render("kidsProducts",{find})
+   const find = await productModel.find({}).populate({
+    path: 'subcategory_id',
+    match: { 'name': 'Kids' } // Filter subcategory documents
+  });
+
+  // Filter out documents where subcategory is null or didn't match the condition
+  const filteredFind = find.filter(item => item.subcategory_id !== null);
+
+   res.render("kidsProducts",{find:filteredFind})
 }
 
 const loadProductDetails = async(req,res)=>{
-  console.log(req.query.id);
-  const find = await  productModel.findOne({_id:req.query.id}).populate("subcategory_id")
-  console.log(find);
-  res.render("productDetails",{find})
+   const find = await  productModel.findOne({_id:req.query.id}).populate("subcategory_id")
+    res.render("productDetails",{find})
 }
 
   

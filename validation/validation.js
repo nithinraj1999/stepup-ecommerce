@@ -1,13 +1,12 @@
-const express = require("express")
+
 const { body, validationResult } = require('express-validator')
 const userValidationRules = () => {
   return [
-    // username must be an email
-    body('username').isEmail(),
-    // password must be at least 5 chars long
-    body('password').isLength({ min: 5 }),
-  ]
-}
+    body('name').isLength({ min: 5 }).withMessage('Name must be at least 5 characters long'),
+    body('description').isLength({ min: 5 }).withMessage('Description must be at least 5 characters long'),
+  ];
+};
+
 
 const validate = (req, res, next) => {
   const errors = validationResult(req)
@@ -21,6 +20,8 @@ const validate = (req, res, next) => {
     errors: extractedErrors,
   })
 }
+ 
+
 
 module.exports = {
   userValidationRules,
