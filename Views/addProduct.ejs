@@ -98,7 +98,7 @@
             </a>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" href="">
+            <a class="nav-link" href="/admin/all-products">
               <span class="menu-icon">
                 <i class="mdi mdi-playlist-play"></i>
               </span>
@@ -337,6 +337,7 @@
                 <textarea class="form-control" required pattern="^\S.*$" name="description" id="exampleFormControlTextarea1" rows="3"></textarea>
               </div>
               <div class="mb-3" style="display: flex;">
+                
                 <div style="margin-right: 10px;">
                     <label for="main-category1" class="category-text">Main Category </label>
                     <select class="form-select" name="maincategory" style="width: 250px;" aria-label="Default select example">
@@ -350,10 +351,10 @@
                     <label for="main-category2" class="category-text">Sub Category </label>
                     <select class="form-select" name="subcategory" style="width: 250px;" aria-label="Default select example">
                       <% find.forEach((i)=>{ %>
-                        <option value="<%= i.subcategory %>"><%= i.subcategory %></option>
-                     <% }) %>
-                        
-                        
+                        <option value="<%=i %>"><%= i %></option>
+                      <% }) %>
+
+
                     </select>
                 </div>
                
@@ -361,7 +362,8 @@
                       <label for="quantity">Quantity:</label>
                       <input type="number" required class="form-control w-25" id="quantity" name="quantity" min="1" max="10" value="1">
                   </div>
-           
+                 
+                    
 
             </div>
             <div class="row g-3">
@@ -369,13 +371,13 @@
                 <label for="exampleFormControlTextarea1" class="form-label">Product image 1</label>
                 <input type="file" class="form-control" required name="avatar" multiple >
               </div>
-              
-                
+
+
               <div class="mb-3">
                 <button class="btn btn-primary" type="submit">Add Product</button>
               </div>
             </form>
-            </div>           
+            </div>               
              
             
           </div>

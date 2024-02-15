@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
         required:true
     },
     password:{
-        type:Number,
+        type:String,
         required:true
     },
     isAdmin:{
@@ -29,7 +29,38 @@ const userSchema = new mongoose.Schema({
     isVerified:{
         type:Boolean,
         default:false
-    }
+    },
+    address:[{
+        name:{
+            type:String, 
+            required:true
+        },
+        phone:{
+            type:Number, 
+            required:true
+        },
+        building:{
+            type:String, 
+            required:true
+        },
+        city:{
+            type:String, 
+            required:true
+        },
+        district:{
+            type:String, 
+            required:true
+        },
+        state:{
+            type:String, 
+            required:true
+        },
+        pincode:{
+            type:Number, 
+            required:true
+        }
+
+    }]
    
 })
 

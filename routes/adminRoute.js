@@ -44,9 +44,16 @@ adminRoute.get("/updatecategory",adminController.loadUpdateCategory)
 adminRoute.post("/updatecategory",adminController.updateCategory)
 
 adminRoute.get("/addproduct",adminController.loadAddProduct)
-adminRoute.post("/addproduct",upload.array("avatar",4),validate.userValidationRules(),validate.validate,adminController.addProduct)
+adminRoute.post("/addproduct",upload.array("avatar",4),adminController.addProduct)
+
+adminRoute.get("/all-products",adminController.allProducts)
+adminRoute.post("/all-products",adminController.editProducts)
 
 
+adminRoute.get("/update-product",adminController.loadUpdateProduct)
+adminRoute.post("/update-product",upload.array("avatar",4),adminController.updateProduct)
+adminRoute.get("/delete-img/*",adminController.deleteimage)
 
-
-module.exports = adminRoute   
+ 
+ 
+module.exports = adminRoute    

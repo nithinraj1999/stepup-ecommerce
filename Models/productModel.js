@@ -28,6 +28,11 @@ const productSchema = mongoose.Schema({
         type:Number,
         required:true
     },
+    list:{
+        type:Boolean,
+        default:true
+    },
+    
     product_image:[
         {
                 filename:{
@@ -41,12 +46,7 @@ const productSchema = mongoose.Schema({
                     resizedFile: {
                     type:String,
                     required:true
-                    }
-
-
-
-
-            
+                    }           
         }
     ]
 })
