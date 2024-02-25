@@ -30,6 +30,7 @@
     <!-- Main CSS File -->
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/plugins/nouislider/nouislider.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 
 <body>
@@ -69,7 +70,7 @@
                                     <li><a href="wishlist.html"><i class="icon-heart-o"></i>Wishlist <span>(3)</span></a></li>
                                     <li><a href="about.html">About Us</a></li>
                                     <li><a href="/account">My account</a></li>
-                                    <li><a href="#signin-modal" data-toggle="modal"><i class="icon-user"></i>Login</a></li>
+                                    <li><a href="/login" ><i class="icon-user"></i>Login</a></li>
                                 </ul>
                             </li>
                         </ul><!-- End .top-menu -->
@@ -121,91 +122,15 @@
                                 </div><!-- End .header-search-wrapper -->
                             </form>
                         </div><!-- End .header-search -->
-                        <div class="dropdown compare-dropdown">
-                            <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static" title="Compare Products" aria-label="Compare Products">
-                                <i class="icon-random"></i>
+                       
+                        <div class="cart-icon" style="margin-top: -2px;">
+                            <a href="/cart" class="cart-link">
+                                <i class="icon-shopping-cart" style="font-size: 3.2rem;  color: black;"></i>
+                                
                             </a>
 
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <ul class="compare-products">
-                                    <li class="compare-product">
-                                        <a href="#" class="btn-remove" title="Remove Product"><i class="icon-close"></i></a>
-                                        <h4 class="compare-product-title"><a href="product.html">Blue Night Dress</a></h4>
-                                    </li>
-                                    <li class="compare-product">
-                                        <a href="#" class="btn-remove" title="Remove Product"><i class="icon-close"></i></a>
-                                        <h4 class="compare-product-title"><a href="product.html">White Long Skirt</a></h4>
-                                    </li>
-                                </ul>
 
-                                <div class="compare-actions">
-                                    <a href="#" class="action-link">Clear All</a>
-                                    <a href="#" class="btn btn-outline-primary-2"><span>Compare</span><i class="icon-long-arrow-right"></i></a>
-                                </div>
-                            </div><!-- End .dropdown-menu -->
-                        </div><!-- End .compare-dropdown -->
-
-                        <div class="dropdown cart-dropdown">
-                            <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static">
-                                <i class="icon-shopping-cart"></i>
-                                <span class="cart-count">2</span>
-                            </a>
-
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <div class="dropdown-cart-products">
-                                    <div class="product">
-                                        <div class="product-cart-details">
-                                            <h4 class="product-title">
-                                                <a href="product.html">Beige knitted elastic runner shoes</a>
-                                            </h4>
-
-                                            <span class="cart-product-info">
-                                                <span class="cart-product-qty">1</span>
-                                                x $84.00
-                                            </span>
-                                        </div><!-- End .product-cart-details -->
-
-                                        <figure class="product-image-container">
-                                            <a href="product.html" class="product-image">
-                                                <img src="assets/images/products/cart/product-1.jpg" alt="product">
-                                            </a>
-                                        </figure>
-                                        <a href="#" class="btn-remove" title="Remove Product"><i class="icon-close"></i></a>
-                                    </div><!-- End .product -->
-
-                                    <div class="product">
-                                        <div class="product-cart-details">
-                                            <h4 class="product-title">
-                                                <a href="product.html">Blue utility pinafore denim dress</a>
-                                            </h4>
-
-                                            <span class="cart-product-info">
-                                                <span class="cart-product-qty">1</span>
-                                                x $76.00
-                                            </span>
-                                        </div><!-- End .product-cart-details -->
-
-                                        <figure class="product-image-container">
-                                            <a href="product.html" class="product-image">
-                                                <img src="assets/images/products/cart/product-2.jpg" alt="product">
-                                            </a>
-                                        </figure>
-                                        <a href="#" class="btn-remove" title="Remove Product"><i class="icon-close"></i></a>
-                                    </div><!-- End .product -->
-                                </div><!-- End .cart-product -->
-
-                                <div class="dropdown-cart-total">
-                                    <span>Total</span>
-
-                                    <span class="cart-total-price">$160.00</span>
-                                </div><!-- End .dropdown-cart-total -->
-
-                                <div class="dropdown-cart-action">
-                                    <a href="cart.html" class="btn btn-primary">View Cart</a>
-                                    <a href="checkout.html" class="btn btn-outline-primary-2"><span>Checkout</span><i class="icon-long-arrow-right"></i></a>
-                                </div><!-- End .dropdown-cart-total -->
-                            </div><!-- End .dropdown-menu -->
-                        </div><!-- End .cart-dropdown -->
+                        </div>
                     </div><!-- End .header-right -->
                 </div><!-- End .container -->
             </div><!-- End .header-middle -->
@@ -243,7 +168,7 @@
                                     <div class="row">
                                         <figure class="product-main-image">
                                             <% if (find.product_image && find.product_image.length >= 4 && find.product_image[3] && find.product_image[3].resizedFile) { %>
-                                                <img id="product-zoom" src="/uploads/<%= find.product_image[3].resizedFile %>" data-zoom-image="/uploads/<%= find.product_image[3].resizedFile %>" alt="product image">
+                                                <img id="product-zoom" src="/uploads/<%= find?.product_image[3]?.resizedFile %>" data-zoom-image="/uploads/<%= find?.product_image[3]?.resizedFile %>" alt="product image">
                                             <% } else { %>
                                                 <!-- Provide a placeholder or handle the absence of the image -->
                                                 <p>No image available</p>
@@ -257,8 +182,8 @@
                                         <div id="product-zoom-gallery" class="product-image-gallery">
                                             <% for (let i = 3; i >= 0; i--) { %>
                                                 <% if (find.product_image && find.product_image[i] && find.product_image[i].resizedFile) { %>
-                                                    <a class="product-gallery-item <%= i === 3 ? 'active' : '' %>" href="#" data-image="/uploads/<%= find.product_image[i].resizedFile %>" data-zoom-image="/uploads/<%= find.product_image[i].resizedFile %>">
-                                                        <img src="/uploads/<%= find.product_image[i].resizedFile %>" alt="product image <%= i %>">
+                                                    <a class="product-gallery-item <%= i === 3 ? 'active' : '' %>" href="#" data-image="/uploads/<%= find?.product_image[i]?.resizedFile %>" data-zoom-image="/uploads/<%= find?.product_image[i]?.resizedFile %>">
+                                                        <img src="/uploads/<%= find?.product_image[i]?.resizedFile %>" alt="product image <%= i %>">
                                                     </a>
                                                 <% } %>
                                             <% } %>
@@ -270,8 +195,8 @@
 
                             <div class="col-md-6">
                                 <div class="product-details">
-                                    <p><%=find.subcategory_id.name%></p>
-                                    <h1 class="product-title"><%=find.name%></h1><!-- End .product-title -->
+                                    <p><%=find?.subcategory_id?.name%></p>
+                                    <h1 class="product-title"><%=find?.name%></h1><!-- End .product-title -->
 
                                     <div class="ratings-container">
                                         <div class="ratings">
@@ -281,11 +206,11 @@
                                     </div><!-- End .rating-container -->
 
                                     <div class="product-price">
-                                        $<%=find.price%>
+                                        $<%=find?.price%>
                                     </div><!-- End .product-price -->
 
                                     <div class="product-content">
-                                        <p><%=find.description %></p>
+                                        <p><%=find?.description %></p>
                                     </div><!-- End .product-content -->
 
                                     <!-- <div class="details-filter-row details-row-size">
@@ -298,10 +223,10 @@
                                             <a href="#">
                                                 <img src="/uploads/<%= find.product_image[0].resizedFile %>" alt="product desc">
                                             </a>
-                                        </div><!-- End .product-nav -->
+                                        </div> End .product-nav -->
                                     <!-- </div>End .details-filter-row --> 
 
-                                    <div class="details-filter-row details-row-size">
+                                    <!-- <div class="details-filter-row details-row-size">
                                         <label for="size">Size:</label>
                                         <div class="select-custom">
                                             <select name="size" id="size" class="form-control">
@@ -316,20 +241,20 @@
                                                 <option value="xl">12 </option>
                                                 <option value="xl">12 </option>
                                             </select>
-                                        </div><!-- End .select-custom -->
-
+                                        </div>End .select-custom -->
+<!-- 
                                         <a href="#" class="size-guide"><i class="icon-th-list"></i>size guide</a>
-                                    </div><!-- End .details-filter-row -->
+                                    </div>End .details-filter-row --> 
 
                                     <div class="details-filter-row details-row-size">
-                                        <label for="qty">Qty:</label>
-                                        <div class="product-details-quantity">
+                                        <!-- <label for="qty">Qty:</label> -->
+                                        <!-- <div class="product-details-quantity">
                                             <input type="number" id="qty" class="form-control" value="1" min="1" max="10" step="1" data-decimals="0" required>
-                                        </div><!-- End .product-details-quantity -->
+                                        </div>End .product-details-quantity -->
                                     </div><!-- End .details-filter-row -->
 
                                     <div class="product-details-action">
-                                        <a href="#" class="btn-product btn-cart"><span>add to cart</span></a>
+                                        <a href="#" class="btn-product btn-cart addToCartBtn" product-price="<%=find?.price %>"  data-product-id="<%= find?._id %>"><span>add to cart</span></a>
 
                                         <div class="details-action-wrapper">
                                             <a href="#" class="btn-product btn-wishlist" title="Wishlist"><span>Add to Wishlist</span></a>
@@ -343,7 +268,7 @@
                                             <a href="#">Women</a>,
                                             <a href="#">Dresses</a>,
                                             <a href="#">Yellow</a>
-                                        </div><!-- End .product-cat -->
+                                        </div> End .product-cat -->
 
                                         <div class="social-icons social-icons-sm">
                                             <span class="social-label">Share:</span>
@@ -678,7 +603,7 @@
                                 </div><!-- End .product-action-vertical -->
 
                                 <div class="product-action">
-                                    <a href="#" class="btn-product btn-cart"><span>add to cart</span></a>
+                                    <a href="/cart" class="btn-product btn-cart"><span>add to cart</span></a>
                                 </div><!-- End .product-action -->
                             </figure><!-- End .product-media -->
 
@@ -1095,6 +1020,40 @@
             </div><!-- End .modal-content -->
         </div><!-- End .modal-dialog -->
     </div><!-- End .modal -->
+
+
+    <script>
+
+        document.querySelectorAll('.addToCartBtn').forEach(function(button) {
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                const data = {
+                    productId:this.getAttribute('data-product-id'),
+                    productPrice: this.getAttribute('product-price')
+                }
+                axios.post('/add-to-cart',data )
+                    .then(function(response) {
+                                       
+                        if (response.data.success) {
+                            console.log(response.data.message);
+                            
+                            window.location.href = '/cart?productId=' + data.productId;
+    
+                        } else {
+                            console.error(response.data.message);
+                        
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error adding item to cart:', error);
+                    });
+            });
+        });
+    
+    </script>
+
+
+
 
     <!-- Plugins JS File -->
     <script src="assets/js/jquery.min.js"></script>

@@ -21,6 +21,7 @@
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
   </head>
   <body>
+    
     <div class="container-scroller">
       <!-- partial:../../partials/_sidebar.html -->
       <!-- partial -->
@@ -186,10 +187,12 @@
               <h1 class="category-text">Update Category</h1>
               <div class="mb-3">
               <label for="main-category" class="category-text">Main Category</label>
-              <select class="form-select" name="maincategory"   aria-label="Default select example">
-                <option value="Men">Men</option>
-                <option value="Women">Women</option>
-                <option value="Kids">Kids</option>
+              <select class="form-select" name="maincategory" style="width: 250px;" aria-label="Default select example">
+                <% const selectedCategory = find?.name %>
+                <option value="<%= selectedCategory %>" selected><%= selectedCategory %></option>
+                <option value="Men" <% if (selectedCategory == "Men") { %>hidden<% } %>>Men</option>
+                <option value="Women" <% if (selectedCategory == "Women") { %>hidden<% } %>>Women</option>
+                <option value="Kids" <% if (selectedCategory == "Kids") { %>hidden<% } %>>Kids</option>
               </select>
               </div>
               <div class="mb-3">
@@ -204,7 +207,7 @@
                 <button class="btn btn-primary" type="submit">Update Category</button>
               </div>
             </form>
-            
+           
           </div> 
           
           <!-- content-wrapper ends -->
@@ -218,6 +221,10 @@
     </div>
     <!-- container-scroller -->
     <!-- plugins:js -->
+
+
+    
+      
     <script src="../../assets/vendors/js/vendor.bundle.base.js"></script>
     <!-- endinject -->
     <!-- Plugin js for this page -->

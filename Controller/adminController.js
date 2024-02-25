@@ -4,10 +4,16 @@ const productModal = require("../Models/productModel")
 const path = require("path")
 const sharp = require("sharp")
 const Swal = require("sweetalert2")
-const loginLoad = (req, res) => {
-  res.render("adminLogin");
-};
+const categoryModel = require("../Models/categoryModel")
 
+
+const loginLoad = (req, res) => {
+  if(req.session.admin_id){
+    res.render("adminDashboard")
+  }else{
+    res.render("adminLogin");
+  }
+};
 
 const verifyLogin = async (req,res)=>{
   try{  
@@ -16,6 +22,7 @@ const verifyLogin = async (req,res)=>{
     const find = await userModel.findOne({email:email,isAdmin:true})
     if(find) {
        if(find.password == password){
+        req.session.admin_id = find._id
         res.render("adminDashboard")
         }else{
         console.log("Failed");
@@ -27,6 +34,23 @@ const verifyLogin = async (req,res)=>{
      }
 }catch(error){
   console.log(error.message);
+}
+}
+
+
+
+const logout = (req,res)=>{
+  try {
+       
+    req.session.destroy((err) => {
+         if (err) {
+              console.log('logout failed')
+         } else {
+              res.redirect('/admin')
+         }
+    })
+} catch (error) {
+    console.log(error)
 }
 }
  
@@ -115,23 +139,30 @@ const loadUpdateCategory = async (req,res)=>{
 
 const updateCategory = async(req,res)=>{ 
   const id = req.query.id
-  const {maincategory} = req.body
-  const {subcategory} = req.body 
-  const {description} = req.body 
-  const find = await category.find({name:maincategory,subcategory:subcategory})
+  const {maincategory,subcategory,description} = req.body
+  const lowerSubcategory = subcategory.toLowerCase()
+  console.log(lowerSubcategory);
+  const find = await category.find({name:maincategory,subcategory:lowerSubcategory})
   if(find.length ==0){
-      await category.updateOne({_id:id},{$set:{name:maincategory,subcategory:subcategory,description:description}})
+      await category.updateOne({_id:id},{$set:{name:maincategory,subcategory:lowerSubcategory,description:description}})
       res.redirect("/admin/editcategory")
   }else{
-    const find = await category.findOne({_id:id})
-   res.render("updateCategory",{find})
+      const find = await category.findOne({_id:id})
+      res.render("updateCategory",{find})
   } 
-}
+}    
+
 
 const loadAddProduct = async (req,res)=>{
-  
   const find = await category.distinct("subcategory")
   res.render("addProduct",{find})
+}
+
+const loadSubcategories = async (req,res)=>{
+  const {mainCategory} = req.query
+  const subcategory = await category.distinct("subcategory",{name:mainCategory})
+  console.log(subcategory);
+  res.status(200).json({ message: "Subcategories loaded successfully",subcategory});
 }
 
 
@@ -241,8 +272,12 @@ const updateProduct = async(req,res)=>{
     try {
 
     const { id } = req.query;
-    const { name, manufacturer, price, description, maincategory, subcategory } = req.body;
-    const find = category.find({name:maincategory,subcategory:subcategory})
+    const { name, manufacturer, price, description, maincategory, subcategory,quantity } = req.body;
+
+    
+    console.log(req.body);
+    const find= await category.findOne({name:maincategory,subcategory:subcategory})
+    console.log(find);
     const productImages = await Promise.all(req.files.map(async (file) => {
       try {
           console.log("promise is working");
@@ -258,25 +293,43 @@ const updateProduct = async(req,res)=>{
               path: file.path,
               resizedFile: resizedFilename,
 
-          };
+          }; 
       } catch (error) {
           console.error('Error processing and saving image:', error);
           return null; // Exclude failed images
       }
   }))
     if(find){
-         const updatedProduct = await productModal.updateOne(
-      { _id: id },
-      {
-        $set: {
-          name: name,
-          manufacturer: manufacturer,
-          price: price,
-          description: description,
-          subcategory_id:find._id,
-          product_image:productImages
-          }    
-      })
+      
+      //    await productModal.updateOne(
+      // { _id: id },
+      // {
+      //   $set: {
+      //     name: name,
+      //     manufacturer: manufacturer,
+      //     price: price,
+      //     description: description,
+      //     subcategory_id:find._id,
+      //     product_image:productImages,
+      //     quantity:quantity
+      //     }
+      // })
+      const updatedFields = {
+        name: name,
+        manufacturer: manufacturer,
+        price: price,
+        description: description,
+        subcategory_id: find._id,
+        quantity: quantity
+      };
+  
+      if (productImages && productImages.length > 0) {
+        updatedFields.product_image = productImages;
+      }
+  
+      // Update the product
+      const result = await productModal.updateOne({ _id: id }, { $set: updatedFields });
+  
     }else{
       const subcategory1 = await category.distinct("subcategory")
       const find2 = await productModal.findOne({_id:id}).populate("subcategory_id")
@@ -287,7 +340,7 @@ const updateProduct = async(req,res)=>{
       const find2 = await productModal.findOne({_id:id}).populate("subcategory_id")
       res.render("updateProducts",{find:find2,subcategory:subcategory1})
   } catch (error) {
-    console.log(error);
+    console.log(error); 
     res.status(500).send("Internal Server Error");
   }
 };
@@ -335,6 +388,8 @@ module.exports = {
   loadUpdateProduct,
   updateProduct,
   deleteimage,
-  
+  loadSubcategories, 
+  logout,
+
 };
 

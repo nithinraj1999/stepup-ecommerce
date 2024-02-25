@@ -46,7 +46,7 @@ const productSchema = mongoose.Schema({
                     resizedFile: {
                     type:String,
                     required:true
-                    }           
+                    }
         }
     ]
 })

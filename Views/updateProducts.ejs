@@ -314,33 +314,33 @@
         <div class="main-panel">
           <div class="content-wrapper">
     
-            <form method="POST"  action="/admin/update-product?id=<%=find._id %>" enctype="multipart/form-data" >
+            <form method="POST"  action="/admin/update-product?id=<%=find?._id %>" enctype="multipart/form-data" >
               <h1 class="category-text">Update Product</h1>
               <div class="mb-3">
                 <div class="row g-3">
                   <div class="col">
                     <label for="exampleFormControlTextarea1" class="form-label">Product Name</label>
-                    <input type="text" class="form-control" value="<%=find.name %>" required name="name"  aria-label="First name">
+                    <input type="text" class="form-control" value="<%=find?.name %>" required name="name"  aria-label="First name">
                   </div>
                   <div class="col">
                     <label for="exampleFormControlTextarea1" class="form-label">Product Manufacturer</label>
-                    <input type="text" class="form-control"   value="<%=find.manufacturer %>" required  name="manufacturer" aria-label="Last name">
+                    <input type="text" class="form-control"   value="<%=find?.manufacturer %>" required  name="manufacturer" aria-label="Last name">
                   </div>
                   <div class="col">
                     <label for="exampleFormControlTextarea1" class="form-label">Product Price</label>
-                    <input type="text" class="form-control"  value="<%=find.price %>"required name="price" aria-label="Last name">
+                    <input type="text" class="form-control"  value="<%=find?.price %>"required name="price" aria-label="Last name">
                   </div>
                 </div>
               </div>
               <div class="mb-3">
                 <label for="exampleFormControlTextarea1" class="form-label">Product description</label>
-                <input class="form-control" required pattern="^\S.*$" value="<%=find.description %>" va  name="description" id="exampleFormControlTextarea1" rows="3">
+                <input class="form-control" required pattern="^\S.*$" value="<%=find?.description %>" va  name="description" id="exampleFormControlTextarea1" rows="3">
               </div>
               <div class="mb-3" style="display: flex;">
                 <div style="margin-right: 10px;">
                     <label for="main-category1" class="category-text">Main Category </label>
                     <select class="form-select" name="maincategory" style="width: 250px;" aria-label="Default select example">
-                      <% const selectedCategory = find.subcategory_id.name; %>
+                      <% const selectedCategory = find?.subcategory_id?.name; %>
                       <option value="<%= selectedCategory %>" selected><%= selectedCategory %></option>
                       <option value="Men" <% if (selectedCategory == "Men") { %>hidden<% } %>>Men</option>
                       <option value="Women" <% if (selectedCategory == "Women") { %>hidden<% } %>>Women</option>
@@ -352,10 +352,10 @@
                   <label for="main-category2" class="category-text">Sub Category </label>
                   
                   <select class="form-select" name="subcategory" style="width: 250px;" aria-label="Default select example">
-                     <% const selectedSubcategory = find.subcategory_id ? find.subcategory_id.subcategory : ''; %>
-                      <option value="<%= find.subcategory_id.subcategory %>" selected><%= find.subcategory_id.subcategory %></option>
+                     <% const selectedSubcategory = find?.subcategory_id ? find?.subcategory_id?.subcategory : ''; %>
+                      <option value="<%= find?.subcategory_id?.subcategory %>" selected><%= find?.subcategory_id?.subcategory %></option>
                      <% subcategory.forEach(sub => { %>
-                         <option value="<%= sub %>" <% if (sub == find.subcategory_id.subcategory ){ %>hidden<% }  %>><%= sub %></option>
+                         <option value="<%= sub %>" <% if (sub == find?.subcategory_id?.subcategory ){ %>hidden<% }  %>><%= sub %></option>
                       <% }); %>
                       </select>
 
@@ -364,7 +364,7 @@
                
                   <div class="col">
                       <label for="quantity">Quantity:</label>
-                      <input type="number" required class="form-control w-25" value="<%=find.quantity %>" id="quantity" name="quantity" min="1" max="10" value="1">
+                      <input type="number" required class="form-control w-25" value="<%=find?.quantity %>" id="quantity" name="quantity" min="1"  value="1">
                   </div>
                   <br>
               
@@ -373,17 +373,17 @@
             </div>
             <div class="mb-3">
               <div class="card-group">      
-              <% if (find.product_image && find.product_image.length) { %>
-                <% for (let i = find.product_image.length -1; i >= 0; i--) { %>
+              <% if (find?.product_image && find?.product_image?.length) { %>
+                <% for (let i = find?.product_image?.length -1; i >= 0; i--) { %>
                  
                 <div class="card" style="width: 200px;" >
-                  <img class="card-img-top" src="/uploads/<%= find.product_image[i].resizedFile %>"  alt="Card image cap">
-                  <div class="card-body">                   
-                    <a href="/admin/delete-img/?product_id=<%= find._id %>&img_id=<%= find.product_image[i]._id %>" class="btn btn-primary bg-danger" >DELETE</a>
+                  <img class="card-img-top" src="/uploads/<%= find?.product_image[i]?.resizedFile %>"  alt="Card image cap">
+                  <div class="card-body">
+                    <a href="/admin/delete-img/?product_id=<%= find?._id %>&img_id=<%= find?.product_image[i]?._id %>" class="btn btn-primary bg-danger" >DELETE</a>
                   </div>
                 </div>
                 <% } %>
-              </div>  
+              </div>
               <% } else { %>
                 <!-- Handle the case when find.product_image is undefined or empty -->
               <% } %>
@@ -391,7 +391,7 @@
               <br>
               <div class="col">
                 <label for="exampleFormControlTextarea1" class="form-label">Product image 1</label>
-                <input type="file" class="form-control" required name="avatar" multiple >
+                <input type="file" class="form-control"  name="avatar" multiple >
               </div>
               <br>
               <div class="mb-3">
@@ -403,11 +403,6 @@
             
           </div>
 
-
-
-
-          
-          
           <!-- content-wrapper ends -->
           <!-- partial:../../partials/_footer.html -->
           <!-- partial -->

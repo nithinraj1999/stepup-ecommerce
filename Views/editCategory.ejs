@@ -171,7 +171,10 @@
                 </form>
               </li>
             </ul>
-            <ul class="navbar-nav navbar-nav-right">              
+            <ul class="navbar-nav navbar-nav-right">  
+              <li>
+                <a type="button" href="admin/logout">Logout</a>
+               </li>            
               <li class="nav-item nav-settings d-none d-lg-block">
                 <a class="nav-link" href="#">
                   <i class="mdi mdi-view-grid"></i>
@@ -379,7 +382,7 @@
                    
                     <td><button type="submit" name="action" value="update" class="btn btn-primary">Update</button></td>
                     
-                    <td><button type="submit" name="action" value="delete" class="btn btn-danger">Delete</button></td>
+                    <td><button type="submit" name="action" value="delete" onclick="showAlert()" class="btn btn-danger">Delete</button></td>
                     </form>
                     
                   </tr>
@@ -399,6 +402,17 @@
     </div>
     <!-- container-scroller -->
     <!-- plugins:js -->
+<script>
+   function showAlert(){
+    alert("this wiill delete the category")
+   }
+</script>
+    
+
+
+
+
+
     <script src="../../assets/vendors/js/vendor.bundle.base.js"></script>
     <!-- endinject -->
     <!-- Plugin js for this page -->

@@ -19,6 +19,8 @@
     <link rel="shortcut icon" href="../../assets2/images/favicon.png" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
   </head>
   <body>
     <div class="container-scroller">
@@ -174,7 +176,9 @@
               </li>
             </ul>
             <ul class="navbar-nav navbar-nav-right">
-              
+              <li>
+               <a type="button" href="admin/logout">Logout</a>
+              </li>
               <li class="nav-item nav-settings d-none d-lg-block">
                 <a class="nav-link" href="#">
                   <i class="mdi mdi-view-grid"></i>
@@ -340,27 +344,24 @@
                 
                 <div style="margin-right: 10px;">
                     <label for="main-category1" class="category-text">Main Category </label>
-                    <select class="form-select" name="maincategory" style="width: 250px;" aria-label="Default select example">
-                      
+                    <select class="form-select" name="maincategory" style="width: 250px;" aria-label="Default select example"  onchange="getSubcategories(this.value)">
+                      <option value="" disabled selected>Choose Category</option>
                         <option value="Men">Men</option>
                         <option value="Women">Women</option>
                         <option value="Kids">Kids</option>
                     </select>
                 </div>
-                <div>
-                    <label for="main-category2" class="category-text">Sub Category </label>
-                    <select class="form-select" name="subcategory" style="width: 250px;" aria-label="Default select example">
-                      <% find.forEach((i)=>{ %>
-                        <option value="<%=i %>"><%= i %></option>
-                      <% }) %>
-
-
-                    </select>
-                </div>
+                <div style="margin-right: 10px;">
+                  <label for="sub-category" class="category-text">Sub Category </label>
+                  <select class="form-select" name="subcategory" style="width: 250px;" aria-label="Default select example" id="subcategoryDropdown">
+                     
+                  </select>
+              </div>
+              
                
                   <div class="col">
                       <label for="quantity">Quantity:</label>
-                      <input type="number" required class="form-control w-25" id="quantity" name="quantity" min="1" max="10" value="1">
+                      <input type="number" required class="form-control w-25" id="quantity" name="quantity" min="1"  value="1">
                   </div>
                  
                     
@@ -392,6 +393,41 @@
     </div>
     <!-- container-scroller -->
     <!-- plugins:js -->
+
+
+    <script>
+
+      function getSubcategories(mainCategory){
+
+        axios.get(`/admin/load-subcategories?mainCategory=${mainCategory}`)
+        .then(response =>{
+
+          console.log(response.data.subcategory);
+          const subcategoryDropdown = document.getElementById('subcategoryDropdown');
+                subcategoryDropdown.innerHTML = '';
+
+
+                response.data.subcategory.forEach(function (subcategory) {
+                    const option = document.createElement('option');
+                    option.value = subcategory;
+                    option.text = subcategory;
+                    subcategoryDropdown.add(option);
+                });
+          
+        })
+        .catch(error=>{
+          console.log(error);
+        })
+      }
+    </script>
+
+
+
+
+
+
+
+
     <script src="../../assets/vendors/js/vendor.bundle.base.js"></script>
     <!-- endinject -->
     <!-- Plugin js for this page -->
