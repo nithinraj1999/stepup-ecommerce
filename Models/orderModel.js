@@ -7,6 +7,10 @@ const orderSchema = mongoose.Schema({
         ref:'User',
         required:true
     },
+    order_id:{
+        type: String,
+        required: true,
+    },
     products: [{
         name: {
             type: String,
@@ -17,10 +21,10 @@ const orderSchema = mongoose.Schema({
             required: true,
         },
         quantity: {
-            type: Number,
+            type: Number, 
             required: true,
-        },
-        price: {
+        },  
+        price: { 
             type: Number,
             required: true,
         },
@@ -28,10 +32,44 @@ const orderSchema = mongoose.Schema({
             type: Number,
             required: true,
         },
+        productImage:{
+            type:String,
+            required:true
+        },
+        orderStatus:{
+            type:String,
+            default:"Placed",
+           
+        },
+        productId:{
+            type:mongoose.Schema.Types.ObjectId,
+            required:true
+        },
+        reason:{
+            type:String,
+            default:" "
+        }
     }],
+    addressId:{
+             type:String,
+             required:true
+    },
+    paymentMethod:{
+        type:String,
+        required:true
+    },
+    orderDate: {
+        type: Date,
+        default: Date.now 
+      },
     subTotal: {
         type: Number,
         required: true,
-    }
+    },
+    
+
 });
+
+
+ 
 module.exports = mongoose.model("Order",orderSchema)

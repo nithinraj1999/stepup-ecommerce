@@ -8565,7 +8565,7 @@ pre {
   .offset-xl-11 {
     margin-left: 91.66667%; } }
 
-.table, .jsgrid .jsgrid-table {
+/* .table, .jsgrid .jsgrid-table {
   width: 100%;
   margin-bottom: 1rem;
   color: #ffffff; }
@@ -8673,7 +8673,8 @@ pre {
   background-color: #7543d0; }
   .table-hover .table-info:hover > td,
   .table-hover .table-info:hover > th {
-    background-color: #7543d0; }
+    background-color: #7543d0; 
+  }
 
 .table-warning,
 .table-warning > th,
@@ -8821,7 +8822,7 @@ pre {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch; }
   .table-responsive > .table-bordered {
-    border: 0; }
+    border: 0; } */
 
 .form-control, .asColorPicker-input, .dataTables_wrapper select, .jsgrid .jsgrid-table .jsgrid-filter-row input[type=text],
 .jsgrid .jsgrid-table .jsgrid-filter-row select, .jsgrid .jsgrid-table .jsgrid-filter-row input[type=number], .select2-container--default .select2-selection--single, .select2-container--default .select2-selection--single .select2-search__field, .typeahead,

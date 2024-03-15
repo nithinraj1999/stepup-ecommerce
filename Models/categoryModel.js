@@ -16,8 +16,13 @@ const categorySchema = mongoose.Schema({
     isBlock:{
         type:Boolean,
         default:false
-    }
+    },
+    offer:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"offer"
+    },
+    
 })
-
+ 
 
 module.exports = mongoose.model("Category",categorySchema)

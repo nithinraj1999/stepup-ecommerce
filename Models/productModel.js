@@ -33,6 +33,7 @@ const productSchema = mongoose.Schema({
         default:true
     },
     
+    
     product_image:[
         {
                 filename:{
@@ -45,11 +46,12 @@ const productSchema = mongoose.Schema({
                 },
                     resizedFile: {
                     type:String,
-                    required:true
+                    required:true,
+                    default:"https://via.placeholder.com/80"
                     }
         }
     ]
 })
 
-
+ 
 module.exports = mongoose.model("products",productSchema)

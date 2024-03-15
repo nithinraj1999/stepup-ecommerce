@@ -8,7 +8,7 @@ const nocache = require("nocache");
 
 
 const path = require('path');
-
+adminRoute.set("views","views/admin")
 const auth = require("../middleware/authAdmin");
 adminRoute.use(nocache());
 
@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
     },
 });
 
-const upload = multer({ storage:storage});
+const upload = multer({ storage:storage}); 
 
 
 
@@ -37,7 +37,6 @@ adminRoute.get("/",adminController.loginLoad)
 adminRoute.post("/",adminController.verifyLogin)
 
 adminRoute.get("/logout",adminController.logout); 
- 
 adminRoute.get("/user",auth.isLogin,adminController.loadUser)
 adminRoute.post("/user",adminController.restrict)
 
@@ -62,6 +61,24 @@ adminRoute.get("/update-product",auth.isLogin,adminController.loadUpdateProduct)
 adminRoute.post("/update-product",auth.isLogin,upload.array("avatar",4),adminController.updateProduct)
 adminRoute.get("/delete-img/*",auth.isLogin,adminController.deleteimage)
 
- 
-    
-module.exports = adminRoute
+
+//=========================== order ==========
+
+adminRoute.get("/orders",auth.isLogin,adminController.loadOrders)
+adminRoute.post("/order-status",auth.isLogin,adminController.orderStatus)
+adminRoute.post("/customer-Request",adminController.orderRequest)
+
+//====================== coupens =================
+
+adminRoute.get("/coupens",adminController.loadCoupenPage)
+adminRoute.post("/add-new-coupen",adminController.addNewCoupen)
+adminRoute.post("/delete-coupon",adminController.deleteCoupen)
+
+//=================== offer ======================================
+
+adminRoute.get("/offer",adminController.offer)
+adminRoute.post("/add-offer",adminController.addOffer) 
+adminRoute.post("/apply-offer",adminController.applyOffer)
+
+
+module.exports = adminRoute 

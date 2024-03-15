@@ -6,27 +6,44 @@ const nodemailer = require("nodemailer")
 const productModel = require("../Models/productModel")
 const cartModal = require("../Models/cartModal")
 const orderModal = require("../Models/orderModel")
+const wishListModel = require("../Models/wishListModel")
+const walletModel = require("../Models/walletModel")
 const Swal = require('sweetalert2');
 const mongoose = require('mongoose');
+const {v4:uuidv4} = require('uuid')
+const Razorpay = require("razorpay")
 require('dotenv').config()
 const bcrypt = require('bcrypt')
+const crypto = require("crypto")
+const coupenModel = require("../Models/coupenModel")
 
-
+var instance = new Razorpay(
+  { 
+    key_id: 'rzp_test_EXuX7ue9wXyfnc', 
+    key_secret: 'BnbkfGmhHXITc2ZOkHCgfk1M' 
+  })
+ 
 
 const securePassword = async (password) => {
   try {
        const passwordHash = await bcrypt.hash(password, 10)
        return passwordHash
   } catch (error) {
-       console.log(error)
+       console.error(error)
   }
 }
 
 const loadHomePage = (req,res)=>{
+  let isLoggedIn
+    if(req.session.user_id){
+       isLoggedIn = true
+    }else{
+      isLoggedIn = false
+    }
   if(req.session.user_id){
-    res.render("firstPage")
+    res.render("home",{isLoggedIn})
   }else{
-    res.render("home")
+    res.render("home",{isLoggedIn})
   }
    
 }
@@ -35,26 +52,6 @@ const loadsignup = (req,res)=>{
     res.render("login")
 }
 
-// const signup = async (req,res)=>{
-//   const {email} = req.body
-//   const checkEmail = await userModel.find({email:email})
-//   if(checkEmail==0){
-//     const spassword = await securePassword(req.body.password)
-//     const userDoc = new userModel({
-//         name:req.body.name,
-//         email:req.body.email, 
-//         phone:req.body.phone,
-//         password:spassword
-//     })
-
-//     await userDoc.save()
-//     await otp(email)
-//     res.render("otp-verification",{email})
-
-//  }else{
-//   res.render("login")
-//  }
-//  }  
 
 const signup = async (req,res)=>{
   const {email,name,phone,password} = req.body
@@ -89,12 +86,12 @@ const signup = async (req,res)=>{
 const loadOTP = async(req,res)=>{
 
   const email = req.query.email
-  console.log(email);
   res.render("otp-verification",{email:email})
 }
 
 const resendOTP =async (req,res)=>{
   const {email} =req.body
+  
   await otp(email)
    res.json({success:true,email})
 }
@@ -104,35 +101,48 @@ const resendOTP =async (req,res)=>{
 const verifyOTP = async (req,res)=>{
 
   try{
-    // const {email} = req.query
+    let isLoggedIn
+    if(req.session.user_id){
+       isLoggedIn = true
+    }else{ 
+      isLoggedIn = false
+    }
     const {hiddenEmail} = req.body
     const email = hiddenEmail
     const found = await otpModel.find({ email: { $eq: email } }).sort({_id:-1}).limit(1)
-    // const otp = found[0].otp 
+   
     if(found.length == 0){
-      res.render("home")
+      res.render("home",{isLoggedIn})
     }
-    else if(found){    
+
+    else if(found){
       const otp = found[0].otp 
      if(otp == req.body.otp){  
        await userModel.updateOne({email:email},{$set:{isVerified:true}})
-      res.render('home');
+       res.render('home',{isLoggedIn});
  
     }else{
-     res.render("otp-verification",{email})
+      req.flash('message', 'Invalid OTP. Please try again.');
+      const message = req.flash('message')
+     res.render("otp-verification",{email,message:message })
     }
     }else{
      res.render("login")
     } 
-    
   }catch(error){
     console.log(error);
   }
 }
 //=============================================
 const loadLogin = (req,res)=>{
+  let isLoggedIn
+    if(req.session.user_id){
+       isLoggedIn = true
+    }else{
+      isLoggedIn = false
+    }
   
-  res.render("login")
+  res.render("login",{isLoggedIn})
 }
 //=====================================
 const verifyLogin = async(req,res)=>{
@@ -148,7 +158,7 @@ const verifyLogin = async(req,res)=>{
      )
         if(passwordMatch){
           req.session.user_id = found._id  
-          res.render("firstPage")
+          res.redirect("/")
         }else{
         res.redirect("/login")
       }
@@ -158,68 +168,104 @@ const verifyLogin = async(req,res)=>{
       }catch(error){  
       console.log(error);
     }
-  
+   
 }
 
 const loadProductList = async (req,res)=>{
-  let isLoggedIn
-    if(req.session.user_id){
-       isLoggedIn = true
-    }else{
-      isLoggedIn = false
-    }
-  const find = await productModel.find({list:true}).populate("subcategory_id")
-  const subcategory = await categoryModal.distinct("subcategory")
-  const brand = await productModel.distinct("manufacturer")
-  res.render("productList",{find,category:"All products",brand,subcategory,isLoggedIn})
-
-}
+  try{
+    const userId = req.session.user_id
+    let isLoggedIn
+      if(req.session.user_id){
+         isLoggedIn = true
+      }else{
+        isLoggedIn = false
+      }
+    const find = await productModel.find({list:true}).populate("subcategory_id")
+    const subcategory = await categoryModal.distinct("subcategory")
+    const brand = await productModel.distinct("manufacturer")
+    const wishList = await wishListModel.findOne({userId:userId})
+    const cart = await cartModal.findOne({userId:userId})
+    // res.render("productList",{find,category:"All products",brand,subcategory,isLoggedIn,wishList})
+    res.render("productGrid",{find,category:"All products",brand,cart,subcategory,isLoggedIn,wishList,cat:"all"})
+  }
+  catch(error){
+    console.error(error);  
+  }
+  
+ 
+} 
 
 //=========================================Load Men products on ===============================
 const loadMen = async (req,res)=>{
- let isLoggedIn
+  try{
+
+  
+  const userId = req.session.user_id
+  let isLoggedIn
     if(req.session.user_id){
        isLoggedIn = true
-    }else{
-      isLoggedIn = false
+    }else{  
+      isLoggedIn = false 
     }
     const find = await productModel.find({list:true}).populate({
       path: 'subcategory_id',
       match: { 'name': 'Men' } 
     });
-    // Filter out documents where subcategory is null or didn't match the condition
     const filteredFind = find.filter(item => item.subcategory_id !== null);
     const brand = await productModel.distinct("manufacturer")
     const subcategory = await categoryModal.distinct("subcategory")
-    res.render("productList", { find: filteredFind ,category:"Men's shoes",brand,subcategory,isLoggedIn});
- 
+    const wishList = await wishListModel.findOne({userId:userId})
+    const cart = await cartModal.findOne({userId:userId})
+    res.render("productGrid",{find: filteredFind,cart,category:"Men's shoes",brand,subcategory,isLoggedIn,wishList,cat:"Men"})
+
+  }
+  catch(error){
+    console.error(error);
+  }
   }
   
    
 //=========================================Load women productspage===============================
 
 const loadWomen = async (req,res)=>{
+  try{
+
+  
+  const userId = req.session.user_id
   let isLoggedIn
     if(req.session.user_id){
        isLoggedIn = true
     }else{
-      isLoggedIn = false
+      isLoggedIn = false   
     }
    const find = await productModel.find({list:true}).populate({
     path: 'subcategory_id',
-    match: { 'name': 'Women' } 
+    match: { 'name': 'Women' }  
   });
 
   const filteredFind = find.filter(item => item.subcategory_id !== null);
   const brand = await productModel.distinct("manufacturer")
   const subcategory = await categoryModal.distinct("subcategory")
-  res.render("productList", { find: filteredFind,category:"Women's shoes" ,brand,subcategory,isLoggedIn});
-  
+  const wishList = await wishListModel.findOne({userId:userId})  
+  const cart = await cartModal.findOne({userId:userId})
+
+  // res.render("productList", { find: filteredFind,category:"Women's shoes" ,brand,subcategory,isLoggedIn,wishList});
+  res.render("productGrid",{find: filteredFind,cart,category:"Women's shoes",brand,subcategory,isLoggedIn,wishList,cat:"Women"})
+
+
+}
+catch(error){
+  console.error(error);
+}
 }
 
 //=========================================Load Kids products ===============================
 
 const loadKids = async (req,res)=>{
+try{
+
+
+  const userId = req.session.user_id
   let isLoggedIn
     if(req.session.user_id){
        isLoggedIn = true
@@ -235,14 +281,25 @@ const loadKids = async (req,res)=>{
   const filteredFind = find.filter(item => item.subcategory_id !== null);
   const brand = await productModel.distinct("manufacturer")
   const subcategory = await categoryModal.distinct("subcategory")
-   res.render("productList",{find:filteredFind,category:"Kids shoes",brand,subcategory,isLoggedIn})
+  const wishList = await wishListModel.findOne({userId:userId})
+  const cart = await cartModal.findOne({userId:userId})
+
+  //  res.render("productList",{find:filteredFind,category:"Kids shoes",brand,subcategory,isLoggedIn,wishList})
+  res.render("productGrid",{find:filteredFind,cart,category:"Kids shoes",brand,subcategory,isLoggedIn,wishList,cat:"Kids"})
+
 }
- 
+catch(error){
+  console.error(error);
+}
+}  
+  
 //===================================Load product details page==========================================
 
 const loadProductDetails = async(req,res)=>{
+  const userId = req.session.user_id
    const find = await  productModel.findOne({_id:req.query.id}).populate("subcategory_id")
-    res.render("productDetails",{find})
+   const wishList = await wishListModel.findOne({userId:userId})
+    res.render("productDetails",{find,wishList})
 }
 
 
@@ -304,6 +361,7 @@ main().catch(console.error);
                    res.redirect('/')
               }
          })
+       
     } catch (error) {
          console.log(error)
     }
@@ -313,13 +371,20 @@ main().catch(console.error);
 
 const myAccount = async (req,res)=>{
 
+try{
+
   const userId = req.session.user_id
   const find = await userModel.findOne({_id:userId})
-  const orders = await orderModal.find({})
-  res.render("myAccount",{find,orders})
+  const orders = await orderModal.find({userId:userId}).sort({_id:-1})
+  const wallet = await walletModel.findOne({userId:userId})
 
+  res.render("myAccount",{find,orders,wallet})
 }
-const editUser = async (req,res)=>{
+catch(error){
+  console.error(error);
+}
+}
+const editUser = async (req,res)=>{ 
 
   const {name,email,phone,userId} = req.body
   const find = await userModel.findOne({_id:userId})
@@ -424,7 +489,7 @@ const loadCart = async (req,res)=>{
         { $set: { "product.$.total": total } }
       );
 
-      
+        
     }
   }
 
@@ -441,7 +506,6 @@ const loadCart = async (req,res)=>{
 
 }
 
- 
 
 const addTocart = async (req, res) => { 
  
@@ -449,17 +513,16 @@ const addTocart = async (req, res) => {
     const userId = req.session.user_id 
     const {productPrice,productId} = req.body
     const price = parseInt(productPrice)
-
     let userCart = await cartModal.findOne({ userId: userId });
-  
+
     if (!userCart) {
-    userCart = new cartModal(
-      { userId: userId, 
+    userCart = new cartModal(  
+      { userId: userId,  
        product:[ {     
         productId:productId, 
         total:price 
        }],
-       subTotal:price
+       subTotal:price  
 
        });   
     await userCart.save()
@@ -478,7 +541,7 @@ const addTocart = async (req, res) => {
     if(find.length == 0){
       await cartModal.updateOne(
         {userId: userId},
-        {$push:{product:{ 
+        {$push:{product:{       
         productId:productId,
         total:price
         }}})  
@@ -492,11 +555,7 @@ const addTocart = async (req, res) => {
         res.status(200).json({ success: true, message: 'Item added/updated to cart successfully' });
 
     }else{
-      const find = await cartModal.find({ userId: userId, 'product.productId': productId })
-      await cartModal.updateOne(
-        { userId: userId, 'product.productId': productId },
-        { $inc: { 'product.$.quantity': 1 ,'product.$.total':price,subTotal:price} }
-      );
+      
       res.status(200).json({ success: true, message: 'Item added/updated to cart successfully' });
     } 
   }
@@ -507,14 +566,16 @@ const addTocart = async (req, res) => {
 };  
 
 
+
 const updateCart = async (req,res)=>{
 
+try{
   const id = req.session.user_id;
   const {productId,quantity,productPrice} = req.body
+  
   const total = quantity * productPrice
+  let warningMsg
   
-  
-
   await cartModal.updateOne({userId:id,'product.productId': productId},{$set:{'product.$.quantity':quantity,'product.$.total':total}})
   const subtotal = await cartModal.aggregate([
     { $match: { $expr : { $eq: [ '$userId' , { $toObjectId: id } ] } } },{$group:{_id:{subTotal: { $sum: "$product.total"}}}}
@@ -522,121 +583,923 @@ const updateCart = async (req,res)=>{
 
   const cartSubtotal =subtotal[0]?._id?.subTotal; 
   await cartModal.updateOne({userId:id},{$set:{subTotal:cartSubtotal}})
-  const find = await cartModal.findOne({userId:id})
+  const find = await cartModal.findOne({userId:id}).populate("product.productId")
   const subTotal =find.subTotal
-  res.json({success:true,total,subTotal})
-
-}  
- 
-const removeItem = async(req,res)=>{ 
-
-  const id = req.session.user_id
-  const {productId} = req.body
-  await cartModal.updateOne({userId:id},{$pull:{product:{productId:productId}}})
-  res.json({success:true})
-}
-
-const loadCheckout = async (req,res)=>{
-
-  try{
-
-    const id = req.session.user_id
-
-    const find = await userModel.findOne({_id:id})
-    
-    const cartData = await cartModal.findOne({userId:id}).populate("product.productId")
-    res.render("checkout",{find,cartData})
-    }
-    catch(error){
-    console.error(error);
-
-    }
-}
-
-const loadOrderSuccess = async (req,res)=>{
-  // const find = await orderModal.findOne({}).populate({
-  //   path: 'cartId',
-  //   populate: [
-  //     { path: 'userId', model: 'User' },
-  //     { path: 'product.productId', model: 'products' }
-  //   ]
-  // }).exec();
- 
-  //  console.log(find.cartId.userId.name);
-  res.render("orderSuccessPage")
-} 
-
-
-
-const order = async (req,res)=>{
-  try{ 
-    const id = req.session.user_id
-    const {cartId,selectedAddress} = req.body
-
-    const cart = await cartModal.findOne({userId:id})
-    .populate('product.productId')
-
-   
-    const subTotal = cart.subTotal
-
-  if (cart && cart.product) {
-
-    const products = []
-
-    for (const item of cart.product) {
-      const quantity = item.quantity;
-      const productPrice = item.productId.price; 
-      const manufacturer = item.productId.manufacturer;
-      const productName = item.productId.name; 
-      const productTotal =item.total
-      
-     
-      products.push({
-        name: productName,
-        manufacturer: manufacturer,
-        quantity: quantity,
-        price: productPrice,
-        total: productTotal
-    })
-
-    }
-
-    const order = new orderModal({
-      userId: id,
-      products: products,
-      subTotal: subTotal,
-      
-})
-    await order.save()
+  const productItem = find?.product?.find(item => item.productId._id == productId);
+  const f = await cartModal.findOne({userId:id}).populate("product.productId")
+  if (productItem && productItem.productId.quantity == quantity) {
+    warningMsg = true;
+  } else { 
+    warningMsg = false;
   }
-  await cartModal.deleteOne({userId:id})
-
-    res.status(200).json({ 
-      success: true,
-      message: 'Order placed successfully!',
-  });
+  res.json({success:true,total,subTotal,warningMsg})
+}   
+catch(error){
+  console.error(error);
+}    
+}  
+  
+const removeItem = async(req,res)=>{ 
+  try{
+    const id = req.session.user_id
+    const {productId} = req.body
+    await cartModal.updateOne({userId:id},{$pull:{product:{productId:productId}}})
+    res.json({success:true})
   }
   catch(error){
     console.error(error);
   }
 }
 
-   
-module.exports = {    
+const loadCheckout = async (req,res)=>{
+  try{
 
-  loadHomePage,      
-  loadsignup, 
-  signup,     
-  loadOTP,    
-  verifyOTP,
-  loadLogin,
-  verifyLogin,  
+    const id = req.session.user_id
+    const find = await userModel.findOne({_id:id})
+    const cartData = await cartModal.findOne({userId:id}).populate("product.productId")
+    const wallet = await walletModel.findOne({userId:id})
+    const coupens = await coupenModel.find({})
+    res.render("checkout",{find,cartData,wallet,coupens})
+    }
+  catch(error){
+    console.error(error);
+    }
+}
+
+const loadOrderSuccess = async (req,res)=>{
+  res.render("orderSuccessPage")
+} 
+
+function generateUniqueID(length) {
+  const uuid = uuidv4().replace(/-/g, ''); // Remove dashes from the UUID
+  return uuid.substring(0, length);
+}
+
+
+const checkOutVerification = async (req, res) => {
+  try {
+    const userId = req.session.user_id;
+    const cartData = await cartModal.findOne({ userId: userId }).populate("product.productId");
+
+    for (const item of cartData.product) {
+      const product = item.productId;
+      
+      if (item.quantity > product.quantity) {
+        console.error(`Error: Quantity of product '${product.name}' is insufficient.`);
+        return res.status(400).json({ error: `Quantity of product '${product.name}' is insufficient.`});
+      }
+    }
+ 
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+const order = async (req,res)=>{
+  try{ 
+    const id = req.session.user_id
+    const {cartId,selectedAddress,selectedPaymentMethod,total,coupencode} = req.body
+    console.log(req.body);
+    if(coupencode){
+      await coupenModel.updateOne({coupenCode:coupencode},{$push:{users:{userID:id}}})
+    }else{
+      console.log("no coupen");
+    }
+
+    const uniqueOrderId = generateUniqueID(5);
+    const cart = await cartModal.findOne({userId:id}).populate('product.productId')
+
+    const subTotal = cart.subTotal 
+    if(selectedPaymentMethod == "COD"){
+
+      if (cart && cart.product) {
+        const products = [] 
+        for (const item of cart.product) {
+          const quantity = item.quantity;
+          const productPrice = item.productId.price; 
+          const manufacturer = item.productId.manufacturer;
+          const productName = item.productId.name; 
+          const productTotal =item.total;
+          const productImage = item.productId.product_image[3].resizedFile
+          const productId = item.productId
+          
+          products.push({
+            name: productName,
+            manufacturer: manufacturer,
+            productId:productId,
+            quantity: quantity,
+            price: productPrice,
+            total: productTotal,
+            productImage:productImage
+        })
+    
+        await productModel.updateOne({_id:productId},{$inc:{quantity:-quantity}})
+    
+      }
+    
+        const order = new orderModal({
+          userId: id,
+          products: products,
+          addressId:selectedAddress,
+          subTotal: total,
+          order_id:uniqueOrderId,
+          paymentMethod:selectedPaymentMethod
+    })
+    
+        await order.save() 
+    
+        const orderId = order._id
+        const orderTotal = order.subTotal
+    
+    
+        await cartModal.deleteOne({userId:id})  
+        res.status(200).json({codSuccess: true,message: 'Order placed successfully!'});
+    }
+    
+
+  }else if(selectedPaymentMethod == "online"){
+
+    if (cart && cart.product) {
+      const products = [] 
+      for (const item of cart.product) {
+        const quantity = item.quantity;
+        const productPrice = item.productId.price; 
+        const manufacturer = item.productId.manufacturer;
+        const productName = item.productId.name; 
+        const productTotal =item.total;
+        const productImage = item.productId.product_image[3].resizedFile
+        const productId = item.productId
+        
+        products.push({
+          name: productName,
+          manufacturer: manufacturer,
+          productId:productId,
+          quantity: quantity,
+          price: productPrice,
+          total: productTotal,
+          productImage:productImage
+        })
+
+      //  await productModel.updateOne({_id:productId},{$inc:{quantity:-quantity}})
+
+    }
+  
+      const order = new orderModal({
+        userId: id,
+        products: products,
+        addressId:selectedAddress,
+        subTotal: total,
+        order_id:uniqueOrderId,
+        paymentMethod:selectedPaymentMethod
+  })
+  
+      await order.save()
+        const orderId = order._id
+        const orderTotal = order.subTotal
+ 
+        const razorpayInstance = await generaterazorpay(orderId,orderTotal)
+
+        res.json({ razorpayInstance})
+}
+   
+}else if(selectedPaymentMethod =="wallet"){
+
+  if (cart && cart.product) {
+    const products = [] 
+    for (const item of cart.product) {
+      const quantity = item.quantity;
+      const productPrice = item.productId.price; 
+      const manufacturer = item.productId.manufacturer;
+      const productName = item.productId.name; 
+      const productTotal =item.total;
+      const productImage = item.productId.product_image[3].resizedFile
+      const productId = item.productId
+      
+      products.push({
+        name: productName,
+        manufacturer: manufacturer,
+        productId:productId,
+        quantity: quantity,
+        price: productPrice,
+        total: productTotal,
+        productImage:productImage
+      })
+
+      await productModel.updateOne({_id:productId},{$inc:{quantity:-quantity}})
+
+  }
+
+    const order = new orderModal({
+      userId: id,
+      products: products,
+      addressId:selectedAddress,
+      subTotal: total,
+      order_id:uniqueOrderId,
+      paymentMethod:selectedPaymentMethod
+})
+
+    await order.save()
+      const orderId = order._id
+      const orderTotal = order.subTotal
+
+     await walletModel.updateOne({userId:id},{$inc:{balance:-orderTotal},$push:{transactions:{amount:orderTotal,type:"Debit"}}})
+
+
+
+      await cartModal.deleteOne({userId:id})  
+      res.status(200).json({codSuccess: true,message: 'Order placed successfully!'});
+}
+ 
+}
+  else{
+    res.json({message:"error"})
+  }
+  
+  }
+  catch(error){
+    console.error(error);
+  }   
+}
+
+//=====================function to generate Razorpay ===================
+
+function generaterazorpay(orderId,totalPrice){
+  
+  const options= instance.orders.create({
+    amount: totalPrice * 100,
+    currency: "INR",
+    receipt: orderId,
+    })
+    return options
+}
+
+//======================================================================
+
+
+const verifyPayment = async (req,res)=>{
+  
+  try{
+
+    const {payment,order: orderData} =req.body
+    let hmac = crypto.createHmac('sha256', 'BnbkfGmhHXITc2ZOkHCgfk1M');
+    hmac.update(payment.razorpay_order_id +"|"+ payment.razorpay_payment_id)
+    hmac = hmac.digest('hex')
+
+    if(hmac == payment.razorpay_signature){
+      const orderId = orderData.razorpayInstance.receipt
+      const order = await orderModal.findOne({_id:orderId})
+      const userId = order.userId
+      if(order){
+
+        await cartModal.deleteOne({userId:userId}) 
+
+          for (const item of order.products) {
+            const quantity = item.quantity;
+            const productId = item.productId;
+            await productModel.updateOne({_id:productId},{$inc:{quantity:-quantity}})
+        }
+          res.status(200).json({onlinePaymentsuccess: true,message: 'Order placed successfully!'});
+      }else{
+        res.json({message:"cannot find order document"})
+      }
+  }else{
+ 
+    console.log("signature isnt matching");
+
+
+    res.json({message:"payament signature isnt matching"})
+  }
+  } 
+  catch(error){
+    console.error(error);
+  }
+  }
+  //======================
+
+  const failedPayment = async (req,res)=>{
+    try{
+      const {payment, order: orderData} = req.body
+      const orderId = orderData.razorpayInstance.receipt
+      const del =await orderModal.deleteOne({_id:orderId})
+      console.log(del);
+      res.json({success:true})
+    }
+    catch(error){
+      console.error(error);
+    }
+     
+  }
+
+  const paymentFailed = (req,res)=>{
+    try{
+      res.render("paymentFailedPage")
+    }
+    catch(error){
+      console.error(error);
+    }
+  }
+
+//========
+const orderDetails = async (req,res)=>{
+
+  try{
+ 
+    const orderId = req.query.orderId
+    const productId = req.query.productId  
+    const userId = req.session.user_id
+    const order = await orderModal.findOne({_id:orderId,userId:userId})
+    const addressId = order.addressId
+    const user = await userModel.findOne({_id:userId})
+    const product = order.products.find(p => p._id.toString() === productId);
+    const address = user.address.find(address =>address._id.toString() === addressId)
+    const otherItems = order.products.filter(p => p._id.toString() !== productId);  
+    
+    res.render("orderDetails",{product,address,otherItems,order}) 
+  }catch(error){
+    console.error(error);
+  } 
+}
+
+// const p = async (req,res)=>{
+//   try{
+  
+//   const userId = req.session.user_id
+//   let isLoggedIn
+//     if(req.session.user_id){ 
+//        isLoggedIn = true
+//     }else{
+//       isLoggedIn = false
+//     }
+//   const find = await productModel.find({list:true}).populate("subcategory_id")
+//   const subcategory = await categoryModal.distinct("subcategory")
+//   const brand = await productModel.distinct("manufacturer")
+//   const wishList = await wishListModel.findOne({userId:userId})
+//   res.render("productGrid",{find,category:"All products",brand,subcategory,isLoggedIn,wishList})
+//   }
+//   catch(error){
+//     console.error(error);
+//   }
+   
+// } 
+
+
+const cancelRequest = async (req,res)=>{
+
+try{ 
+  const userId = req.session.user_id
+  const {productId,orderId,reason} = req.body
+  await orderModal.updateOne(
+    {_id:orderId,userId:userId,"products._id":productId},
+    {
+      $set:{"products.$.orderStatus": "Canceled",reason:reason}
+    })
+
+    
+  const order =  await orderModal.findOne({_id:orderId,userId:userId})
+
+  const cancelledProduct = order.products.find(item => item._id == productId)
+  const cancelledProductId = cancelledProduct.productId
+  const quantityOfCanceled = cancelledProduct.quantity
+  const priceOfCanceled = cancelledProduct.price
+  const totalPriceOfCancelled = quantityOfCanceled * priceOfCanceled
+  const paymentMethod = order.paymentMethod
+ 
+  console.log("payment menthod"+paymentMethod);
+
+  await productModel.updateOne({_id:cancelledProductId},{$inc:{quantity:quantityOfCanceled}})
+ 
+  
+  if(order.paymentMethod == "wallet" ||order.paymentMethod == "online"){
+    const wallet = await walletModel.findOne({userId:userId})
+  if(!wallet){
+    const addBalaceToWallet = new walletModel({
+    userId:userId,
+    balance:priceOfCanceled,
+    transactions:[{
+      amount:totalPriceOfCancelled,
+    }]
+  })
+
+  await addBalaceToWallet.save()
+
+  }else{
+
+    await walletModel.updateOne({userId:userId},{$inc:{balance:totalPriceOfCancelled},$push:{transactions:{amount:totalPriceOfCancelled}}})
+
+  }
+  }
+  
+    
+  res.json({success:true})
+
+}
+catch(error){ 
+  console.error(error);
+} 
+}  
+ 
+
+const returnRequest = async (req,res)=>{ 
+  try{
+    const userId = req.session.user_id
+    const {productId,orderId,reason} = req.body
+    await orderModal.updateOne(
+      {_id:orderId,userId:userId,"products._id":productId},
+      {
+        $set:{"products.$.orderStatus": "Requested Return",reason:reason}
+      })
+      res.json({success:true})
+  
+  }catch(error){
+    console.error(error);
+  }
+}
+
+
+
+
+const addToWishList = async (req,res)=>{
+
+  try{
+    const userId = req.session.user_id
+    const {productId} = req.body
+    const wishList = await wishListModel.findOne({userId:userId})
+    if(!wishList){
+      const wishList = new wishListModel({
+        userId:userId,
+        product:[{ 
+          productId:productId
+        }]
+      })
+
+      await wishList.save()
+ 
+    }else{
+
+      const isProductExists = wishList.product.find(item => item.productId.equals(productId));
+      if(!isProductExists){
+        await wishListModel.updateOne( {userId:userId},{$push:{product:{productId:productId}}});
+      }else{
+        await wishListModel.updateOne( {userId:userId},{$pull:{product:{productId:productId}}});
+      }
+    }
+
+    const find = await wishListModel.findOne({userId:userId})
+    const checkIsThereProductID = find.product.find(item => item.productId.equals(productId));
+    
+    res.json({success:true,checkIsThereProductID}) 
+
+  }catch(error){
+    console.error(error);
+  }
+}
+
+
+const loadWishList = async (req,res)=>{
+  try{
+    let isLoggedIn = req.session.user_id ? true : false;
+    const userId = req.session.user_id
+    const wishList = await wishListModel.findOne({userId:userId}).populate("product.productId")
+    res.render("wishList",{wishList,isLoggedIn})
+}
+catch(error){ 
+  console.error(error);
+}
+}
+
+
+const removeWishList = async (req,res)=>{
+  try{
+  const userId = req.session.user_id
+  const {productId} = req.body
+ await wishListModel.updateOne({userId:userId},{$pull:{product:{productId:productId}}})
+
+  res.json({success:true})
+  }
+  catch(error){
+    console.error(error);
+  }
+}
+
+
+
+const applyCoupen =  async(req,res)=>{
+  try{
+    const userId = req.session.user_id
+    const {coupencode} = req.body
+    const cart =  await cartModal.findOne({userId:userId})
+    const coupen = await coupenModel.findOne({coupenCode:coupencode})
+    const couponAlreadyUsed = coupen?.users?.find((user)=> user.userID == userId )
+    let subTotal = cart.subTotal
+    if(couponAlreadyUsed){
+      res.json({success:true,alreadyused:true,message:"Coupen Already Used",subTotal:subTotal})
+    }else{
+      const {discount,validUntill,minPurchaseAmount} = coupen
+      
+      console.log(coupen);
+      if(subTotal >=minPurchaseAmount && validUntill >Date.now()){
+      discountamount = subTotal*discount/100
+      subTotal = subTotal - discountamount
+      res.json({success:true,subTotal:subTotal})
+    }else{
+      res.json({message:"Cannot apply coupen",subTotal:subTotal})
+    }
+
+   
+    }
+    
+
+  }  
+  catch(error){ 
+    console.error(error); 
+  }
+} 
+    
+
+// const sortByPrice = async (req,res)=>{
+//   try{
+//     const {value,category} = req.query
+//     const userId = req.session.user_id
+//     let filteredFind
+//     let find;
+//     let title
+//     console.log(req.query);
+//     let isLoggedIn
+//       if(req.session.user_id){
+//          isLoggedIn = true
+//       }else{
+//         isLoggedIn = false
+//       }
+//       if(category == "all" ){
+//          find = await productModel.find({list:true}).populate("subcategory_id").sort({price: parseInt(value)})
+//          title ="All products"
+//       }else{
+//           find = await productModel.find({list:true}).populate({
+//           path: 'subcategory_id',
+//           match: { 'name': `${category}`} 
+//         }).sort({price: parseInt(value)}) 
+//         title = `${category} shoes`
+//         filteredFind = find.filter(item => item.subcategory_id !== null);
+//         find =filteredFind
+//       }
+   
+//     const subcategory = await categoryModal.distinct("subcategory")
+//     const brand = await productModel.distinct("manufacturer")
+//     const wishList = await wishListModel.findOne({userId:userId})
+//     res.render("productGrid",{find,category:`${title}`,brand,subcategory,isLoggedIn,wishList,cat:`${category}`})
+//   }
+//   catch(error){
+//     console.error(error);
+//   }   
+// }    
+ 
+
+ 
+
+
+const loadProduct = async (req,res)=>{
+
+    try{
+    const userId = req.session.user_id
+    let isLoggedIn
+      if(req.session.user_id){
+         isLoggedIn = true
+      }else{
+        isLoggedIn = false
+      }
+
+
+    const find = await productModel.find({list:true}).populate("subcategory_id").sort({price:-1})
+    const subcategory = await categoryModal.distinct("subcategory")
+    const brand = await productModel.distinct("manufacturer")
+    const wishList = await wishListModel.findOne({userId:userId})
+    res.render("productGrid",{find,category:"All products",brand,subcategory,isLoggedIn,wishList})
+    
+  }
+  catch(error){
+    console.error(error);
+  }
+}
+
+
+// const filter = async (req, res) => {
+//   try {
+//       const userId = req.session.user_id;
+//       const isLoggedIn = req.session.user_id ? true : false;
+
+//       const { category, brand: manufacturer, sort, mainCategory } = req.query;
+//       console.log(req.query);
+
+//       const filter = {
+//           list: true
+//       };
+
+//       if (manufacturer && Array.isArray(manufacturer)) {
+//           filter.manufacturer = { $in: manufacturer }; // Use the array directly
+//       } else if (manufacturer) {
+//           // Handle the case where manufacturer is a single value
+//           filter.manufacturer = manufacturer;
+//       }
+//       if (category) {
+//           // Populate the 'subcategory_id' field to access the category information
+//           filter.subcategory_id = { $in: await categoryModal.find({ subcategory: category }) };
+//       }
+
+//       // Include filtering based on the main category if available
+//       if (mainCategory && mainCategory !== "all") {
+//           // Assuming 'mainCategory' corresponds to a field in your product model
+//           filter.subcategory_id = { $in: await categoryModal.find({ name: mainCategory }) };
+//       }
+
+//       // Query MongoDB to find products that meet the filter criteria
+//       let find;
+//       if (mainCategory === "all") {
+//         title ="All products"
+//           find = await productModel.find(filter).populate("subcategory_id");
+//       } else {
+//           find = await productModel.find(filter).populate({
+//               path: 'subcategory_id',
+//               match: { 'mainCategory': mainCategory }
+//           });
+//           title = `${category} shoes`
+//       }
+
+//       // if (sort == '-1') {
+//       //     find = find.sort((a, b) => b.price - a.price);
+//       // } else if (sort == '1') {
+//       //     find = find.sort((a, b) => a.price - b.price);
+//       // }
+//       const subcategory = await categoryModal.distinct("subcategory");
+//       const brand = await productModel.distinct("manufacturer");
+//       const wishList = await wishListModel.findOne({ userId: userId });
+//       res.render("productGrid", { find, category: title, brand, subcategory, isLoggedIn, wishList, cat: mainCategory });
+
+//   } catch (error) {
+//       console.error(error);
+//   }
+// }
+
+// const filter = async (req, res) => {
+//   try {
+//       const userId = req.session.user_id;
+//       const isLoggedIn = req.session.user_id ? true : false;
+
+//       const { category, brand: manufacturer, sort, mainCategory } = req.query;
+//       console.log(req.query);
+
+//       const filter = {
+//           list: true
+//       };
+
+//       if (manufacturer && Array.isArray(manufacturer)) {
+//           filter.manufacturer = { $in: manufacturer }; // Use the array directly
+//       } else if (manufacturer) {
+//           // Handle the case where manufacturer is a single value
+//           filter.manufacturer = manufacturer;
+//       }
+//       if (category) {
+//           filter.subcategory_id = { 
+//               $in: await categoryModal.find({ 
+//                   subcategory: category, 
+//                   ...(mainCategory && mainCategory !== "all" ? { name: mainCategory } : {})
+//               })
+//           };
+//       }
+
+//       // Query MongoDB to find products that meet the filter criteria
+//       let find;
+//       if (mainCategory === "all") {
+//         title = "All products";
+//         find = await productModel.find(filter).populate("subcategory_id");
+//       } else {
+//         find = await productModel.find(filter).populate({
+//               path: 'subcategory_id',
+//               match: { 'name': mainCategory }
+//         });
+//             title = `${mainCategory}'s shoes`;
+//         // if(mainCategory == "Kids"){
+//         //   title = "Kids shoes"
+//         // }else{
+//         //   title = `${mainCategory}'s shoes`;
+//         // }
+       
+//       }
+
+//       const subcategory = await categoryModal.distinct("subcategory");
+//       const brand = await productModel.distinct("manufacturer");
+//       const wishList = await wishListModel.findOne({ userId: userId });
+//       res.render("productGrid", { find, category: title, brand, subcategory, isLoggedIn, wishList, cat: mainCategory });
+
+//   } catch (error) {
+//       console.error(error);
+//   }
+// }
+
+// const filter = async (req, res) => {
+//   try {
+//       const userId = req.session.user_id;
+//       const isLoggedIn = req.session.user_id ? true : false;
+
+//       const { category, brand: manufacturer, sort, mainCategory } = req.query;
+//       console.log(req.query);
+
+//       const filter = {
+//           list: true
+//       };
+
+//       if (manufacturer && Array.isArray(manufacturer)) {
+//           filter.manufacturer = { $in: manufacturer }; // Use the array directly
+//       } else if (manufacturer) {
+//           // Handle the case where manufacturer is a single value
+//           filter.manufacturer = manufacturer;
+//       }
+
+//       if (category) {
+//           // If category is provided, filter based on category and mainCategory
+//           filter.subcategory_id = { 
+//               $in: await categoryModal.find({ 
+//                   subcategory: category, 
+//                   ...(mainCategory && mainCategory !== "all" ? { name: mainCategory } : {})
+//               })
+//           };
+//       } else if (mainCategory && mainCategory !== "all") {
+//           // If no category is provided, filter based only on mainCategory
+//           filter.subcategory_id = { 
+//               $in: await categoryModal.find({ name: mainCategory })
+//           };
+//       }
+
+//       // Query MongoDB to find products that meet the filter criteria
+//       let find;
+//       if (mainCategory === "all") {
+//         title = "All products";
+//         find = await productModel.find(filter).populate("subcategory_id");
+//       } else {
+//         find = await productModel.find(filter).populate({
+//               path: 'subcategory_id',
+//               match: { 'name': mainCategory }
+//         });
+//         title = `${mainCategory}'s shoes`;
+//       }
+
+//       const subcategory = await categoryModal.distinct("subcategory");
+//       const brand = await productModel.distinct("manufacturer");
+//       const wishList = await wishListModel.findOne({ userId: userId });
+//       res.render("productGrid", { find, category: title, brand, subcategory, isLoggedIn, wishList, cat: mainCategory });
+
+//   } catch (error) {
+//       console.error(error);
+//   }
+// }
+
+
+const filter = async (req, res) => {
+  try {
+      const userId = req.session.user_id;
+      const isLoggedIn = req.session.user_id ? true : false;
+
+      const { category, brand: manufacturer, sort, mainCategory } = req.query;
+   console.log(req.query);
+
+      const filter = {
+          list: true
+      };
+
+      if (manufacturer && Array.isArray(manufacturer)) {
+          filter.manufacturer = { $in: manufacturer }; // Use the array directly
+      } else if (manufacturer) {
+          // Handle the case where manufacturer is a single value
+          filter.manufacturer = manufacturer;
+      }
+
+      if (category) {
+          // If category is provided, filter based on category and mainCategory
+          filter.subcategory_id = { 
+              $in: await categoryModal.find({ 
+                  subcategory: category, 
+                  ...(mainCategory && mainCategory !== "all" ? { name: mainCategory } : {})
+              })
+          };
+      } else if (mainCategory && mainCategory !== "all") {
+          // If no category is provided, filter based only on mainCategory
+          filter.subcategory_id = { 
+              $in: await categoryModal.find({ name: mainCategory })
+          };
+      }
+
+      // Query MongoDB to find products that meet the filter criteria
+      let find;
+      if (mainCategory === "all") {
+        title = "All products";
+        find = await productModel.find(filter).populate("subcategory_id");
+      } else {
+        find = await productModel.find(filter).populate({
+              path: 'subcategory_id',
+              match: { 'name': mainCategory }
+        });
+        title = `${mainCategory}'s shoes`;
+      }
+
+      const subcategory = await categoryModal.distinct("subcategory");
+      const brand = await productModel.distinct("manufacturer");
+      const wishList = await wishListModel.findOne({ userId: userId });
+      res.render("productGrid", { find, category: title, brand, subcategory, isLoggedIn, wishList, cat: mainCategory });
+
+  } catch (error) {
+      console.error(error);
+  }
+}
+
+
+
+
+
+
+const sortByPrice = async (req,res)=>{
+ try{
+
+  const userId = req.session.user_id;
+      const isLoggedIn = req.session.user_id ? true : false;
+
+      const { category, brand: manufacturer, sort, mainCategory } = req.query;
+   
+      console.log(sort);
+      const filter = { 
+          list: true
+      };
+
+      if (manufacturer && Array.isArray(manufacturer)) {
+          filter.manufacturer = { $in: manufacturer }; // Use the array directly
+      } else if (manufacturer) {
+          // Handle the case where manufacturer is a single value
+          filter.manufacturer = manufacturer;
+      }
+
+      if (category) {
+          // If category is provided, filter based on category and mainCategory
+          filter.subcategory_id = { 
+              $in: await categoryModal.find({ 
+                  subcategory: category, 
+                  ...(mainCategory && mainCategory !== "all" ? { name: mainCategory } : {})
+              })
+          };
+      } else if (mainCategory && mainCategory !== "all") {
+          // If no category is provided, filter based only on mainCategory
+          filter.subcategory_id = { 
+              $in: await categoryModal.find({ name: mainCategory })
+          };
+      }
+
+      // Query MongoDB to find products that meet the filter criteria
+      let find;
+      let sortOption = {};
+        if (sort === "1") {
+            sortOption = { price: 1 }; // Low to High
+        } else if (sort === "-1") {
+            sortOption = { price: -1 }; // High to Low
+        }
+      if (mainCategory === "all") { 
+        title = "All products";
+
+        find = await productModel.find(filter).populate("subcategory_id").sort(sortOption)
+      } else {
+        find = await productModel.find(filter).populate({
+              path: 'subcategory_id',
+              match: { 'name': mainCategory }
+        }).sort(sortOption)
+        title = `${mainCategory}'s shoes`;
+      }
+
+      const subcategory = await categoryModal.distinct("subcategory");
+      const brand = await productModel.distinct("manufacturer");
+      const wishList = await wishListModel.findOne({ userId: userId });
+      res.render("productGrid", { find, category: title, brand, subcategory, isLoggedIn, wishList, cat: mainCategory });
+
+
+ }catch(error){
+  console.error(error);
+ }
+}
+
+module.exports = { 
+
+  
+  loadHomePage,   
+  loadsignup,  
+  signup,
+  loadOTP,
+  verifyOTP, 
+  loadLogin, 
+  verifyLogin, 
   loadProductList,
-  loadMen,  
+  loadMen,
   loadWomen,
   loadKids, 
   loadProductDetails,
-  userLogout,    
+  userLogout,
   loadCart,
   addTocart,
   myAccount,
@@ -650,5 +1513,21 @@ module.exports = {
   order,
   loadOrderSuccess,
   resendOTP,
-  editUser
-}
+  editUser,
+  orderDetails,
+  cancelRequest,
+  returnRequest,
+  addToWishList,
+  loadWishList,
+  removeWishList,
+  verifyPayment,
+  applyCoupen,
+  loadProduct,
+  sortByPrice,
+  failedPayment,
+  paymentFailed,
+  checkOutVerification,
+  filter,
+  
+
+} 

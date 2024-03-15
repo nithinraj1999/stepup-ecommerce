@@ -5,7 +5,10 @@ const path = require("path")
 const sharp = require("sharp")
 const Swal = require("sweetalert2")
 const categoryModel = require("../Models/categoryModel")
-
+const orderModel = require("../Models/orderModel")
+const walletModel = require("../Models/walletModel")
+const coupenModel = require("../Models/coupenModel")
+const offerModel = require("../Models/offer")
 
 const loginLoad = (req, res) => {
   if(req.session.admin_id){
@@ -25,10 +28,9 @@ const verifyLogin = async (req,res)=>{
         req.session.admin_id = find._id
         res.render("adminDashboard")
         }else{
-        console.log("Failed");
         res.render("adminLogin")
-       }
-    }else{
+       } 
+    }else{ 
         console.log("failed");
         res.render("adminLogin")
      }
@@ -41,25 +43,24 @@ const verifyLogin = async (req,res)=>{
 
 const logout = (req,res)=>{
   try {
-       
     req.session.destroy((err) => {
          if (err) {
               console.log('logout failed')
          } else {
               res.redirect('/admin')
          }
-    })
+    }) 
 } catch (error) {
     console.log(error)
-}
+} 
 }
  
 const loadUser = async (req,res)=>{
   const find = await userModel.find({isAdmin:false})
   res.render("allUsers",{find})
-}
+} 
 
-
+ 
 const restrict = async (req,res)=>{
   const id = req.query.id
   let find = await userModel.findOne({_id:id})  
@@ -93,14 +94,15 @@ const addCategory = async (req,res)=>{
    res.render("category", {alertMessage: null});
     }else{
     
-     res.render("category", {alertMessage:"already Exist"});
+     res.render("category", {exist:"Category Already Exists"});
     }
       
 }
 
 const loadEditCategory = async (req,res)=>{
     const find = await category.find({});
-    res.render("editCategory",{find})
+    const offer = await offerModel.find({})
+    res.render("editCategory",{find,offer})
 }
 
 const editCategory = async (req,res)=>{ 
@@ -148,9 +150,9 @@ const updateCategory = async(req,res)=>{
       res.redirect("/admin/editcategory")
   }else{
       const find = await category.findOne({_id:id})
-      res.render("updateCategory",{find})
+      res.render("updateCategory",{find,exist:"Category Already Exist"})
   } 
-}    
+}
 
 
 const loadAddProduct = async (req,res)=>{
@@ -161,7 +163,7 @@ const loadAddProduct = async (req,res)=>{
 const loadSubcategories = async (req,res)=>{
   const {mainCategory} = req.query
   const subcategory = await category.distinct("subcategory",{name:mainCategory})
-  console.log(subcategory);
+
   res.status(200).json({ message: "Subcategories loaded successfully",subcategory});
 }
 
@@ -189,7 +191,7 @@ const addProduct = async (req,res)=>{
                     resizedFile: resizedFilename,
 
                 };
-            } catch (error) {
+            } catch (error) { 
                 console.error('Error processing and saving image:', error);
                 return null; // Exclude failed images
             }
@@ -204,7 +206,7 @@ const addProduct = async (req,res)=>{
         quantity:quantity,
         product_image:productImages
       })
-      
+        
        
       const save =await productCollection.save() 
 
@@ -225,7 +227,7 @@ const allProducts = async(req,res)=>{
   }catch(error){
     console.log(error);
   }
-} 
+}
 
 
 
@@ -235,7 +237,7 @@ const editProducts = async (req,res)=>{
 
   try{
      const id = req.query.id 
-    const {action} = req.body
+     const {action} = req.body
     if(action == "list"){
      
       const find = await productModal.findOne({_id:id})
@@ -274,10 +276,7 @@ const updateProduct = async(req,res)=>{
     const { id } = req.query;
     const { name, manufacturer, price, description, maincategory, subcategory,quantity } = req.body;
 
-    
-    console.log(req.body);
     const find= await category.findOne({name:maincategory,subcategory:subcategory})
-    console.log(find);
     const productImages = await Promise.all(req.files.map(async (file) => {
       try {
           console.log("promise is working");
@@ -300,20 +299,7 @@ const updateProduct = async(req,res)=>{
       }
   }))
     if(find){
-      
-      //    await productModal.updateOne(
-      // { _id: id },
-      // {
-      //   $set: {
-      //     name: name,
-      //     manufacturer: manufacturer,
-      //     price: price,
-      //     description: description,
-      //     subcategory_id:find._id,
-      //     product_image:productImages,
-      //     quantity:quantity
-      //     }
-      // })
+
       const updatedFields = {
         name: name,
         manufacturer: manufacturer,
@@ -348,28 +334,223 @@ const updateProduct = async(req,res)=>{
 
 
 const deleteimage = async (req,res)=>{
-
-const {product_id,img_id} = req.query
- 
+  const {product_id,img_id} = req.query
   await productModal.updateOne(
-    {_id:product_id},
-    {
-      $pull:{
-        product_image:{
-          _id:img_id
-        }}
-      })
- const find = await productModal.find({})
- res.redirect(`/admin/update-product?id=${product_id}`)
+  {_id:product_id},
+  {
+    $pull:{
+      product_image:{
+        _id:img_id
+      }}
+  })
+  const find = await productModal.find({})
+  res.redirect(`/admin/update-product?id=${product_id}`)
+
+}
+const loadOrders = async (req,res) =>{
+    const orders = await orderModel.find({}).populate("userId").sort({_id:-1})
+    res.render("adminAllOrders.ejs",{orders})
+}
+ 
+
+
+
+const orderStatus = async(req,res) =>{
+  try{
+    const {currentStatus,orderId,productId} = req.body
+    const find = await orderModel.findOne({_id:orderId})
+    await orderModel.updateOne(
+      { "_id": orderId, "products._id": productId },
+      { $set: { "products.$.orderStatus": currentStatus } }
+    );  
+    res.json({success:true,currentStatus}) 
+  }
+  catch(error){ 
+    console.error(error);
+  }
+} 
+ 
+
+const orderRequest = async (req,res)=>{
+  try{
+    const {status,orderId,productId} = req.body
+    if(status == "Reject Request"){
+
+      await orderModel.updateOne(
+        { "_id": orderId, "products._id": productId },
+        { $set: { "products.$.orderStatus":"Delivered"} }
+      );
+    
+    }else{
+      await orderModel.updateOne(
+        { "_id": orderId, "products._id": productId },
+        { $set: { "products.$.orderStatus": "Product Returned"} }
+      );
+
+      const order =  await orderModel.findOne({_id:orderId})
+
+     const returnedProduct = order.products.find(item => item._id == productId)
+     const returnedProductId = returnedProduct.productId
+     const quantityOfReturned = returnedProduct.quantity
+
+
+     await productModal.updateOne({_id:returnedProductId},{$inc:{quantity:quantityOfReturned}})
+    
+    const orders =await orderModel.findOne({ "_id": orderId,"products._id": productId })
+    const orderStatus = orders.products[0].orderStatus
+
+     
+
+
+   const  priceOfReturned = returnedProduct.price
+   const totalPriceOfReturned = priceOfReturned * quantityOfReturned
+
+   const userId = order.userId
+
+
+    const wallet = await walletModel.findOne({userId:userId})
+    if(!wallet){
+      const addBalaceToWallet = new walletModel({
+      userId:userId,
+      balance:priceOfReturned,
+      transactions:[{
+        amount:totalPriceOfReturned,
+      }]
+    })
+  
+    await addBalaceToWallet.save()
+  
+    }else{
+  
+      await walletModel.updateOne({userId:userId},{$inc:{balance:priceOfReturned},$push:{transactions:{amount:totalPriceOfReturned}}})
+    }
+
+
+  }
+
+
+
+    
+
+    
+    res.json({ status, orderStatus });
+ 
+  }
+  catch(error){
+    console.error(error);
+  }
  
 
 }
+ 
+    
+
+
+
+const loadCoupenPage = async(req,res)=>{
+try{
+
+  const coupens = await coupenModel.find({})
+
+  res.render("coupens",{coupens})
+}
+catch(error){
+  console.error(error);
+}
+}
+
+
+
+
+
+const addNewCoupen = async (req,res)=>{
+
+  try{
+    const {couponTitle,couponCode,validFrom,validUntil,discountPercentage,minTotalPrice} =req.body
+    const coupenCodeUpperCase = couponCode.toUpperCase()
+    const coupen = new coupenModel({
+      coupenName:couponTitle,
+      coupenCode:coupenCodeUpperCase,
+      discount:discountPercentage,
+      minPurchaseAmount:minTotalPrice,
+      validFrom:validFrom,
+      validUntill:validUntil,
+    })
+       await coupen.save()  
+
+       res.json({success:true})
+  }
+  catch(error){
+    console.error(error);
+  } 
+}  
+
+
+const deleteCoupen = async (req,res)=>{
+  try{
+    const {couponId} =req.body
+   await coupenModel.deleteOne({_id:couponId})
+  }
+  catch(error){
+    console.error(error);
+  }
+  res.json({success:true})
+}
+
+
+
+const offer = async (req,res)=>{
+try{
+
+  const offer = await offerModel.find({})
+  res.render("offer",{offer})
+}
+catch(error){
+  console.log(error);
+}
+}
+
+const addOffer = async (req,res)=>{
+  try{
+
+    const {offerName,offerPercentage,startDate,endDate} = req.body
+    const isOfferNameExist = await offerModel.findOne({name:offerName})
+    if(!isOfferNameExist){
+      const offer = new offerModel({
+        name:offerName,
+        percentage:offerPercentage,
+        startDate:startDate,
+        endDate:endDate
+      })
+      await offer.save()
+      res.json({success:true})
+    }else{
+      res.json({alreadyExist:"offer already Exist"})
+    }
+  }
+  catch(error){
+    console.error(error);
+  }
+}
+
+
+const applyOffer = async(req,res)=>{
+try{
+  const {mainCategory,subCategory,offerId} = req.body
+  console.log(req.body);
+  await categoryModel.updateOne({name:mainCategory,subcategory:subCategory},{$set:{offer:offerId}})
+  const category = await categoryModel.findOne({name:mainCategory,subcategory:subCategory})
+  console.log(category);
+  res.json({success:true})
+}
+catch(error){
+  console.error(error);
+}
+}
+
+
 
  
-
-
-
-
 module.exports = { 
   loginLoad,
   verifyLogin,
@@ -390,6 +571,15 @@ module.exports = {
   deleteimage,
   loadSubcategories, 
   logout,
+  loadOrders,
+  orderStatus,
+  orderRequest,
+  loadCoupenPage,
+  addNewCoupen,
+  deleteCoupen,
+  offer,
+  addOffer,
+  applyOffer
 
-};
+}; 
 
