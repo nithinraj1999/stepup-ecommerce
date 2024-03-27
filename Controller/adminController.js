@@ -43,22 +43,33 @@ const verifyLogin = async (req,res)=>{
 
 const logout = (req,res)=>{
   try {
-    req.session.destroy((err) => {
-         if (err) {
-              console.log('logout failed')
-         } else {
-              res.redirect('/admin')
-         }
-    }) 
+    req.session.admin_id =null
+    res.redirect('/admin')
 } catch (error) {
     console.log(error)
 } 
 }
  
-const loadUser = async (req,res)=>{
-  const find = await userModel.find({isAdmin:false})
-  res.render("allUsers",{find})
-} 
+const loadUser = async (req, res) => {
+    try {
+        const ITEMS_PER_PAGE = 8
+        const page = parseInt(req.query.page) || 1
+        const totalUsersCount = await userModel.countDocuments({
+            isAdmin: false,
+        })
+        const totalPages = Math.ceil(totalUsersCount / ITEMS_PER_PAGE)
+        const skip = (page - 1) * ITEMS_PER_PAGE
+        const find = await userModel
+            .find({ isAdmin: false })
+            .skip(skip)
+            .limit(ITEMS_PER_PAGE)
+
+        res.render('allUsers', { find, totalPages, currentPage: page })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 
  
 const restrict = async (req,res)=>{
@@ -74,7 +85,6 @@ const restrict = async (req,res)=>{
 }
 
 const loadCategory = (req,res)=>{
-
     res.render("category")
 }
 
@@ -100,7 +110,7 @@ const addCategory = async (req,res)=>{
 }
 
 const loadEditCategory = async (req,res)=>{
-    const find = await category.find({});
+    const find = await category.find({}).populate("offer")
     const offer = await offerModel.find({})
     res.render("editCategory",{find,offer})
 }
@@ -143,7 +153,7 @@ const updateCategory = async(req,res)=>{
   const id = req.query.id
   const {maincategory,subcategory,description} = req.body
   const lowerSubcategory = subcategory.toLowerCase()
-  console.log(lowerSubcategory);
+  
   const find = await category.find({name:maincategory,subcategory:lowerSubcategory})
   if(find.length ==0){
       await category.updateOne({_id:id},{$set:{name:maincategory,subcategory:lowerSubcategory,description:description}})
@@ -210,26 +220,48 @@ const addProduct = async (req,res)=>{
        
       const save =await productCollection.save() 
 
-      // const populate = await productModal.find({}).populate("subcategory_id")    
     }catch(error){
       console.log(error); 
     }
     const find = await category.distinct("subcategory")
      res.render("addProduct",{find})
 }
+ 
 
+const allProducts = async (req, res) => {
+  try {
+    const ITEMS_PER_PAGE = 8; // Number of items to display per page
+    
+    // Extract page number from query parameters or default to 1
+    const page = parseInt(req.query.page) || 1;
+    
+    // Count total number of products
+    const totalProductsCount = await productModal.countDocuments();
+    
+    // Calculate total pages
+    const totalPages = Math.ceil(totalProductsCount / ITEMS_PER_PAGE);
 
-const allProducts = async(req,res)=>{
+    // Calculate how many products to skip
+    const skip = (page - 1) * ITEMS_PER_PAGE;
 
-  try{
-    const find = await productModal.find({}).populate("subcategory_id")
-    res.render("allProducts",{find})
-  }catch(error){
+    // Fetch products for the current page
+    const find = await productModal
+      .find({})
+      .populate("subcategory_id")
+      .populate("offer")
+      .skip(skip)
+      .limit(ITEMS_PER_PAGE);
+
+    const offer = await offerModel.find({});
+
+    // Pass data to the view
+    res.render("allProducts", { find, offer, totalPages, currentPage: page });
+  } catch (error) {
     console.log(error);
   }
-}
+};
 
-
+ 
 
 
 
@@ -347,12 +379,34 @@ const deleteimage = async (req,res)=>{
   res.redirect(`/admin/update-product?id=${product_id}`)
 
 }
-const loadOrders = async (req,res) =>{
-    const orders = await orderModel.find({}).populate("userId").sort({_id:-1})
-    res.render("adminAllOrders.ejs",{orders})
-}
- 
+const loadOrders = async (req, res) => {
 
+ 
+    const page = parseInt(req.query.page) || 1
+
+    const limit = 7
+    const skip = (page - 1) * limit
+    try {
+        const orders = await orderModel
+            .find({})
+            .populate('userId')
+            .sort({ _id: -1 })
+            .skip(skip)
+            .limit(limit)
+
+        const totalOrders = await orderModel.countDocuments()
+
+        const totalPages = Math.ceil(totalOrders / limit)
+
+        res.render('adminAllOrders.ejs', {
+            orders,
+            totalPages,
+            currentPage: page,
+        })
+    } catch (error) { 
+        console.error('Error fetching orders:', error)
+    }
+}
 
 
 const orderStatus = async(req,res) =>{
@@ -422,7 +476,7 @@ const orderRequest = async (req,res)=>{
   
     }else{
   
-      await walletModel.updateOne({userId:userId},{$inc:{balance:priceOfReturned},$push:{transactions:{amount:totalPriceOfReturned}}})
+      await walletModel.updateOne({userId:userId},{$inc:{balance:totalPriceOfReturned},$push:{transactions:{amount:totalPriceOfReturned}}})
     }
 
 
@@ -447,42 +501,65 @@ const orderRequest = async (req,res)=>{
 
 
 
-const loadCoupenPage = async(req,res)=>{
-try{
+const loadCoupenPage = async (req, res) => {
+  try {
+    const ITEMS_PER_PAGE = 5; // Number of coupons to display per page
 
-  const coupens = await coupenModel.find({})
+    // Extract page number from query parameters or default to 1
+    const page = parseInt(req.query.page) || 1;
 
-  res.render("coupens",{coupens})
-}
-catch(error){
-  console.error(error);
-}
-}
+    // Count total number of coupons
+    const totalCouponsCount = await coupenModel.countDocuments();
 
+    // Calculate total pages
+    const totalPages = Math.ceil(totalCouponsCount / ITEMS_PER_PAGE);
 
+    // Calculate how many coupons to skip
+    const skip = (page - 1) * ITEMS_PER_PAGE;
 
+    // Fetch coupons for the current page
+    const coupens = await coupenModel
+      .find({})
+      .skip(skip)
+      .limit(ITEMS_PER_PAGE);
 
-
-const addNewCoupen = async (req,res)=>{
-
-  try{
-    const {couponTitle,couponCode,validFrom,validUntil,discountPercentage,minTotalPrice} =req.body
-    const coupenCodeUpperCase = couponCode.toUpperCase()
-    const coupen = new coupenModel({
-      coupenName:couponTitle,
-      coupenCode:coupenCodeUpperCase,
-      discount:discountPercentage,
-      minPurchaseAmount:minTotalPrice,
-      validFrom:validFrom,
-      validUntill:validUntil,
-    })
-       await coupen.save()  
-
-       res.json({success:true})
-  }
-  catch(error){
+    // Pass data to the view
+    res.render("coupens", { coupens, totalPages, currentPage: page });
+  } catch (error) {
     console.error(error);
-  } 
+  }
+};
+
+
+
+
+
+const addNewCoupen = async (req, res) => {
+    try {
+        const {
+            couponTitle,
+            couponCode,
+            validFrom,
+            validUntil,
+            discountPercentage,
+            minTotalPrice,
+        } = req.body
+
+        const coupenCodeUpperCase = couponCode.toUpperCase()
+        const coupen = new coupenModel({
+            coupenName: couponTitle,
+            coupenCode: coupenCodeUpperCase,
+            discount: discountPercentage,
+            minPurchaseAmount: minTotalPrice,
+            validFrom: validFrom,
+            validUntill: validUntil,
+        })
+        await coupen.save()
+
+        res.json({ success: true })
+    } catch (error) {
+        console.error(error)
+    }
 }  
 
 
@@ -490,34 +567,85 @@ const deleteCoupen = async (req,res)=>{
   try{
     const {couponId} =req.body
    await coupenModel.deleteOne({_id:couponId})
+   res.json({success:true})
   }
   catch(error){
     console.error(error);
   }
-  res.json({success:true})
+ 
+}
+
+const loadEditCoupen = async (req,res)=>{
+  try{
+
+    const  {coupenId} = req.body
+    
+    const coupenDetails = await coupenModel.findOne({_id:coupenId})
+    res.json({coupenDetails})
+
+  }
+  catch(error){
+    console.error(error);
+  }
 }
 
 
-
-const offer = async (req,res)=>{
-try{
-
-  const offer = await offerModel.find({})
-  res.render("offer",{offer})
+const editCoupen = async (req, res) => {
+    try {
+        const {
+            coupenId,
+            title,
+            coupenCode,
+            validFrom,
+            validUntill,
+            discount,
+            minPrice,
+        } = req.body
+        const coupenCodeUpperCase = coupenCode.toUpperCase()
+        const coupen = await coupenModel.findOne({
+            coupenCode: coupenCodeUpperCase,
+        })
+        if (!coupen) {
+            await coupenModel.updateOne(
+                { _id: coupenId },
+                {
+                    $set: {
+                        coupenName: title,
+                        coupenCode: coupenCodeUpperCase,
+                        validFrom: validFrom,
+                        validUntill: validUntill,
+                        discount: discount,
+                        minPurchaseAmount: minPrice,
+                    },
+                }
+            )
+            res.json({ success: true })
+        } else {
+            res.json({ message: 'Coupen alredy exist', alreadyExist: true })
+        }
+    } catch (error) {
+        console.error(error)
+    }
 }
-catch(error){
-  console.log(error);
-}
+
+const offer = async (req, res) => {
+    try {
+        const offer = await offerModel.find({})
+        res.render('offer', { offer })
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 const addOffer = async (req,res)=>{
   try{
 
     const {offerName,offerPercentage,startDate,endDate} = req.body
-    const isOfferNameExist = await offerModel.findOne({name:offerName})
+    const uppercaseName = offerName.toUpperCase();
+    const isOfferNameExist = await offerModel.findOne({name:uppercaseName})
     if(!isOfferNameExist){
       const offer = new offerModel({
-        name:offerName,
+        name:uppercaseName,
         percentage:offerPercentage,
         startDate:startDate,
         endDate:endDate
@@ -536,28 +664,268 @@ const addOffer = async (req,res)=>{
 
 const applyOffer = async(req,res)=>{
 try{
-  const {mainCategory,subCategory,offerId} = req.body
-  console.log(req.body);
-  await categoryModel.updateOne({name:mainCategory,subcategory:subCategory},{$set:{offer:offerId}})
-  const category = await categoryModel.findOne({name:mainCategory,subcategory:subCategory})
-  console.log(category);
+  const {categoryId,selectedOfferId} = req.body
+  await categoryModel.updateOne({_id:categoryId},{$set:{offer:selectedOfferId}})
   res.json({success:true})
 }
 catch(error){
   console.error(error);
 }
 }
-
-
-
  
+const deleteOffer = async (req,res)=>{
+try{
+   const {offerId} = req.body
+   await offerModel.deleteOne({_id:offerId})
+
+   res.json({success:true})
+}
+catch(error){
+  console.error(error);
+}
+}
+
+const loadEditOffer = async(req,res)=>{
+  try{
+    const {offerid} = req.query
+  
+    const offer = await offerModel.findOne({_id:offerid})
+  
+    res.json({offer})
+  }catch(error){
+    console.error(error);
+  }
+} 
+
+const editOffer = async (req,res)=>{
+try{
+  const {offerid} =req.query
+  
+const {name,
+  percentage,
+  startDate,
+  endDate} = req.body
+const nameToUpper = name.toUpperCase()
+
+const isExist = await offerModel.findOne({name:nameToUpper})
+
+if(!isExist){
+  const offer = await offerModel.updateOne(
+    { _id: offerid },
+    {
+        $set: {
+            name: nameToUpper,
+            percentage: percentage,
+            startDate: startDate,
+            endDate: endDate
+        }
+    }   
+  );
+  res.json({success:true})
+}else{
+  res.json({message:"alreadyExist"})
+}
+ 
+}
+catch(error){
+  console.error(error);
+}
+}
+ 
+
+const removeOffer = async (req, res) => {
+    try {
+        const { categoryId } = req.body
+        await categoryModel.updateOne(
+            { _id: categoryId },
+            { $unset: { offer: '' } }
+        )
+        res.json({ success: true })
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+
+const applyProductOffer = async (req, res) => {
+    try {
+        const { productId, selectedOfferId } = req.body
+        await productModal.updateOne(
+            { _id: productId },
+            { $set: { offer: selectedOfferId } }
+        )
+        console.log(req.body)
+        res.json({ success: true })
+    } catch (error) {
+        console.error(error)
+    }
+} 
+
+
+
+const removeProductOffer = async (req, res) => {
+    try {
+        const { productId } = req.body
+        await productModal.updateOne(
+            { _id: productId },
+            { $unset: { offer: '' } }
+        )
+        res.json({ success: true })
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+const loadSalesReport = async (req, res) => {
+  const page = parseInt(req.query.page) || 1
+
+  const limit = 20
+  const skip = (page - 1) * limit
+  try {
+      const orders = await orderModel
+          .find({})
+          .populate('userId')
+          .sort({ _id: -1 })
+          .skip(skip)
+          .limit(limit)
+
+      const totalOrders = await orderModel.countDocuments()
+      const totalPages = Math.ceil(totalOrders / limit)
+
+      res.render('sales', {
+          orders,
+          totalPages,
+          currentPage: page,
+      })
+  } catch (error) { 
+      console.error('Error fetching orders:', error)
+  }
+} 
+
+
+const monthlyReport = async(req,res)=>{
+const {month} = req.body
+  res.redirect(`/admin/monthly-report?month=${month}`)
+}
+
+
+const loadMonthlyReport = async (req, res) => {
+    const month = req.query.month
+    const monthIndex = new Date(Date.parse(month + ' 1, 2000')).getMonth()
+
+    const startDate = new Date(new Date().getFullYear(), monthIndex, 1)
+    const endDate = new Date(new Date().getFullYear(), monthIndex + 1, 0)
+    try {
+        const orders = await orderModel 
+            .find({ orderDate: { $gte: startDate, $lt: endDate } })
+            .populate('userId')
+            .sort({ _id: -1 })
+        res.render('salesReport', {
+            orders,
+        })
+    } catch (error) {
+        console.error('Error fetching orders:', error)
+    }
+}
+
+
+const loadWeeklyReport = async (req, res) => {
+    const currentDate = new Date()
+    const startOfWeek = new Date(
+        currentDate.setDate(currentDate.getDate() - currentDate.getDay())
+    ) 
+    const endOfWeek = new Date(currentDate.setDate(currentDate.getDate() + 6)) 
+
+    try {
+        const orders = await orderModel
+            .find({ orderDate: { $gte: startOfWeek, $lt: endOfWeek } })
+            .populate('userId')
+            .sort({ _id: -1 })
+        res.render('salesReport', {
+            orders,
+        })
+    } catch (error) {
+        console.error('Error fetching orders:', error)
+    }
+}
+
+const loadyearlyReport = async (req, res) => {
+    const currentDate = new Date()
+    const startOfYear = new Date(currentDate.getFullYear(), 0, 1) // Start of current year
+    const endOfYear = new Date(currentDate.getFullYear(), 11, 31, 23, 59, 59) // End of current year
+
+    try {
+        const orders = await orderModel
+            .find({ orderDate: { $gte: startOfYear, $lt: endOfYear } })
+            .populate('userId')
+            .sort({ _id: -1 })
+        res.render('salesReport', {
+            orders,
+        })
+    } catch (error) {
+        console.error('Error fetching orders:', error)
+    }
+}
+
+
+const loadDailyReport = async (req, res) => {
+  const currentDate = new Date();
+  const startOfDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()); // Start of current day
+  const endOfDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 23, 59, 59); // End of current day
+
+    try {
+        const orders = await orderModel
+            .find({ orderDate: { $gte: startOfDay, $lt: endOfDay } })
+            .populate('userId')
+            .sort({ _id: -1 })
+        res.render('salesReport', {
+            orders,
+        })
+    } catch (error) {
+        console.error('Error fetching orders:', error)
+    }
+}
+
+
+const cutomDatereport = async (req, res) => {
+    try {
+        const { startDate, endDate } = req.body
+        console.log(req.body)
+        res.redirect(
+            `/admin/custom-date-report?startDate=${startDate}&endDate=${endDate}`
+        )
+    } catch (error) {
+        console.error()
+    } 
+}
+
+
+const getCutomDatereport = async (req, res) => {
+    try {
+        const startDate = new Date(req.query['startDate'])
+        const endDate = new Date(req.query['endDate'])
+        const orders = await orderModel
+            .find({ orderDate: { $gte: startDate, $lt: endDate } })
+            .populate('userId')
+            .sort({ _id: -1 })
+        res.render('salesReport', {
+            orders,
+        })
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+
+
+
 module.exports = { 
   loginLoad,
   verifyLogin,
   loadUser,
   restrict,
   loadCategory,
-  addCategory,
+  addCategory, 
   loadEditCategory,
   editCategory,
   loadUpdateCategory,
@@ -579,7 +947,23 @@ module.exports = {
   deleteCoupen,
   offer,
   addOffer,
-  applyOffer
+  applyOffer,
+  deleteOffer,
+  loadEditOffer,
+  editOffer,
+  removeOffer,
+  applyProductOffer,
+  removeProductOffer,
+  loadEditCoupen,
+  editCoupen,
+  loadSalesReport,
+  monthlyReport,
+  loadMonthlyReport,
+  loadWeeklyReport,
+  loadyearlyReport,
+  loadDailyReport,
+  cutomDatereport,
+  getCutomDatereport
 
 }; 
 

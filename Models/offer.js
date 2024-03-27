@@ -21,6 +21,6 @@ const offerSchema = mongoose.Schema({
         type:Boolean,
         default:true
     } 
-})
+})   
 
 module.exports = mongoose.model("offer",offerSchema) 

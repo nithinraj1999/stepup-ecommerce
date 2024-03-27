@@ -17,8 +17,10 @@
     <link rel="stylesheet" href="../../assets2/css/style.css">
     <!-- End layout styles -->
     <link rel="shortcut icon" href="../../assets2/images/favicon.png" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
   </head>
   <body>
     <div class="container-scroller">
@@ -130,7 +132,7 @@
             </a>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" href="#auth" >
+            <a class="nav-link"  href="/admin/orders" >
               <span class="menu-icon">
                 <i class="mdi mdi-security"></i>
               </span>
@@ -143,6 +145,14 @@
                 <i class="mdi mdi-security"></i>
               </span>
               <span class="menu-title">Coupens</span>              
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link"  href="/admin/offer" >
+              <span class="menu-icon">
+                <i class="mdi mdi-security"></i>
+              </span>
+              <span class="menu-title">Offer</span>              
             </a>
           </li>
           <li class="nav-item menu-items">
@@ -182,7 +192,9 @@
               </li>
             </ul>
             <ul class="navbar-nav navbar-nav-right">
-              
+              <li>
+                <a type="button" href="/admin/logout">Logout</a>
+               </li>
               <li class="nav-item nav-settings d-none d-lg-block">
                 <a class="nav-link" href="#">
                   <i class="mdi mdi-view-grid"></i>
@@ -321,94 +333,58 @@
         <!-- partial -->
         <div class="main-panel">
           <div class="content-wrapper">
-    
-            <form method="POST"  action="/admin/update-product?id=<%=find?._id %>" enctype="multipart/form-data" >
-              <h1 class="category-text">Update Product</h1>
-              <div class="mb-3">
-                <div class="row g-3">
-                  <div class="col">
-                    <label for="exampleFormControlTextarea1" class="form-label">Product Name</label>
-                    <input type="text" class="form-control" value="<%=find?.name %>" required name="name"  aria-label="First name">
-                  </div>
-                  <div class="col">
-                    <label for="exampleFormControlTextarea1" class="form-label">Product Manufacturer</label>
-                    <input type="text" class="form-control"   value="<%=find?.manufacturer %>" required  name="manufacturer" aria-label="Last name">
-                  </div>
-                  <div class="col">
-                    <label for="exampleFormControlTextarea1" class="form-label">Product Price</label>
-                    <input type="text" class="form-control"  value="<%=find?.price %>"required name="price" aria-label="Last name">
-                  </div>
-                </div>
-              </div>
-              <div class="mb-3">
-                <label for="exampleFormControlTextarea1" class="form-label">Product description</label>
-                <input class="form-control" required pattern="^\S.*$" value="<%=find?.description %>" va  name="description" id="exampleFormControlTextarea1" rows="3">
-              </div>
-              <div class="mb-3" style="display: flex;">
-                <div style="margin-right: 10px;">
-                    <label for="main-category1" class="category-text">Main Category </label>
-                    <select class="form-select" name="maincategory" style="width: 250px;" aria-label="Default select example">
-                      <% const selectedCategory = find?.subcategory_id?.name; %>
-                      <option value="<%= selectedCategory %>" selected><%= selectedCategory %></option>
-                      <option value="Men" <% if (selectedCategory == "Men") { %>hidden<% } %>>Men</option>
-                      <option value="Women" <% if (selectedCategory == "Women") { %>hidden<% } %>>Women</option>
-                      <option value="Kids" <% if (selectedCategory == "Kids") { %>hidden<% } %>>Kids</option>
-                    </select>
-                </div>
-                <div>
-                  <label for="main-category2" class="category-text">Sub Category </label>
+         <div>
+          <h3>Sales Report</h3>
+        </div>  
+       
+         <div>
+            <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">Order ID</th>
+                    <th scope="col">Billing Name</th>
+                    <th scope="col">Product Name</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Payment Status</th>
+                    <th scope="col">Payment Method</th>
+  
+                  </tr>
+                </thead>
+                <tbody>
+                  <% orders.forEach((order) => { %>
+                    <% order.products.forEach((product) => { %>
+                  <tr>
+                    <td><%=order?.order_id %></td>
+                    <td><%=order?.userId?.name %></td>
+                    <td><%=product?.name %></td>
+                    <td><%=order?.orderDate %></td>
+                    <td><%=product?.total %></td>
+                    <td><%=product?.quantity %></td>
+                   
                   
-                  <select class="form-select" name="subcategory" style="width: 250px;" aria-label="Default select example">
-                     <% const selectedSubcategory = find?.subcategory_id ? find?.subcategory_id?.subcategory : ''; %>
-                      <option value="<%= find?.subcategory_id?.subcategory %>" selected><%= find?.subcategory_id?.subcategory %></option>
-                     <% subcategory.forEach(sub => { %>
-                         <option value="<%= sub %>" <% if (sub == find?.subcategory_id?.subcategory ){ %>hidden<% }  %>><%= sub %></option>
-                      <% }); %>
-                      </select>
-
-                  </select>
-                </div>
-               
-                  <div class="col">
-                      <label for="quantity">Quantity:</label>
-                      <input type="number" required class="form-control w-25" value="<%=find?.quantity %>" id="quantity" name="quantity" min="0"  value="1">
-                  </div>
-                  <br>
-              
-                </div>
-            </div>
-            <div class="mb-3">
-              <div class="card-group">      
-              <% if (find?.product_image && find?.product_image?.length) { %>
-                <% for (let i = find?.product_image?.length -1; i >= 0; i--) { %>
-                 
-                <div class="card" style="width: 200px;" >
-                  <img class="card-img-top" src="/uploads/<%= find?.product_image[i]?.resizedFile %>"  alt="Card image cap">
-                  <div class="card-body">
-                    <a href="/admin/delete-img/?product_id=<%= find?._id %>&img_id=<%= find?.product_image[i]?._id %>" class="btn btn-primary bg-danger" >DELETE</a>
-                  </div>
-                </div>
-                <% } %>
-              </div>
-              <% } else { %>
-                <!-- Handle the case when find.product_image is undefined or empty -->
-              <% } %>
-              </div>
-              <br>
-              <div class="col">
-                <label for="exampleFormControlTextarea1" class="form-label">Product image 1</label>
-                <input type="file" class="form-control"  name="avatar" multiple >
-              </div>
-              <br>
-              <div class="mb-3">
-                <button class="btn btn-primary" type="submit">Update Product</button>
-              </div>
-           </form>
-            </div>           
+                    <td>Success</td>
+                    <td><%=order?.paymentMethod %></td>
+                  </tr>
+                    <% }) %>
+                  <% }) %>
+                </tbody>
+              </table>
              
+  
+        </div>
+         </div>
             
-          </div>
 
+
+
+
+
+
+
+          
+          </div>
           <!-- content-wrapper ends -->
           <!-- partial:../../partials/_footer.html -->
           <!-- partial -->
@@ -419,6 +395,15 @@
     </div>
     <!-- container-scroller -->
     <!-- plugins:js -->
+
+
+
+   
+
+
+
+
+
     <script src="../../assets/vendors/js/vendor.bundle.base.js"></script>
     <!-- endinject -->
     <!-- Plugin js for this page -->
@@ -435,5 +420,3 @@
   
   </body>
 </html>
-
-

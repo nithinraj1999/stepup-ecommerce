@@ -73,9 +73,9 @@
                             <li>
                                 <a href="#">Links</a>
                                 <ul>
-                                    <li><a href="tel:#"><i class="icon-phone"></i>Call: +0123 456 789</a></li>
+                                    <!-- <li><a href="tel:#"><i class="icon-phone"></i>Call: +0123 456 789</a></li> -->
                                     <li><a href="/my-wish-list"><i class="icon-heart-o"></i>Wishlist</a></li>
-                                    <li><a href="about.html">About Us</a></li>
+                                    <!-- <li><a href="about.html">About Us</a></li> -->
                                     <li><a href="/account">My account</a></li>
                                     <% if (isLoggedIn) { %>
                                             <li><a href="/logout"><i class="icon-user"></i>Logout</a></li>
@@ -135,7 +135,7 @@
                         <div class="dropdown cart-dropdown">
                             <a href="/cart" class="dropdown-toggle" role="button"  aria-haspopup="true" aria-expanded="false" data-display="static">
                                 <i class="icon-shopping-cart"></i>
-                                <span class="cart-count">2</span>
+                                <span class="cart-count"><%=cart?.product?.length %></span>
                             </a>
                         </div><!-- End .cart-dropdown -->
                     </div><!-- End .header-right -->
@@ -165,16 +165,21 @@
                 		<div class="col-lg-9">
                 			<div class="toolbox">
                 				<div class="toolbox-left">
-                					<div class="toolbox-info">
+                					<!-- <div class="toolbox-info">
                 						Showing <span>9 of 56</span> Products
-                					</div><!-- End .toolbox-info -->
+                					</div> -->
+                                    <div>
+                                        <input id="product-search" type="search">
+                                        <button id="search-button" type="submit">search</button>
+                                    </div>
+                                                
                 				</div><!-- End .toolbox-left -->
 
                 				<div class="toolbox-right">
                 					<div class="toolbox-sort">
                 						<label for="sortby">Sort by price:</label>
                 						<div class="select-custom">
-											<select name="sortby" id="sortby" class="form-control"  onchange="sortByPrice(this.value)">
+											<select name="sortby" id="sortby" class="form-control"  onchange=" applyFilter()">
                                                 <option value="" disabled selected>Sort By</option>
 												<option value=-1 > High To Low</option>
 												<option value=1>Low To High </option>
@@ -182,7 +187,7 @@
 											</select>
 										</div>
                 					</div><!-- End .toolbox-sort -->
-                					<div class="toolbox-layout">
+                					<!-- <div class="toolbox-layout">
                 						<a href="category-list.html" class="btn-layout">
                 							<svg width="16" height="10">
                 								<rect x="0" y="0" width="4" height="4" />
@@ -224,7 +229,7 @@
                 								<rect x="18" y="6" width="4" height="4" />
                 							</svg>
                 						</a>
-                					</div><!-- End .toolbox-layout -->
+                					</div> -->
                 				</div><!-- End .toolbox-right -->
                 			</div><!-- End .toolbox -->
 
@@ -258,15 +263,47 @@
                                                     <a href="#" class="btn-product-icon btn-compare" title="Compare"><span>Compare</span></a> -->
                                                 </div><!-- End .product-action-vertical -->
   
+
+
+                                                <%
+                                                let price = i?.price; // Initialize price with default value
+
+                                                if ((i?.subcategory_id?.offer && i?.subcategory_id?.offer?.status) || (i?.offer && i?.offer?.status)) {
+                                                    let categoryOfferPrice = undefined; // Initialize with undefined
+                                                    let productOfferPrice = undefined; // Initialize with undefined
+                                                
+                                                    if (i?.subcategory_id?.offer && i?.subcategory_id?.offer?.status) {
+                                                        categoryOfferPrice = i?.price - (i?.price * i?.subcategory_id?.offer?.percentage / 100);
+                                                    }
+                                                
+                                                    if (i?.offer && i?.offer?.status) {
+                                                        productOfferPrice = i?.price - (i?.price * i?.offer?.percentage / 100);
+                                                    }
+                                                
+                                                    // Check if either offer price is defined
+                                                    if (categoryOfferPrice !== undefined || productOfferPrice !== undefined) {
+                                                        // Handle the case where either offer price is undefined
+                                                        if (categoryOfferPrice === undefined) {
+                                                            price = productOfferPrice;
+                                                        } else if (productOfferPrice === undefined) {
+                                                            price = categoryOfferPrice;
+                                                        } else {
+                                                            // Both offer prices are defined, choose the lower one
+                                                            price = Math.min(categoryOfferPrice, productOfferPrice);
+                                                        }
+                                                    }
+                                                }
+                                                %>
+                                               
+                                                
                                                 <div class="product-action">
                                                     <% if (i?.quantity <=0) {%>
                                                         <a href="" class="btn-product btn-cart addToCartBtn" onclick="outOfStock()" ><span>OUT OF STOCK</span></a>
                                                            <% } else {%> 
                                                             <% if (isLoggedIn) { %>
-                                                            <a href="#" class="btn-product btn-cart addToCartBtn" product-price="<%=i?.price %>"  data-product-id="<%= i?._id %>"><span>add to cart</span></a>
+                                                            <a href="#" class="btn-product btn-cart addToCartBtn" product-price="<%=i?.price %>" offer-price="<%= price %>" data-product-id="<%= i?._id %>"><span>add to cart</span></a>
                                                                 <% } else { %>
                                                                     <a href="/login" class="btn-product btn-cart " ><span>add to cart</span></a>
-
                                                                     <% } %>
                                                             <% } %>                                                
                                                         </div><!-- End .product-action -->
@@ -275,11 +312,33 @@
                                             <div class="product-body">
                                                 <div class="product-cat">
                                                     <a href=""><%=i?.subcategory_id?.name %></a>
+                                                    <br>
+                                                    <a href=""><%=i?.subcategory_id?.subcategory %></a>
                                                 </div><!-- End .product-cat -->
                                                 <h3 class="product-title"><a href=""><%=i?.name %></a></h3><!-- End .product-title -->
-                                                <div class="product-price">
-                                                    ₹ <%=i?.price %>
-                                                </div>
+
+                                               
+                                                
+                                                <% if (price !== undefined) { %>
+                                                    <div class="product-price">
+                                                        <% if (i?.subcategory_id?.offer && i?.subcategory_id?.offer?.status) { %>
+                                                            <del> ₹ <%= i?.price %></del> <!-- Striked original price -->
+                                                            &nbsp; <!-- Space between original and offer price -->
+                                                        <% } else if (i?.offer && i?.offer?.status) { %>
+                                                            <del> ₹ <%= i?.price %></del> <!-- Striked original price -->
+                                                            &nbsp; <!-- Space between original and offer price -->
+                                                        <% } %>
+                                                        ₹ <%= price %> <!-- Offer price -->
+                                                    </div>
+                                                <% } else { %>
+                                                    <div class="product-price">
+                                                        ₹ <%= i?.price %>
+                                                    </div>
+                                                <% } %>
+
+
+                                                
+                                                
                                                 <div class="ratings-container">
                                                     <div class="ratings">
                                                         <div class="ratings-val" style="width: 20%;"></div><!-- End .ratings-val -->
@@ -307,7 +366,33 @@
                                 </div><!-- End .row -->
                             </div><!-- End .products -->
 
-                			<nav aria-label="Page navigation">
+
+
+                            <!-- Pagination -->
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                                        <a class="page-link page-link-prev clicked-page"  onclick="applyFilter()" data-value="<%= currentPage - 1 %>" href= " " aria-label="Previous" tabindex="-1" aria-disabled="<%= currentPage === 1 %>">
+                                            <span aria-hidden="true"><i class="icon-long-arrow-left"></i></span>Prev
+                                        </a>
+                                    </li>
+                                    <% for (let i = 1; i <= totalPages; i++) { %>
+                                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                            <a class="page-link clicked-page"  onclick="applyFilter()"  data-value ="<%= i %>"   href=""><%= i %></a>
+                                        </li>
+                                    <% } %>
+                                    <li class="page-item-total">of <%= totalPages %></li>
+                                    <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                                        <a class="page-link page-link-next clicked-page"  onclick="applyFilter()" data-value ="<%= currentPage + 1 %>" href="" aria-label="Next">
+                                            Next <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                            
+                            
+  
+                			<!-- <nav aria-label="Page navigation">
 							    <ul class="pagination justify-content-center">
 							        <li class="page-item disabled">
 							            <a class="page-link page-link-prev" href="#" aria-label="Previous" tabindex="-1" aria-disabled="true">
@@ -324,14 +409,14 @@
 							            </a>
 							        </li>
 							    </ul>
-							</nav>
+							</nav> -->
                 		</div><!-- End .col-lg-9 -->
                 		<aside class="col-lg-3 order-lg-first">
                 			<div class="sidebar sidebar-shop">
                 				<div class="widget widget-clean">
                 					<label>Filters:</label>
-                					<a href="#" class="sidebar-filter-clear">Clean All</a>
-                				</div><!-- End .widget widget-clean -->
+                					<a href="#" class="sidebar-filter-clear" onclick="clearFilter()">Clean All</a>
+                				</div>
 
                 				<div class="widget widget-collapsible">
     								<h3 class="widget-title">
@@ -384,26 +469,7 @@
 									</div><!-- End .collapse -->
         						</div><!-- End .widget -->
 
-        						<!-- <div class="widget widget-collapsible">
-    								<h3 class="widget-title">
-									    <a data-toggle="collapse" href="#widget-5" role="button" aria-expanded="true" aria-controls="widget-5">
-									        Price
-									    </a>
-									</h3>End .widget-title -->
-
-									<!-- <div class="collapse show" id="widget-5">
-										<div class="widget-body">
-                                            <div class="filter-price">
-                                                <div class="filter-price-text">
-                                                    Price Range:
-                                                    <span id="filter-price-range"></span>
-                                                </div> End .filter-price-text -->
-
-                                                <!-- <div id="price-slider"></div> End #price-slider -->
-                                            <!-- </div>< End .filter-price -->
-										<!-- </div>End .widget-body -->
-									<!-- </div>End .collapse   -->
-        						<!-- </div>End .widget -->
+        						
                                 <div>
                                     <button id="apply-filter" onclick="applyFilter()">Apply filter</button>
                                 </div>
@@ -787,18 +853,28 @@
         document.querySelectorAll('.addToCartBtn').forEach(function(button) {
             button.addEventListener('click', function(event) {
                 event.preventDefault();
+                let productPrice = this.getAttribute('product-price'); // Get the product price
+                const offerPrice = this.getAttribute('offer-price'); // Get the offer price if available
+             
+                if (!isNaN(offerPrice)) {
+                    productPrice=offerPrice
+                 } 
+                
+                console.log("product price"+productPrice);
+
+         
                 const data = {
                     productId:this.getAttribute('data-product-id'),
-                    productPrice: this.getAttribute('product-price'),
+                    productPrice: productPrice,
                 }
                 axios.post('/add-to-cart',data )
                     .then(function(response) {
     
                         if (response.data.success) {
                             console.log(response.data.message);
-                            
+
                             window.location.href = '/cart?productId=' + data.productId;
-    
+
                         } else {
                             console.error(response.data.message);
                         }
@@ -807,7 +883,7 @@
                         console.error('Error adding item to cart:', error);
                     });
             });
-        });
+        }); 
     
     
     
@@ -850,35 +926,14 @@
 
 //===============================
 
-    //-----------------------------------------sort By Price ----------------------------------
 
-    // function sortByPrice(value,category) {
-    
-    //     window.location.href =`/sort-by-price?value=${value}&category=${category}`
-    
-    // }
-
-    // function outOfStock(){
-    //     Swal.fire({
-    //     title: 'Out of Stock',
-    //     text: 'This item is currently out of stock.',
-    //     icon: 'warning',
-    //     confirmButtonText: 'OK',
-    //   });
-    // }
-
-    //======================================== filter --------------------------
-
-    
-
-
-// Define selectedBrands and selectedCategories arrays
-
+// // Define selectedBrands and selectedCategories arrays
 // let selectedBrands = [];
 // let selectedCategories = [];
 
-// // Function to update the selected brands or categories array
-// function updateSelectedValues(checkboxes, selectedValues) {
+// // Function to update the selected brands or categories array and store them in local storage
+// // Function to update the selected brands or categories array and store them in local storage
+// function updateSelectedValues(checkboxes, selectedValues, storageKey) {
 //     selectedValues.length = 0; // Clear the selected values array
 //     // Loop through each checkbox
 //     checkboxes.forEach(checkbox => {
@@ -890,73 +945,8 @@
 //             selectedValues.push(value);
 //         }
 //     });
-// }
-
-// // Function to construct query parameters string
-// function constructQueryParams(selectedBrands, selectedCategories) {
-//     const params = [];
-//     selectedBrands.forEach(brand => params.push(`brand=${encodeURIComponent(brand)}`));
-//     selectedCategories.forEach(category => params.push(`category=${encodeURIComponent(category)}`));
-//     return params.join('&');
-// }
-
-// // Function to handle "Apply Filter" button click
-// function applyFilter() {
-//     // Update the selected brands and categories arrays
-//     updateSelectedValues(brandCheckboxes, selectedBrands);
-//     updateSelectedValues(categoryCheckboxes, selectedCategories);
-    
-//     // Construct query parameters string
-//     const queryParams = constructQueryParams(selectedBrands, selectedCategories);
-//     // Construct the full URL with query parameters
-//     const baseURL = 'http://localhost:3000'; // Replace this with your actual base URL
-//     const urlWithParams =  '/filter' + '?' + queryParams; // Append "?" operator here
-//     // Update the URL
-//     window.location.href = urlWithParams; 
-// }
-
-// // Attach click event listener to "Apply Filter" button
-// const applyFilterButton = document.getElementById('apply-filter');
-// applyFilterButton.addEventListener('click', applyFilter);
-
-// // Attach change event listeners to brand checkboxes
-// const brandCheckboxes = document.querySelectorAll('.filter-brand');
-// brandCheckboxes.forEach(checkbox => {
-//     checkbox.addEventListener('change', function() {
-//         updateSelectedValues(brandCheckboxes, selectedBrands);
-//     });
-// });
-
-// // Attach change event listeners to category checkboxes
-// const categoryCheckboxes = document.querySelectorAll('.filter-category');
-// categoryCheckboxes.forEach(checkbox => {
-//     checkbox.addEventListener('change', function() {
-//         updateSelectedValues(categoryCheckboxes, selectedCategories);
-//     });
-// });
-
-
-
-
-
-//----------------------------
-
-// let selectedBrands = [];
-// let selectedCategories = [];
-
-// // Function to update the selected brands or categories array
-// function updateSelectedValues(checkboxes, selectedValues) {
-//     selectedValues.length = 0; // Clear the selected values array
-//     // Loop through each checkbox
-//     checkboxes.forEach(checkbox => {
-//         // Check if the checkbox is checked
-//         if (checkbox.checked) {
-//             // Get the value of the checkbox
-//             const value = checkbox.value;
-//             // Add the value to the selectedValues array
-//             selectedValues.push(value);
-//         }
-//     });
+//     // Store the selected values in local storage
+//     localStorage.setItem(storageKey, JSON.stringify(selectedValues));
 // }
 
 // // Function to construct query parameters string
@@ -968,90 +958,23 @@
 //     if (mainCategory) {
 //         params.push(`mainCategory=${encodeURIComponent(mainCategory)}`);
 //     }
-//     return params.join('&');
-// }
-
-// // Function to handle "Apply Filter" button click
-// function applyFilter() {
-//     // Update the selected brands and categories arrays
-//     updateSelectedValues(brandCheckboxes, selectedBrands);
-//     updateSelectedValues(categoryCheckboxes, selectedCategories);
-    
-//     // Get the selected sorting option
-//     const sortBy = document.getElementById('sortby').value;
-    
-//     // Get the main category
-//     const mainCategory = '<%=cat %>';
-
-//     // Construct query parameters string
-//     const queryParams = constructQueryParams(selectedBrands, selectedCategories, sortBy, mainCategory);
-//     // Construct the full URL with query parameters
-//     const baseURL = 'http://localhost:3000'; // Replace this with your actual base URL
-//     const urlWithParams = '/filter' + '?' + queryParams; // Append "?" operator here
-//     // Update the URL
-//     window.location.href = urlWithParams; 
-// }
-
-// // Attach click event listener to "Apply Filter" button
-// const applyFilterButton = document.getElementById('apply-filter');
-// applyFilterButton.addEventListener('click', applyFilter);
-
-// // Attach change event listeners to brand checkboxes
-// const brandCheckboxes = document.querySelectorAll('.filter-brand');
-// brandCheckboxes.forEach(checkbox => {
-//     checkbox.addEventListener('change', function() {
-//         updateSelectedValues(brandCheckboxes, selectedBrands);
-//     });
-// });
-
-// // Attach change event listeners to category checkboxes
-// const categoryCheckboxes = document.querySelectorAll('.filter-category');
-// categoryCheckboxes.forEach(checkbox => {
-//     checkbox.addEventListener('change', function() {
-//         updateSelectedValues(categoryCheckboxes, selectedCategories);
-//     });
-// });
-
-
-
-//----
-
-
-// const selectedBrands = [];
-// const selectedCategories = [];
-
-// // Function to update the selected brands or categories array
-// function updateSelectedValues(checkboxes, selectedValues) {
-//     selectedValues.length = 0; // Clear the selected values array
-//     // Loop through each checkbox
-//     checkboxes.forEach(checkbox => {
-//         // Check if the checkbox is checked
-//         if (checkbox.checked) {
-//             // Get the value of the checkbox
-//             const value = checkbox.value;
-//             // Add the value to the selectedValues array
-//             selectedValues.push(value);
-//         }
-//     });
-// }
-
-// // Function to construct query parameters string
-// function constructQueryParams(selectedBrands, selectedCategories, sortBy, mainCategory) {
-//     const params = [];
-//     selectedBrands.forEach(brand => params.push(`brand=${encodeURIComponent(brand)}`));
-//     selectedCategories.forEach(category => params.push(`category=${encodeURIComponent(category)}`));
-    
-//     if (mainCategory) {
-//         params.push(`mainCategory=${encodeURIComponent(mainCategory)}`);
+//     if(sortBy){
+//         params.push(`sort=${encodeURIComponent(sortBy)}`);
 //     }
 //     return params.join('&');
 // }
 
+// // Function to retrieve selected values from local storage
+// function retrieveSelectedValues(storageKey) {
+//     const storedValues = localStorage.getItem(storageKey);
+//     return storedValues ? JSON.parse(storedValues) : [];
+// }
+
 // // Function to handle "Apply Filter" button click
 // function applyFilter() {
 //     // Update the selected brands and categories arrays
-//     updateSelectedValues(brandCheckboxes, selectedBrands);
-//     updateSelectedValues(categoryCheckboxes, selectedCategories);
+//     updateSelectedValues(brandCheckboxes, selectedBrands, 'selectedBrands');
+//     updateSelectedValues(categoryCheckboxes, selectedCategories, 'selectedCategories');
     
 //     // Get the selected sorting option
 //     const sortBy = document.getElementById('sortby').value;
@@ -1061,203 +984,258 @@
 
 //     // Construct query parameters string
 //     const queryParams = constructQueryParams(selectedBrands, selectedCategories, sortBy, mainCategory);
-//     // Construct the full URL with query parameters
-//     const baseURL = 'http://localhost:3000'; // Replace this with your actual base URL
-//     const urlWithParams = '/filter' + '?' + queryParams; // Append "?" operator here
-//     // Update the URL
-//     window.location.href = urlWithParams; 
-// }
-
-// // Attach click event listener to "Apply Filter" button
-// const applyFilterButton = document.getElementById('apply-filter');
-// applyFilterButton.addEventListener('click', applyFilter);
-
-// // Attach change event listeners to brand checkboxes
-// const brandCheckboxes = document.querySelectorAll('.filter-brand');
-// brandCheckboxes.forEach(checkbox => {
-//     checkbox.addEventListener('change', function() {
-//         updateSelectedValues(brandCheckboxes, selectedBrands);
-//     });
-// });
-
-// // Attach change event listeners to category checkboxes
-// const categoryCheckboxes = document.querySelectorAll('.filter-category');
-// categoryCheckboxes.forEach(checkbox => {
-//     checkbox.addEventListener('change', function() {
-//         updateSelectedValues(categoryCheckboxes, selectedCategories);
-//     });
-// });
-
-// Function to handle "Apply Sort" button click
-
-
-
-
-
-//------
-
-
-
-
-
-
-// Define selectedBrands and selectedCategories arrays
-let selectedBrands = [];
-let selectedCategories = [];
-
-// Function to update the selected brands or categories array and store them in local storage
-// Function to update the selected brands or categories array and store them in local storage
-function updateSelectedValues(checkboxes, selectedValues, storageKey) {
-    selectedValues.length = 0; // Clear the selected values array
-    // Loop through each checkbox
-    checkboxes.forEach(checkbox => {
-        // Check if the checkbox is checked
-        if (checkbox.checked) {
-            // Get the value of the checkbox
-            const value = checkbox.value;
-            // Add the value to the selectedValues array
-            selectedValues.push(value);
-        }
-    });
-    // Store the selected values in local storage
-    localStorage.setItem(storageKey, JSON.stringify(selectedValues));
-}
-
-// Function to construct query parameters string
-function constructQueryParams(selectedBrands, selectedCategories, sortBy, mainCategory) {
-    const params = [];
-    selectedBrands.forEach(brand => params.push(`brand=${encodeURIComponent(brand)}`));
-    selectedCategories.forEach(category => params.push(`category=${encodeURIComponent(category)}`));
-    
-    if (mainCategory) {
-        params.push(`mainCategory=${encodeURIComponent(mainCategory)}`);
-    }
-    if(sortBy){
-        params.push(`sort=${encodeURIComponent(sortBy)}`);
-    }
-    return params.join('&');
-}
-
-// Function to retrieve selected values from local storage
-function retrieveSelectedValues(storageKey) {
-    const storedValues = localStorage.getItem(storageKey);
-    return storedValues ? JSON.parse(storedValues) : [];
-}
-
-// Function to handle "Apply Filter" button click
-function applyFilter() {
-    // Update the selected brands and categories arrays
-    updateSelectedValues(brandCheckboxes, selectedBrands, 'selectedBrands');
-    updateSelectedValues(categoryCheckboxes, selectedCategories, 'selectedCategories');
-    
-    // Get the selected sorting option
-    const sortBy = document.getElementById('sortby').value;
-    
-    // Get the main category
-    const mainCategory = '<%=cat %>';
-
-    // Construct query parameters string
-    const queryParams = constructQueryParams(selectedBrands, selectedCategories, sortBy, mainCategory);
    
-    // Construct the full URL with query parameters
-    const baseURL = 'http://localhost:3000'; // Replace this with your actual base URL
-    const urlWithParams = '/filter' + '?' + queryParams; // Append "?" operator here
-    // Update the URL
-    window.location.href = urlWithParams; 
+//     // Construct the full URL with query parameters
+//     const baseURL = 'http://localhost:3000'; // Replace this with your actual base URL
+//     const urlWithParams = '/filter' + '?' + queryParams; // Append "?" operator here
+//     // Update the URL
+//     window.location.href = urlWithParams; 
+// }
+
+// // Attach click event listener to "Apply Filter" button
+// const applyFilterButton = document.getElementById('apply-filter');
+// applyFilterButton.addEventListener('click', applyFilter);
+
+// // Attach change event listeners to brand checkboxes
+// const brandCheckboxes = document.querySelectorAll('.filter-brand');
+// brandCheckboxes.forEach(checkbox => {
+//     checkbox.addEventListener('change', function() {
+//         updateSelectedValues(brandCheckboxes, selectedBrands, 'selectedBrands');
+//     });
+// });
+
+// // Attach change event listeners to category checkboxes
+// const categoryCheckboxes = document.querySelectorAll('.filter-category');
+// categoryCheckboxes.forEach(checkbox => {
+//     checkbox.addEventListener('change', function() {
+//         updateSelectedValues(categoryCheckboxes, selectedCategories, 'selectedCategories');
+//     });
+// });
+
+// // Retrieve selected values from local storage and update checkboxes
+// window.addEventListener('DOMContentLoaded', function() {
+//     const storedBrands = retrieveSelectedValues('selectedBrands');
+//     const storedCategories = retrieveSelectedValues('selectedCategories');
+
+//     // Update brand checkboxes
+//     brandCheckboxes.forEach(checkbox => {
+//         if (storedBrands.includes(checkbox.value)) {
+//             checkbox.checked = true;
+//         }
+//     });
+
+//     // Update category checkboxes
+//     categoryCheckboxes.forEach(checkbox => {
+//         if (storedCategories.includes(checkbox.value)) {
+//             checkbox.checked = true;
+//         }
+//     });
+// });
+
+
+
+
+// // //=================== sort   =========================
+
+
+//  // Function to handle sorting by price
+// function sortByPrice(sortOrder) {
+//     // Store the selected sorting option in local storage
+//     localStorage.setItem('sortOrder', sortOrder);
+    
+//     // Retrieve selected filter values from local storage
+//     const selectedBrands = retrieveSelectedValues('selectedBrands');
+//     const selectedCategories = retrieveSelectedValues('selectedCategories');
+    
+//     const mainCategory = '<%=cat %>'; // Assuming you have a way to get the main category value
+
+//     // Construct query parameters string
+//     const queryParams = constructQueryParams(selectedBrands, selectedCategories, sortOrder, mainCategory);
+//     console.log(queryParams);
+//     // Construct the full URL with query parameters
+//     const baseURL = 'http://localhost:3000'; // Replace this with your actual base URL
+//     const urlWithParams = '/sort-product' + '?' + queryParams; // Assuming the route is named sort-product
+//     // Redirect to the URL
+//     window.location.href = urlWithParams;
+
+// }
+
+// // Function to clear data in local storage unless navigating to specific paths
+// function clearLocalStorage() {
+//     const allowedPaths = ['/products', '/men', '/women', '/kids','/filter']; // Paths to retain data for
+//     const currentPath = window.location.pathname;
+
+//     if (!allowedPaths.includes(currentPath)) {
+//         localStorage.removeItem('selectedBrands');
+//         localStorage.removeItem('selectedCategories');
+//         localStorage.removeItem('sortOrder');
+//     }
+// }
+
+// // Attach event listener to the window's beforeunload event
+// window.addEventListener('beforeunload', clearLocalStorage);
+
+// window.addEventListener('DOMContentLoaded', function() {
+//     // Retrieve selected sorting order from local storage
+//     const sortOrder = localStorage.getItem('sortOrder');
+
+//     // Update the selected option in the <select> element only if sortOrder is not null
+//     if (sortOrder !== null) {
+//         document.getElementById('sortby').value = sortOrder;
+//     }
+// });
+
+
+
+//======================= product search ================================
+
+// document.getElementById("search-button").addEventListener("click", function() {
+//             var searchValue = document.getElementById("product-search").value;
+//             window.location.href = `/product-search?search=${searchValue}`
+//         });
+
+//================== search sort filter =================================
+
+// function applyFilter() {
+//     const categoryFilters = Array.from(document.querySelectorAll('.filter-category:checked')).map(input => input.value);
+//     const brandFilters = Array.from(document.querySelectorAll('.filter-brand:checked')).map(input => input.value);
+//     const sortBy = document.getElementById('sortby').value;
+//     const searchQuery = document.getElementById('product-search').value.trim();
+//    const queryParams = [];
+
+//     if (categoryFilters.length > 0) {
+//         queryParams.push(`category=${categoryFilters.join('&category=')}`);
+//     }
+//     if (brandFilters.length > 0) {
+//         queryParams.push(`brand=${brandFilters.join('&brand=')}`); // Join using & instead of ,
+//     }
+//     if (sortBy) {
+//         queryParams.push(`sortBy=${sortBy}`);
+//     }
+//     if (searchQuery) {
+//         queryParams.push(`search=${searchQuery}`);
+//     }
+    
+//     const queryString = queryParams.length > 0 ? '?' + queryParams.join('&') : '';
+//     window.location.href = '/apply-filter' + queryString;
+    
+// }
+
+
+let queryParams = [];
+
+function applyFilter() {
+    const categoryFilters = Array.from(document.querySelectorAll('.filter-category:checked')).map(input => input.value);
+    const brandFilters = Array.from(document.querySelectorAll('.filter-brand:checked')).map(input => input.value);
+    const sortBy = document.getElementById('sortby').value;
+    const searchQuery = document.getElementById('product-search').value.trim();
+
+    if (categoryFilters.length > 0) {
+        queryParams.push(`category=${categoryFilters.join('&category=')}`);
+        sessionStorage.setItem('categoryFilters', JSON.stringify(categoryFilters));
+    } else {
+        sessionStorage.removeItem('categoryFilters');
+    }
+
+    if (brandFilters.length > 0) {
+        queryParams.push(`brand=${brandFilters.join('&brand=')}`);
+        sessionStorage.setItem('brandFilters', JSON.stringify(brandFilters));
+    } else {
+        sessionStorage.removeItem('brandFilters');
+    }
+
+    if (sortBy) {
+        queryParams.push(`sortBy=${sortBy}`);
+        sessionStorage.setItem('sortBy', sortBy);
+    } else {
+        sessionStorage.removeItem('sortBy');
+    }
+
+    if (searchQuery) {
+        queryParams.push(`search=${searchQuery}`);
+        sessionStorage.setItem('searchQuery', searchQuery);
+    } else {
+        sessionStorage.removeItem('searchQuery');
+    }
+
+    const queryString = queryParams.length > 0 ? '?' + queryParams.join('&') : '';
+    const path = "<%= path %>"
+    window.location.href = path + queryString;
 }
 
-// Attach click event listener to "Apply Filter" button
-const applyFilterButton = document.getElementById('apply-filter');
-applyFilterButton.addEventListener('click', applyFilter);
+// Function to apply filters on page load
+function applyFiltersOnLoad() {
+    const categoryFilters = JSON.parse(sessionStorage.getItem('categoryFilters')) || [];
+    const brandFilters = JSON.parse(sessionStorage.getItem('brandFilters')) || [];
+    const sortBy = sessionStorage.getItem('sortBy') || '';
+    const searchQuery = sessionStorage.getItem('searchQuery') || '';
 
-// Attach change event listeners to brand checkboxes
-const brandCheckboxes = document.querySelectorAll('.filter-brand');
-brandCheckboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-        updateSelectedValues(brandCheckboxes, selectedBrands, 'selectedBrands');
-    });
-});
-
-// Attach change event listeners to category checkboxes
-const categoryCheckboxes = document.querySelectorAll('.filter-category');
-categoryCheckboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-        updateSelectedValues(categoryCheckboxes, selectedCategories, 'selectedCategories');
-    });
-});
-
-// Retrieve selected values from local storage and update checkboxes
-window.addEventListener('DOMContentLoaded', function() {
-    const storedBrands = retrieveSelectedValues('selectedBrands');
-    const storedCategories = retrieveSelectedValues('selectedCategories');
-
-    // Update brand checkboxes
-    brandCheckboxes.forEach(checkbox => {
-        if (storedBrands.includes(checkbox.value)) {
+    // Apply category filters
+    categoryFilters.forEach(value => {
+        const checkbox = document.querySelector(`.filter-category[value="${value}"]`);
+        if (checkbox) {
             checkbox.checked = true;
         }
     });
 
-    // Update category checkboxes
-    categoryCheckboxes.forEach(checkbox => {
-        if (storedCategories.includes(checkbox.value)) {
+    // Apply brand filters
+    brandFilters.forEach(value => {
+        const checkbox = document.querySelector(`.filter-brand[value="${value}"]`);
+        if (checkbox) {
             checkbox.checked = true;
         }
+    });
+
+    // Apply sort by
+    if (sortBy) {
+        document.getElementById('sortby').value = sortBy;
+    }
+
+    // Apply search query
+    document.getElementById('product-search').value = searchQuery;
+
+    // Clear the queryParams array to prevent duplicate entries
+    queryParams = [];
+}
+
+// Call applyFiltersOnLoad when the page loads
+window.onload = applyFiltersOnLoad;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const paginationLinks = document.querySelectorAll('.clicked-page');
+    console.log("Pagination links found:", paginationLinks.length);
+    
+    paginationLinks.forEach(function(link) {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            const currentPage = parseInt(this.getAttribute('data-value')); 
+            if (!isNaN(currentPage)) {
+                queryParams.push(`page=${currentPage}`);
+                sessionStorage.setItem('currentPage', currentPage);
+                const queryString = queryParams.length > 0 ? '?' + queryParams.join('&') : '';
+                const path = "<%=path %>"
+                window.location.href = path + queryString;
+            } else {
+                sessionStorage.removeItem('currentPage');
+            }
+        });
     });
 });
 
 
 
-
-//=================== sort   =========================
-
-
- // Function to handle sorting by price
-function sortByPrice(sortOrder) {
-    // Store the selected sorting option in local storage
-    localStorage.setItem('sortOrder', sortOrder);
-    
-    // Retrieve selected filter values from local storage
-    const selectedBrands = retrieveSelectedValues('selectedBrands');
-    const selectedCategories = retrieveSelectedValues('selectedCategories');
-    
-    const mainCategory = '<%=cat %>'; // Assuming you have a way to get the main category value
-
-    // Construct query parameters string
-    const queryParams = constructQueryParams(selectedBrands, selectedCategories, sortOrder, mainCategory);
-    console.log(queryParams);
-    // Construct the full URL with query parameters
-    const baseURL = 'http://localhost:3000'; // Replace this with your actual base URL
-    const urlWithParams = '/sort-product' + '?' + queryParams; // Assuming the route is named sort-product
-    // Redirect to the URL
-    window.location.href = urlWithParams;
-
+function clearFilter(){
+    sessionStorage.removeItem('categoryFilters');
+    sessionStorage.removeItem('brandFilters');
+    sessionStorage.removeItem('sortBy');
+    sessionStorage.removeItem('searchQuery');
+    const path = "<%=path %>"
+    window.location.href = path
 }
 
-// Function to clear data in local storage unless navigating to specific paths
-function clearLocalStorage() {
-    const allowedPaths = ['/products', '/men', '/women', '/kids','/filter']; // Paths to retain data for
-    const currentPath = window.location.pathname;
 
-    if (!allowedPaths.includes(currentPath)) {
-        localStorage.removeItem('selectedBrands');
-        localStorage.removeItem('selectedCategories');
-        localStorage.removeItem('sortOrder');
-    }
-}
 
-// Attach event listener to the window's beforeunload event
-window.addEventListener('beforeunload', clearLocalStorage);
 
-window.addEventListener('DOMContentLoaded', function() {
-    // Retrieve selected sorting order from local storage
-    const sortOrder = localStorage.getItem('sortOrder');
-
-    // Update the selected option in the <select> element only if sortOrder is not null
-    if (sortOrder !== null) {
-        document.getElementById('sortby').value = sortOrder;
-    }
-});
 
 
 

@@ -6,12 +6,7 @@ const isLogin = async (req,res,next)=>{
         const userId = req.session.user_id
         if(userId){
 
-            const user = await userModel.findOne({_id:userId})
-
-            if(user.isBlock == true){
-                res.redirect("/")
-            }
-
+           
             next()
         }else{
             res.redirect("/")
@@ -34,7 +29,25 @@ const isLogout = async (req,res,next)=>{
     }
 }
 
+const isBlocked=async (req,res,next)=>{
+    try{
+        
+        let check= await userModel.findById(req.session.user_id)
+
+        if(req.session.user_id&&check.isBlock){
+            req.session.user_id=null 
+            res.redirect('/')
+        }else{
+            next()
+        }
+
+    }catch(err){
+        console.log(err);
+    }
+}
+
 module.exports = {
     isLogin,
-    isLogout
+    isLogout,
+    isBlocked
 }

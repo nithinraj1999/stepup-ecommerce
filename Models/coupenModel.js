@@ -14,11 +14,11 @@ const CoupenSchema = mongoose.Schema({
         required:true
     },
     validFrom:{
-        type:Date,
+        type:String,
         required:true,
     },
     validUntill:{
-        type:Date,
+        type:String,
         required:true
     },
     minPurchaseAmount:{
@@ -34,5 +34,5 @@ const CoupenSchema = mongoose.Schema({
     }]    
        
 })
-  
+   
 module.exports = mongoose.model("coupen",CoupenSchema)

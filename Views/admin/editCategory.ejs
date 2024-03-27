@@ -133,7 +133,7 @@
             </a>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" data-toggle="collapse" href="/admin/orders" aria-expanded="false" aria-controls="auth">
+            <a class="nav-link" href="/admin/orders" >
               <span class="menu-icon">
                 <i class="mdi mdi-security"></i>
               </span>
@@ -141,7 +141,7 @@
             </a>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" data-toggle="collapse" href="/admin/coupens" aria-expanded="false" aria-controls="auth">
+            <a class="nav-link"  href="/admin/coupens" >
               <span class="menu-icon">
                 <i class="mdi mdi-security"></i>
               </span>
@@ -149,7 +149,7 @@
             </a>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" data-toggle="collapse" href="/admin/offer" aria-expanded="false" aria-controls="auth">
+            <a class="nav-link"  href="/admin/offer" >
               <span class="menu-icon">
                 <i class="mdi mdi-security"></i>
               </span>
@@ -157,7 +157,7 @@
             </a>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" href="">
+            <a class="nav-link" href="/admin/sales">
               <span class="menu-icon">
                 <i class="mdi mdi-file-document-box"></i>
               </span>
@@ -349,55 +349,56 @@
               <tbody>
                 <% find.forEach((cate)=>{ %>
                   <tr>
-                    <th scope="row"></th>
-                    <td><%=cate.name %></td>
-                    <td><%=cate.subcategory %></td>
-                    <td><%=cate.description %></td>
-                    <% if(cate.isBlock  == false){ %>
-                    <td>isActive</td>
-                    <% } else { %>
-                      <td>block</td>
-                     <% } %>
-                     <td><button type="submit" name="action" value="offer" class="btn btn-success" data-toggle="modal" data-target="#offerModal">offer</button></td>
-                    <form method="post" action="/admin/editcategory?id=<%=cate._id %>">
-                    
-                    <td><button type="submit" name="action" value="block" class="btn btn-warning">Block</button></td>
-                    
-                    <td><button type="submit" name="action" value="unblock" class="btn btn-success">Unblock</button></td>
-                   
-                    <td><button type="submit" name="action" value="update" class="btn btn-primary">Update</button></td>
-                    
-                    <td><button type="submit" name="action" value="delete" onclick="showAlert()" class="btn btn-danger">Delete</button></td>
-                    </form>
-                    
+                      <th scope="row"></th>
+                      <td><%=cate.name %></td>
+                      <td><%=cate.subcategory %></td>
+                      <td><%=cate.description %></td>
+                      <% if(cate.isBlock  == false){ %>
+                          <td>isActive</td>
+                      <% } else { %>
+                          <td>block</td>
+                          <% } %>
+                        <td> <% if (cate.offer && cate.offer.status) { %>
+                          <button type="button" class="btn btn-danger" style="width: 150px;" onclick="removeOffer('<%= cate._id %>')">Remove Offer</button>
+                      <% } else { %>
+                          <button type="button" class="btn btn-success" style="width: 150px;"  data-toggle="modal" data-target="#offerModal<%= cate._id %>">Apply Offer</button>
+                      <% } %></td>
+                      <form method="post" action="/admin/editcategory?id=<%=cate._id %>">
+                          <td><button type="submit" name="action" value="block" class="btn btn-warning">Block</button></td>
+                          <td><button type="submit" name="action" value="unblock" class="btn btn-success">Unblock</button></td>
+                          <td><button type="submit" name="action" value="update" class="btn btn-primary">Update</button></td>
+                          <td><button type="submit" name="action" value="delete" onclick="showAlert()" class="btn btn-danger">Delete</button></td>
+                      </form>
                   </tr>
-                  <div class="modal fade" id="offerModal" tabindex="-1" role="dialog" aria-labelledby="offerModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="offerModalLabel">Select Offer</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                          </button>
-                        </div>
-                        <div class="modal-body">
-                          <h5>Select an offer:</h5>
-                          <% offer.forEach((data)=>{ %>
-                            <div>
-                              <input type="radio" id="offer<%=data?._id %>" name="selectedOffer" value="<%=data?._id %>">
-                              <label for="offer<%=data?._id %>"><%=data?.name%>(<%=data?.percentage %>)</label>
-                            </div>
-                          <% }) %>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-primary" onclick="applySelectedOffer('<%=cate.name %>','<%=cate.subcategory %>')">Apply</button>
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        </div>
+              
+                  <!-- Offer Modal -->
+                  <div class="modal fade" id="offerModal<%=cate._id %>" tabindex="-1" role="dialog" aria-labelledby="offerModalLabel<%=cate._id %>" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered" role="document">
+                          <div class="modal-content">
+                              <div class="modal-header">
+                                  <h5 class="modal-title" id="offerModalLabel<%=cate._id %>">Select Offer</h5>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                  </button>
+                              </div>
+                              <div class="modal-body">
+                                  <h5>Select an offer:</h5>
+                                  <% offer.forEach((data)=>{ %>
+                                      <div>
+                                          <input type="radio" id="offer<%=data?._id %>" name="selectedOffer<%=cate._id %>" value="<%=data?._id %>">
+                                          <label for="offer<%=data?._id %>"><%=data?.name%>(<%=data?.percentage %>)</label>
+                                      </div>
+                                  <% }) %>
+                              </div>
+                              <div class="modal-footer">
+                                  <button type="button" class="btn btn-primary" onclick="applySelectedOffer('<%=cate._id %>')">Apply</button>
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                              </div>
+                          </div>
                       </div>
-                    </div>
                   </div>
-                  
-                <% }) %>
+              <% }) %>
+              
                 
               </tbody>
             </table>
@@ -407,32 +408,6 @@
           
           <!-- partial -->
 
-          <div class="modal fade" id="offerModal" tabindex="-1" role="dialog" aria-labelledby="offerModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="offerModalLabel">Select Offer</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <h5>Select an offer:</h5>
-                  <% offer.forEach((data)=>{ %>
-                    <div>
-                      <input type="radio" id="offer<%=data?._id %>" name="selectedOffer" value="<%=data?._id %>">
-                      <label for="offer<%=data?._id %>"><%=data?.name%>(<%=data?.percentage %>)</label>
-                    </div>
-                  <% }) %>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-primary" onclick="applySelectedOffer()">Apply</button>
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          
           
 
 
@@ -451,34 +426,63 @@
    }
 
 
-   function applySelectedOffer(mainCategory,subCategory){
-      const selectedOfferId = document.querySelector('input[name="selectedOffer"]:checked').value;
+  //  function applySelectedOffer(mainCategory,subCategory){
+  //     const selectedOfferId = document.querySelector('input[name="selectedOffer"]:checked').value;
 
-    const data = {
-      offerId:selectedOfferId,
-      mainCategory:mainCategory,
-      subCategory:subCategory
+  //   const data = {
+  //     offerId:selectedOfferId,
+  //     mainCategory:mainCategory,
+  //     subCategory:subCategory
+  //   }
+
+  //   axios.post("/admin/apply-offer",data)
+  //   .then(response=>{
+  //     console.log(response.data);
+  //     if(response.data.success){
+  //       Swal.fire({
+  //       icon: 'success',
+  //       title: 'Offer Applied Successfully!',
+  //       text: 'The offer has been applied successfully.',
+  //     });
+  //     }
+  //   })
+  //   .catch(error=>{
+  //     console.log(error);
+  //   })
+
+  //  }
+
+
+
+  function applySelectedOffer(categoryId) {
+        var selectedOfferId = $("input[name='selectedOffer" + categoryId + "']:checked").val();
+        axios.post('/admin/apply-offer', {
+            categoryId: categoryId,
+            selectedOfferId: selectedOfferId
+        })
+        .then(function(response) {
+            console.log(response.data);
+            window.location.reload()
+        })
+        .catch(function(error) {
+            console.error(error);
+        });
     }
 
-    axios.post("/admin/apply-offer",data)
-    .then(response=>{
-      console.log(response.data);
-      if(response.data.success){
-        Swal.fire({
-        icon: 'success',
-        title: 'Offer Applied Successfully!',
-        text: 'The offer has been applied successfully.',
-      });
-      }
-    })
-    .catch(error=>{
-      console.log(error);
-    })
+function removeOffer(categoryId){
+  data = {
+    categoryId : categoryId
+  }
+  axios.post("/admin/remove-offer",data)
+  .then(function(response) {
+            console.log(response.data);
+            window.location.reload()
+        })
+        .catch(function(error) {
+            console.error(error);
+        });
 
-   }
-
-
-
+}
 
 
 </script>

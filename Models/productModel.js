@@ -32,8 +32,11 @@ const productSchema = mongoose.Schema({
         type:Boolean,
         default:true
     },
-    
-    
+    offer:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"offer",
+        
+    },
     product_image:[
         {
                 filename:{
@@ -47,7 +50,7 @@ const productSchema = mongoose.Schema({
                     resizedFile: {
                     type:String,
                     required:true,
-                    default:"https://via.placeholder.com/80"
+                   
                     }
         }
     ]

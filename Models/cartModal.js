@@ -12,20 +12,25 @@ const cartSchema = mongoose.Schema({
             ref:"products",
             required:true
         },
+        
         quantity:{
             type:Number,
             default:1
+        },
+        price:{
+            type:Number,
+            require:true
         },
         total:{
             type:Number,
             require:true
         } 
      }], 
-    subTotal:{
+    subTotal:{   
         type:Number,
         default:0
     }
-    
-})
+      
+}) 
 
 module.exports = mongoose.model("cart",cartSchema)

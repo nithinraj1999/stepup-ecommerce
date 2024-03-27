@@ -26,7 +26,7 @@ userRoute.use(nocache());
 userRoute.use(bodyParser.json());
 userRoute.use(bodyParser.urlencoded({ extended: true }));
 
-userRoute.get("/",controller.loadHomePage)
+userRoute.get("/",auth.isBlocked,controller.loadHomePage)
 userRoute.get("/signup",controller.loadsignup)
 userRoute.post("/signup",controller.signup) 
 
@@ -40,52 +40,51 @@ userRoute.post("/otp-verification",controller.verifyOTP)
   
 userRoute.get("/login",controller.loadLogin)
 userRoute.post("/login",controller.verifyLogin) 
-userRoute.get("/logout", controller.userLogout); 
+userRoute.get("/logout", controller.userLogout)
 
 //=============== Product list =================
 
-userRoute.get("/products",controller.loadProductList)
-userRoute.get("/men",controller.loadMen) 
-userRoute.get("/women",controller.loadWomen)
-userRoute.get("/kids",controller.loadKids)
-userRoute.get("/product-details",controller.loadProductDetails)
+userRoute.get("/products",auth.isBlocked,controller.loadProductList)
+userRoute.get("/men",auth.isBlocked,controller.loadMen) 
+userRoute.get("/women",auth.isBlocked,controller.loadWomen)
+userRoute.get("/kids",auth.isBlocked,controller.loadKids) 
+userRoute.get("/product-details",auth.isBlocked,controller.loadProductDetails)
  
-
 //================ My account ===================   
  
-userRoute.get("/account",auth.isLogin,controller.myAccount)  
-userRoute.post("/edit-user",controller.editUser) 
-userRoute.post("/address",controller.addAddress)
-userRoute.get("/edit-address/:id",controller.loadEditAddress)
-userRoute.post("/edit-address",controller.editAddress)
-userRoute.post("/delete-address",controller.deleteAddress)
-  
+userRoute.get("/account",auth.isBlocked,auth.isLogin,controller.myAccount)  
+userRoute.post("/edit-user",auth.isBlocked,controller.editUser) 
+userRoute.post("/address",auth.isBlocked,controller.addAddress)
+userRoute.get("/edit-address/:id",auth.isBlocked,controller.loadEditAddress)
+userRoute.post("/edit-address",auth.isBlocked,controller.editAddress)
+userRoute.post("/delete-address",auth.isBlocked,controller.deleteAddress)
+
 //===================== Cart=====================
 
 userRoute.post('/add-to-cart',controller.addTocart)
-userRoute.get("/cart",auth.isLogin,controller.loadCart)
+userRoute.get("/cart",auth.isBlocked,auth.isLogin,controller.loadCart)
 userRoute.post("/update-cart",auth.isLogin,controller.updateCart)
 userRoute.post("/remove-item",auth.isLogin,controller.removeItem)
 
 //===================== Checkout ================
  
-userRoute.get('/checkout',controller.loadCheckout)
+userRoute.get('/checkout',auth.isBlocked,controller.loadCheckout)
 userRoute.get('/checkout-verification',controller.checkOutVerification)
 
 //===================== orders ==================
 
-userRoute.get("/order",controller.loadOrderSuccess) 
+userRoute.get("/order",auth.isBlocked,controller.loadOrderSuccess) 
 userRoute.post("/order",controller.order)
-userRoute.get("/order-details",auth.isLogin,controller.orderDetails) 
+userRoute.get("/order-details",auth.isBlocked,auth.isLogin,controller.orderDetails) 
 userRoute.post("/order-cancelation",controller.cancelRequest)
 userRoute.post("/request-return",controller.returnRequest)
 userRoute.post("/verify-payment",controller.verifyPayment)
 userRoute.post("/failed-payment",controller.failedPayment)
-userRoute.get("/paymen-failed",controller.paymentFailed)
+userRoute.get("/paymen-failed",auth.isBlocked,controller.paymentFailed)
 //===================== wishList =================
 
 userRoute.post("/wish-list",controller.addToWishList)
-userRoute.get("/my-wish-list",controller.loadWishList) 
+userRoute.get("/my-wish-list",auth.isBlocked,controller.loadWishList) 
 userRoute.post("/remove-from-wishlist",controller.removeWishList) 
 
 //====================== coupens =================
@@ -93,12 +92,13 @@ userRoute.post("/remove-from-wishlist",controller.removeWishList)
 userRoute.post("/apply-coupen",controller.applyCoupen)
 
 //====================== Sort By Price ===========
-
-userRoute.get("/sort-product",controller.sortByPrice)
+ 
+// userRoute.get("/sort-product",auth.isBlocked,controller.sortByPrice)
 
 //=====================
-userRoute.get("/filter",controller.filter)
+// userRoute.get("/filter",auth.isBlocked,controller.filter)
 
+userRoute.get("/apply-filter",auth.isBlocked,controller.applyFilter)
 
 
 

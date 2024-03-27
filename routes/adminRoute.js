@@ -56,13 +56,13 @@ adminRoute.post("/addproduct",auth.isLogin,upload.array("avatar",4),adminControl
 
 adminRoute.get("/all-products",auth.isLogin,adminController.allProducts)
 adminRoute.post("/all-products",adminController.editProducts)
- 
+
 adminRoute.get("/update-product",auth.isLogin,adminController.loadUpdateProduct)
 adminRoute.post("/update-product",auth.isLogin,upload.array("avatar",4),adminController.updateProduct)
 adminRoute.get("/delete-img/*",auth.isLogin,adminController.deleteimage)
 
 
-//=========================== order ==========
+//=========================== order ========== 
 
 adminRoute.get("/orders",auth.isLogin,adminController.loadOrders)
 adminRoute.post("/order-status",auth.isLogin,adminController.orderStatus)
@@ -73,12 +73,36 @@ adminRoute.post("/customer-Request",adminController.orderRequest)
 adminRoute.get("/coupens",adminController.loadCoupenPage)
 adminRoute.post("/add-new-coupen",adminController.addNewCoupen)
 adminRoute.post("/delete-coupon",adminController.deleteCoupen)
-
-//=================== offer ======================================
+adminRoute.post("/load-edit-coupen",adminController.loadEditCoupen)
+adminRoute.post("/edit-coupen",adminController.editCoupen)
+//===================  offer ======================================
 
 adminRoute.get("/offer",adminController.offer)
 adminRoute.post("/add-offer",adminController.addOffer) 
-adminRoute.post("/apply-offer",adminController.applyOffer)
+
+adminRoute.post("/delete-offer",adminController.deleteOffer)
+adminRoute.get("/load-edit-offer",adminController.loadEditOffer)
+adminRoute.post("/edit-offer",adminController.editOffer)
 
 
-module.exports = adminRoute 
+//========== category offer
+
+adminRoute.post("/apply-offer",adminController.applyOffer) 
+adminRoute.post("/remove-offer",adminController.removeOffer)
+//==================== product Offer ==================
+
+adminRoute.post("/apply-product-offer",adminController.applyProductOffer) 
+adminRoute.post("/remove-product-offer",adminController.removeProductOffer) 
+
+//==================== sales report ===================
+adminRoute.get("/sales",adminController.loadSalesReport) 
+adminRoute.post("/monthly-report",adminController.monthlyReport) 
+adminRoute.get("/monthly-report",adminController.loadMonthlyReport) 
+adminRoute.get("/weekly-report",adminController.loadWeeklyReport) 
+adminRoute.get("/yearly-report",adminController.loadyearlyReport) 
+adminRoute.get("/daily-report",adminController.loadDailyReport) 
+adminRoute.post("/custom-date-report",adminController.cutomDatereport) 
+adminRoute.get("/custom-date-report",adminController.getCutomDatereport) 
+
+
+module.exports = adminRoute     

@@ -64,9 +64,9 @@
                             <li>
                                 <a href="#">Links</a>
                                 <ul>
-                                    <li><a href="tel:#"><i class="icon-phone"></i>Call: +0123 456 789</a></li>
+                                    <!-- <li><a href="tel:#"><i class="icon-phone"></i>Call: +0123 456 789</a></li> -->
                                     <li><a href="/my-wish-list"><i class="icon-heart-o"></i>Wishlist </a></li>
-                                    <li><a href="about.html">About Us</a></li>
+                                    <!-- <li><a href="about.html">About Us</a></li> -->
                                     <li><a href="/account">My account</a></li>
                                     <li><a href="/logout" ><i class="icon-user"></i>Logout</a></li>
                                 </ul>
@@ -125,7 +125,7 @@
                         <div class="dropdown cart-dropdown">
                             <a href="/cart" class="dropdown-toggle" role="button"  aria-haspopup="true" aria-expanded="false" data-display="static">
                                 <i class="icon-shopping-cart"></i>
-                                <span class="cart-count">2</span>
+                                <!-- <span class="cart-count">2</span> -->
                             </a>
                         </div><!-- End .cart-dropdown -->
                     </div><!-- End .header-right -->
@@ -161,9 +161,9 @@
                                     <li class="nav-item">
 								        <a class="nav-link" id="tab-address-link" data-toggle="tab" href="#tab-address" role="tab" aria-controls="tab-address" aria-selected="false">Adresses</a>
 								    </li>
-								    <li class="nav-item">
+								    <!-- <li class="nav-item">
 								        <a class="nav-link " id="tab-dashboard-link" data-toggle="tab" href="#tab-dashboard" role="tab" aria-controls="tab-dashboard" aria-selected="false">Dashboard</a>
-								    </li>
+								    </li> -->
 								    <li class="nav-item">
 								        <a class="nav-link" id="tab-orders-link" data-toggle="tab" href="#tab-orders" role="tab" aria-controls="tab-orders" aria-selected="false">Orders</a>
 								    </li>
@@ -173,7 +173,7 @@
 								    
 								   
 								    <li class="nav-item">
-								        <a class="nav-link" href="#">Sign Out</a>
+								        <a class="nav-link" href="/logout">Sign Out</a>
 								    </li>
 								</ul>
 	                		</aside><!-- End .col-lg-3 -->
@@ -208,9 +208,30 @@
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                <div class="col-md-2" style="padding-top: 25px;">
-                                                                    <h6>₹ <%= product?.price %></h6>
+
+                                                               
+                                                                
+
+
+                                                                <!-- <div class="col-md-2" style="padding-top: 25px;">
+                                                                    <% if (product.productId?.subcategory_id?.offer && product.productId?.subcategory_id?.offer?.status) { %>
+                                                                        <h6>₹ <%= product?.price - (product?.price * product.productId?.subcategory_id?.offer?.percentage / 100) %>  </h6>
+                                                                       
+                                                                    <% } else { %>
+                                                                            <h6>₹ <%= product?.price %></h6>
+                                                                    <% } %>
+                                                                  
                                                                 </div>
+                                                                 -->
+                                                                 <div class="col-md-2" style="padding-top: 25px;">
+                                                                    
+                                                                            <h6>₹ <%=product?.total %> %></h6>
+                                                                  
+                                                                  
+                                                                </div>
+                                                                
+
+
                                                                 <div class="col-md-2" style="padding-top: 25px;">
                                                                     <h6> <%= product?.orderStatus %></h6>
                                                                    
@@ -344,7 +365,7 @@
                                             <div class="modal-dialog modal-dialog-centered" role="document">
                                               <div class="modal-content" style="padding: 20px;">
                                                 <div class="modal-header">
-                                                  <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                                                  <h5 class="modal-title" id="exampleModalLongTitle">Add Address</h5>
                                                   <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
                                                   </button>
@@ -425,7 +446,7 @@
                                             <div class="modal-dialog modal-dialog-centered" role="document">
                                               <div class="modal-content" style="padding: 20px;">
                                                 <div class="modal-header">
-                                                  <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                                                  <h5 class="modal-title" id="exampleModalLongTitle">Edit Address</h5>
                                                   <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
                                                   </button>
@@ -918,6 +939,8 @@
 
 
 <script>
+
+
 //------------------ submit the form -----------------------------
 
     // function submitAddressForm() {
@@ -1027,7 +1050,7 @@
 
 
     function updateAddress(){
-        const name = document.getElementById('name2').value.trim();
+    const name = document.getElementById('name2').value.trim();
     const phone = document.getElementById('phone2').value.trim();
     const building = document.getElementById('building2').value.trim();
     const city = document.getElementById('city2').value.trim();

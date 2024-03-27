@@ -131,7 +131,7 @@
             </a>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" data-toggle="collapse" href="/admin/orders" aria-expanded="false" aria-controls="auth">
+            <a class="nav-link"  href="/admin/orders" >
               <span class="menu-icon">
                 <i class="mdi mdi-security"></i>
               </span>
@@ -139,7 +139,7 @@
             </a>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" data-toggle="collapse" href="/admin/coupens" aria-expanded="false" aria-controls="auth">
+            <a class="nav-link"  href="/admin/coupens" >
               <span class="menu-icon">
                 <i class="mdi mdi-security"></i>
               </span>
@@ -147,7 +147,7 @@
             </a>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" data-toggle="collapse" href="/admin/offer" aria-expanded="false" aria-controls="auth">
+            <a class="nav-link"  href="/admin/offer" >
               <span class="menu-icon">
                 <i class="mdi mdi-security"></i>
               </span>
@@ -155,7 +155,7 @@
             </a>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" href="">
+            <a class="nav-link" href="/admin/sales">
               <span class="menu-icon">
                 <i class="mdi mdi-file-document-box"></i>
               </span>
@@ -358,13 +358,13 @@
                     <td id='product<%=product?._id%>order<%=order?._id %>' style="width:200px" ><%=product?.orderStatus %></td>
                     <td> 
                       <% if(product?.orderStatus =="Placed") { %>
-                      <button id='button<%=product?._id%>' class="btn " value="Packed" onclick="action(this.value,'<%=order._id %>','<%=product?._id%>')"  style="width:200px;background-color: #4646fb; color: white;" >Proceed To Pack </button>
+                      <button id='button<%=product?._id%>' class="btn " value="Packed" onclick="action(this.value,'<%=order._id %>','<%=product?._id%>')"  style="width:200px;background-color:#004080; color: white;" >Proceed To Pack </button>
                       <% }else if(product?.orderStatus =="Packed") { %>
-                      <button id='button<%=product?._id%>' class="btn " value="Shipped" onclick="action(this.value,'<%=order._id %>','<%=product?._id%>')"  style="width:200px;background-color: #4646fb; color: white;" >Proceed To Ship </button>
+                      <button id='button<%=product?._id%>' class="btn " value="Shipped" onclick="action(this.value,'<%=order._id %>','<%=product?._id%>')"  style="width:200px;background-color: #ff6600; color: white;" >Proceed To Ship </button>
                       <% }else if(product?.orderStatus =="Shipped") { %>
-                      <button id='button<%=product?._id%>' class="btn " value="Delivered" onclick="action(this.value,'<%=order._id %>','<%=product?._id%>')"  style="width:200px;background-color: #4646fb; color: white;" >Proceed To Delivery </button>
+                      <button id='button<%=product?._id%>' class="btn " value="Delivered" onclick="action(this.value,'<%=order._id %>','<%=product?._id%>')"  style="width:200px;background-color: #66ccff; color: white;" >Proceed To Delivery </button>
                       <% }else if(product?.orderStatus =="Delivered") { %>
-                        <button id='button<%=product?._id%>' class="btn " style="width:200px;background-color: #36ee4c; color: white;">Product Delivered </button>
+                        <button id='button<%=product?._id%>' class="btn " style="width:200px;background-color: #00cc66; color: white;">Product Delivered </button>
                       <% }else if(product?.orderStatus =="Canceled") { %>
                         <button id='button<%=product?._id%>' class="btn " disabled value="Canceled"   style="width:200px;background-color: #b9b9b9; color: white;" >Disabled </button>
                         <% }else if(product?.orderStatus =="Product Returned") { %>
@@ -396,7 +396,23 @@
               
                 </tbody>
               </table>
+              <div class="pagination">
+                <% if (currentPage > 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>" class="page-link">Previous</a>
+                <% } %>
+                
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <a href="?page=<%= i %>" class="page-link <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+                <% } %>
+                
+                <% if (currentPage < totalPages) { %>
+                    <a href="?page=<%= currentPage + 1 %>" class="page-link">Next</a>
+                <% } %>
+              </div>
           </div>
+          <!-- Add pagination controls after the table -->
+
+
           <!-- content-wrapper ends -->
           <!-- partial:../../partials/_footer.html -->
           
@@ -411,29 +427,10 @@
 
 
     
-    <!-- <style>
-      .blinking {
-        animation: blink 1s infinite;
-      }
-  
-      @keyframes blink {
-      0%, 100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.5;
-      }
-    }
-    </style> -->
+
 
 <script>
   
-  // function stopBlinking() {
-  //   var blinkingButton = document.getElementById('blinkingButton');
-  //   blinkingButton.classList.remove('blinking');
-  //   blinkingButton.removeAttribute('onclick');
-  // }
-
    function showAlert(){
     alert("this wiill delete the category")
    }
@@ -458,13 +455,13 @@
             button.value = 'Shipped';
             button.onclick = () => action('Shipped', orderId, productId);
 
-            // button.style.backgroundColor = '#36ee4c'
+             button.style.backgroundColor = '#ff6600'
             break;
           case 'Shipped':
             button.innerText = 'Proceed To Delivery';
             button.value = 'Delivered';
             button.onclick = () => action('Delivered', orderId, productId);
-            // button.style.backgroundColor = '#36ee4c'
+             button.style.backgroundColor = '#66ccff'
             break;
           case 'Delivered':
             button.innerText = 'Product Delivered';

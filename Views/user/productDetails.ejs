@@ -66,9 +66,9 @@
                             <li>
                                 <a href="#">Links</a>
                                 <ul>
-                                    <li><a href="tel:#"><i class="icon-phone"></i>Call: +0123 456 789</a></li>
+                                    <!-- <li><a href="tel:#"><i class="icon-phone"></i>Call: +0123 456 789</a></li> -->
                                     <li><a href="/my-wish-list"><i class="icon-heart-o"></i>Wishlist </a></li>
-                                    <li><a href="about.html">About Us</a></li>
+                                    <!-- <li><a href="about.html">About Us</a></li> -->
                                     <li><a href="/account">My account</a></li>
                                     <li><a href="/login" ><i class="icon-user"></i>Login</a></li>
                                 </ul>
@@ -126,7 +126,7 @@
                         <div class="dropdown cart-dropdown">
                             <a href="/cart" class="dropdown-toggle" role="button"  aria-haspopup="true" aria-expanded="false" data-display="static">
                                 <i class="icon-shopping-cart"></i>
-                                <span class="cart-count">2</span>
+                                <!-- <span class="cart-count">2</span> -->
                             </a>
                         </div><!-- End .cart-dropdown -->
                     </div><!-- End .header-right -->
@@ -191,6 +191,40 @@
                                 </div><!-- End .product-gallery -->
                             </div><!-- End .col-md-6 -->
 
+
+                            <%
+                            let price = find?.price; // Initialize price with default value
+
+                            if ((find?.subcategory_id?.offer && find?.subcategory_id?.offer?.status) || (find?.offer && find?.offer?.status)) {
+                                let categoryOfferPrice = undefined; // Initialize with undefined
+                                let productOfferPrice = undefined; // Initialize with undefined
+                            
+                                if (find?.subcategory_id?.offer && find?.subcategory_id?.offer?.status) {
+                                    categoryOfferPrice = find?.price - (find?.price * find?.subcategory_id?.offer?.percentage / 100);
+                                }
+                            
+                                if (find?.offer && find?.offer?.status) {
+                                    productOfferPrice = find?.price - (find?.price * find?.offer?.percentage / 100);
+                                }
+                            
+                                // Check if either offer price is defined
+                                if (categoryOfferPrice !== undefined || productOfferPrice !== undefined) {
+                                    // Handle the case where either offer price is undefined
+                                    if (categoryOfferPrice === undefined) {
+                                        price = productOfferPrice;
+                                    } else if (productOfferPrice === undefined) {
+                                        price = categoryOfferPrice;
+                                    } else {
+                                        // Both offer prices are defined, choose the lower one
+                                        price = Math.min(categoryOfferPrice, productOfferPrice);
+                                    }
+                                }
+                            }
+                            %>
+                           
+
+
+
                             <div class="col-md-6">
                                 <div class="product-details">
                                     <p><%=find?.subcategory_id?.name%></p>
@@ -203,9 +237,25 @@
                                         <a class="ratings-text" href="#product-review-link" id="review-link">( 2 Reviews )</a>
                                     </div><!-- End .rating-container -->
 
-                                    <div class="product-price">
+                                    <!-- <div class="product-price">
                                         $<%=find?.price%>
-                                    </div><!-- End .product-price -->
+                                    </div>End .product-price -->
+                                    <% if (price !== undefined) { %>
+                                        <div class="product-price">
+                                            <% if (find?.subcategory_id?.offer && find?.subcategory_id?.offer?.status) { %>
+                                                <del> ₹ <%= find?.price %></del> <!-- Striked original price -->
+                                                &nbsp; <!-- Space between original and offer price -->
+                                            <% } else if (find?.offer && find?.offer?.status) { %>
+                                                <del> ₹ <%= find?.price %></del> <!-- Striked original price -->
+                                                &nbsp; <!-- Space between original and offer price -->
+                                            <% } %>
+                                            ₹ <%= price %> <!-- Offer price -->
+                                        </div>
+                                    <% } else { %>
+                                        <div class="product-price">
+                                            ₹ <%= find?.price %>
+                                        </div>
+                                    <% } %>
 
                                     <div class="product-content">
                                         <p><%=find?.description %></p>
@@ -255,7 +305,7 @@
                                       <%  if(find?.quantity <=0 ) {%>
                                         <button class="btn-product btn-cart addToCartBtn" disabled   ><span>OUT OF STOCK</span></button>
                                         <% } else { %>
-                                            <a href="#" class="btn-product btn-cart addToCartBtn" product-price="<%=find?.price %>"  data-product-id="<%= find?._id %>"><span>add to cart</span></a>
+                                            <a href="#" class="btn-product btn-cart addToCartBtn" product-price="<%=find?.price %>"  offer-price="<%= price %>"  data-product-id="<%= find?._id %>"><span>add to cart</span></a>
                                             <% } %>
                                         <div class="details-action-wrapper">
                                             <% const exist =  wishList?.product?.find(item => item?.productId?.equals(find?._id)) %>
@@ -817,9 +867,18 @@
         document.querySelectorAll('.addToCartBtn').forEach(function(button) {
             button.addEventListener('click', function(event) {
                 event.preventDefault();
+
+                let productPrice = this.getAttribute('product-price'); // Get the product price
+                const offerPrice = this.getAttribute('offer-price'); // Get the offer price if available
+             
+                if (!isNaN(offerPrice)) {
+                    productPrice=offerPrice
+                 } 
+                
+
                 const data = {
                     productId:this.getAttribute('data-product-id'),
-                    productPrice: this.getAttribute('product-price')
+                    productPrice: productPrice
                 }
                 axios.post('/add-to-cart',data )
                     .then(function(response) {

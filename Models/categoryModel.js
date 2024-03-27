@@ -19,7 +19,8 @@ const categorySchema = mongoose.Schema({
     },
     offer:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"offer"
+        ref:"offer",
+        
     },
     
 })

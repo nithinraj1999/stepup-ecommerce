@@ -30,6 +30,8 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+
 
 </head>
 
@@ -66,9 +68,9 @@
                             <li>
                                 <a href="#">Links</a>
                                 <ul>
-                                    <li><a href="tel:#"><i class="icon-phone"></i>Call: +0123 456 789</a></li>
+                                    <!-- <li><a href="tel:#"><i class="icon-phone"></i>Call: +0123 456 789</a></li> -->
                                     <li><a href="/my-wish-list"><i class="icon-heart-o"></i>Wishlist </a></li>
-                                    <li><a href="about.html">About Us</a></li>
+                                    <!-- <li><a href="about.html">About Us</a></li> -->
                                     <li><a href="/account">My account</a></li>
                                     <li><a href="/logout"><i class="icon-user"></i>Logout</a></li>
                                 </ul>
@@ -125,7 +127,7 @@
                         <div class="dropdown cart-dropdown">
                             <a href="/cart" class="dropdown-toggle" role="button"  aria-haspopup="true" aria-expanded="false" data-display="static">
                                 <i class="icon-shopping-cart"></i>
-                                <span class="cart-count">2</span>
+                                <!-- <span class="cart-count">2</span> -->
                             </a>
                         </div><!-- End .cart-dropdown -->
                     </div><!-- End .header-right -->
@@ -164,17 +166,29 @@
                         </div><!-- End .cart-discount -->
                         <p style="color: red;" id="coupenWarning"></p>
                         <div class="container-fluid" style="margin-left: -29px;">
-                          
+                          <style>
+                            .copy-icon {
+                            cursor: pointer;
+                            /* Add more styles as needed */
+                            }
+                          </style>
+
                             <div class="row">
                               <div class="col-md-6">
                                 <div class="card card-dashboard">
-                                  <div class="card-body">
-                                    <h6>Awailable Coupens</h6>
-                                    <% coupens?.forEach((coupen)=>{ %>
-                                        <p><%= coupen?.coupenCode %></p>
-                                    <% }) %>
+                                    <div class="card-body">
+                                        <h6>Available Coupons</h6>
+                                        <% coupens?.forEach((coupen)=>{ %>
+                                            <div class="coupon">
+                                                <p><%= coupen?.coupenCode %>
+                                                    <i class="fas fa-copy copy-icon" onclick="copyToClipboard('<%= coupen?.coupenCode %>')"></i>
 
-                                  </div> 
+                                                </p>
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                    
+                                    
                                 </div>
                               </div>
                             </div>
@@ -198,7 +212,7 @@
                                         <div class="modal-dialog modal-dialog-centered" role="document">
                                           <div class="modal-content" style="padding: 20px;">
                                             <div class="modal-header">
-                                              <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                                              <h5 class="modal-title" id="exampleModalLongTitle">Add Address</h5>
                                               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                               </button>
@@ -288,7 +302,7 @@
                                     <div class="modal-dialog modal-dialog-centered" role="document">
                                       <div class="modal-content" style="padding: 20px;">
                                         <div class="modal-header">
-                                          <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                                          <h5 class="modal-title" id="exampleModalLongTitle">Add Address</h5>
                                           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                           </button>
@@ -904,8 +918,10 @@ function verifyPayment(payment,order){
         console.log(response.data);
         if(response.data.onlinePaymentsuccess){
             window.location.href = "/order";
+        }else{
+            alert("somethis went wrong")
         }
-       alert("somethis went wrong")
+       
     })
     .then(error=>{
         console.error(error);
@@ -999,6 +1015,30 @@ function handleRadioChange(radio) {
 
     function submitAddressForm() {
         
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const building = document.getElementById('building').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const district = document.getElementById('district').value.trim();
+    const state = document.getElementById('state').value.trim();
+    const pincode = document.getElementById('pincode').value.trim();
+
+
+    if (!name || !phone || !building || !city || !district || !state || !pincode) {
+       
+       return;
+   }
+
+   if (isNaN(phone) || isNaN(pincode)) {
+      
+       return;
+   }
+   if (phone.length !== 10) {
+      
+       return;
+   }
+
+
         const formData = {
             name: document.getElementById('name').value,
             phone: document.getElementById('phone').value,
@@ -1048,6 +1088,18 @@ function applyCoupen(event) {
     });
 }
 
+
+
+
+//================ copy coupen to clipboard ===================
+
+function copyToClipboard(code) {
+    navigator.clipboard.writeText(code).then(function() {
+        console.log('Coupon code copied to clipboard');
+    }).catch(function(error) {
+        console.error('Error in copying text: ', error);
+    });
+}
 
 
   

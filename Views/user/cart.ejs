@@ -65,9 +65,9 @@
                             <li>
                                 <a href="#">Links</a>
                                 <ul>
-                                    <li><a href="tel:#"><i class="icon-phone"></i>Call: +0123 456 789</a></li>
+                                    <!-- <li><a href="tel:#"><i class="icon-phone"></i>Call: +0123 456 789</a></li> -->
                                     <li><a href="/my-wish-list"><i class="icon-heart-o"></i>Wishlist </a></li>
-                                    <li><a href="about.html">About Us</a></li>
+                                    <!-- <li><a href="about.html">About Us</a></li> -->
                                     <li><a href="/account">My account</a></li>
                                     <li><a href="/logout"><i class="icon-user"></i>Logout</a></li>
                                 </ul>
@@ -126,7 +126,7 @@
                         <div class="dropdown cart-dropdown">
                             <a href="/cart" class="dropdown-toggle" role="button"  aria-haspopup="true" aria-expanded="false" data-display="static">
                                 <i class="icon-shopping-cart"></i>
-                                <span class="cart-count">2</span>
+                                <span class="cart-count"><%=find?.product?.length %></span>
                             </a>
                         </div><!-- End .cart-dropdown -->
                     </div><!-- End .header-right -->
@@ -191,7 +191,9 @@
                                                     
 												</div><!-- End .product -->
 											</td>
-											<td class="price-col" id="product-price">₹ <%=productItem?.productId?.price %></td>
+                                           
+											<td class="price-col" id="product-price">₹ <%=productItem?.price %> </td>
+                                      
 											<td class="quantity-col">
                                                 <div class="cart-product-quantity">
                                                     <input type="number" class="form-control" id="quantity<%=productItem?.productId?._id %>" onchange= " updateProduct('<%=productItem?.productId?._id %>',this.value,'<%=productItem?.productId?.price %>')"  value="<%=productItem?.quantity || 1 %>" min="1" max="<%=productItem?.productId?.quantity || 1 %>" step="1" data-decimals="0" required>
@@ -651,7 +653,7 @@
                 </div><!-- End .modal-body -->
             </div><!-- End .modal-content -->
         </div><!-- End .modal-dialog -->
-    </div><!-- End .modal -->
+    </div><!-- End .modal --> 
 
 
 
@@ -684,7 +686,7 @@ function updateProduct(productId,quantity,productPrice){
             //     document.getElementById(`max-qty-msg${productId}`).innerText= "New Maximum Quantity Message";
             // }
         window.location.reload()
-    })
+    }) 
     .catch(error =>{
         console.error(error.response.data.error);
     })
