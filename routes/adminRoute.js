@@ -68,6 +68,8 @@ adminRoute.get("/orders",auth.isLogin,adminController.loadOrders)
 adminRoute.post("/order-status",auth.isLogin,adminController.orderStatus)
 adminRoute.post("/customer-Request",adminController.orderRequest)
 
+
+
 //====================== coupens =================
 
 adminRoute.get("/coupens",adminController.loadCoupenPage)
@@ -103,6 +105,23 @@ adminRoute.get("/yearly-report",adminController.loadyearlyReport)
 adminRoute.get("/daily-report",adminController.loadDailyReport) 
 adminRoute.post("/custom-date-report",adminController.cutomDatereport) 
 adminRoute.get("/custom-date-report",adminController.getCutomDatereport) 
+
+
+//==================== dashboard ======================
+
+
+adminRoute.get("/dashboard",adminController.loadDashBoard) 
+
+
+
+
+
+
+
+
+
+
+
 
 
 module.exports = adminRoute     

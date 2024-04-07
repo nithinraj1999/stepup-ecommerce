@@ -8,6 +8,7 @@
     <!-- Include Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         /* Add your custom styles here */
         body {
@@ -137,14 +138,23 @@
                 </div>
             </div>
             <div class="col-md-2 ">
+            <% if (order?.paymentStatus =="Failed"){ %>
+                <h6 style="color: red; margin-top: 33px;"> Payment Failed</h6>
+                <% }else{ %>
                 <p style="margin-top: 33px;">Status : <%=product?.orderStatus %></p>
+                <% } %> 
             </div>
-            <div class="col-md-4 action-buttons">
+            <div class="col-md-2 action-buttons">
+                <% if (order?.paymentStatus =="Failed"){ %>
+                    <button class="btn btn-danger" id="retryPayment" onclick="retryPayment('<%= order?._id %>')">Retry Payment</button>
+                <% }else{ %>
+
                 <%if(product?.orderStatus =="Placed" || product?.orderStatus == "Shipped" || product?.orderStatus == "Packed") { %>
                 <button class="btn btn-primary" id="cancelOrder" onclick="cancelOrder()">Cancel Order</button>
                 <% }else if(product?.orderStatus == "Delivered"){ %>
                 <button class="btn btn-danger" id="returnProduct" onclick="returnProduct()">Return Product</button>
                 <% } %>
+                <% } %> 
                 <br>
                 <form>
                     <label for="myTextArea" id="textAreaLabel" style="display: none;">Enter Cancelation Reason:</label>
@@ -156,6 +166,11 @@
                 <button class="btn btn-primary" id="request-return" onclick="requestForReturn('<%=product?._id %>','<%=order?._id %>')" style="display: none;">request Return</button>
                 </form>
                 
+            </div>
+            <div class="col-md-2 ">
+                <% if(product?.orderStatus == "Delivered"){ %>
+                <button class="btn btn-primary"style="margin-top: 26px;" onclick="invoice('<%=order._id %>','<%=product._id %>')">invoice</button>
+                <% } %>
             </div>
         </div>
     </div>
@@ -242,7 +257,107 @@ function requestForReturn(productId,orderId){
     })
 }
 
+function invoice (orderId,productId){
+    window.location.href = `/order-invoice?orderId=${orderId}&productId=${productId}`
+}
 
+
+
+
+//-----------------------
+
+function razorpayPayment(order){
+    
+    var options = {
+    "key": "rzp_test_EXuX7ue9wXyfnc", // Enter the Key ID generated from the Dashboard
+    "amount": order.razorpayInstance.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+    "currency": "INR",
+    "name": "StepUp", //your business name
+    "description": "Test Transaction",
+    "image": "https://example.com/your_logo",
+    "order_id": order.razorpayInstance.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+   
+    "handler": function (response){
+      verifyPayment(response,order)
+},
+    "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information especially their phone number
+        "name": "Gaurav Kumar", //your customer's name
+        "email": "gaurav.kumar@example.com",
+        "contact": "9000090000" //Provide the customer's phone number for better conversion rates 
+    },
+    "notes": {
+        "address": "Razorpay Corporate Office"
+    },
+    "theme": {
+        "color": "#3399cc"
+    }
+};
+
+var rzp1 = new Razorpay(options);
+
+rzp1.on('payment.failed', function (response) {
+
+
+faildPayment(response,order)
+})
+rzp1.open();
+
+}
+
+
+
+function verifyPayment(payment,order){
+    data = {
+        payment,
+        order
+    }
+    axios.post("/verify-payment",data)
+    .then(response =>{
+        console.log(response.data);
+        if(response.data.onlinePaymentsuccess){
+            window.location.href = "/order";
+        }else{
+            alert("somethis went wrong")
+        }
+       
+    })
+    .then(error=>{
+        console.error(error);
+    })
+}
+
+function faildPayment(payment,order){
+    const data = {
+        payment,
+        order,
+    }
+
+    axios.post("/failed-payment",data)
+    .then(response =>{
+        console.log(response.data);
+        window.location.href = "/paymen-failed";
+    })
+    .then(error=>{
+        console.error(error);
+    })
+
+}
+
+function retryPayment(orderId) {
+    axios.post("/retry-payment", { orderId })
+        .then(response => {
+            console.log(response.data);
+            if (response.data.razorpayInstance) {
+                razorpayPayment(response.data);
+            } else {
+                alert(response.data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error retrying payment:', error);
+            alert("An error occurred while retrying payment. Please try again later.");
+        });
+}
 
 
 

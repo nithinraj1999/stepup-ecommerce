@@ -21,7 +21,7 @@ const orderSchema = mongoose.Schema({
                 required: true,
             },
             quantity: {
-                type: Number,
+                type: Number, 
                 required: true,
             },
             price: {
@@ -39,6 +39,9 @@ const orderSchema = mongoose.Schema({
             orderStatus: {
                 type: String,
                 default: 'Placed',
+            },
+            coupenDiscountAmt:{
+                type:Number
             },
             productId: {
                 type: mongoose.Schema.Types.ObjectId,
@@ -67,6 +70,10 @@ const orderSchema = mongoose.Schema({
         type: Number,
         required: true,
     },
+    paymentStatus:{
+        type:String,
+        required:true
+    }
 })
 
 module.exports = mongoose.model('Order', orderSchema)

@@ -178,7 +178,7 @@
 												<label class="custom-control-label" for="signin-remember-2">Remember Me</label>
 											</div><!-- End .custom-checkbox -->
 
-											<a href="#" class="forgot-link">Forgot Your Password?</a>
+											<a href="/reset-password" class="forgot-link">Forgot Your Password?</a>
 							    		</div><!-- End .form-footer -->
 							    	</form>
 							    	<!-- <div class="form-choice">
@@ -215,7 +215,8 @@
 							    		</div><!-- End .form-group -->
 							    		<div class="form-group">
 							    			<label for="register-password-2">Password *</label>
-							    			<input type="password" class="form-control" id="register-password-2" pattern="^\S.*$" name="password" required>
+                                            <input type="password" class="form-control" id="register-password-2" pattern="^[^\s]{6,}$" title="Password must be at least 6 characters long and not contain blank spaces" name="password" required>
+
 							    		</div><!-- End .form-group -->
 
 							    		<div class="form-footer">

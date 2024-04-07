@@ -16,6 +16,10 @@ require('dotenv').config()
 const bcrypt = require('bcrypt')
 const crypto = require("crypto")
 const coupenModel = require("../Models/coupenModel")
+const moment = require('moment');
+const path = require("path")
+const ejs = require('ejs');
+const puppeteer = require('puppeteer');
 
 var instance = new Razorpay(
   { 
@@ -171,118 +175,10 @@ const verifyLogin = async(req,res)=>{
    
 }
 
-// const loadProductList = async (req,res)=>{
-//   try{
-//     const userId = req.session.user_id
-//     let isLoggedIn
-//       if(req.session.user_id){
-//          isLoggedIn = true
-//       }else{
-//         isLoggedIn = false
-//       }
-//     const find = await productModel.find({list:true}).populate("subcategory_id")
-//     const subcategory = await categoryModal.distinct("subcategory")
-//     const brand = await productModel.distinct("manufacturer")
-//     const wishList = await wishListModel.findOne({userId:userId})
-//     const cart = await cartModal.findOne({userId:userId})
-    
-//     res.render("productGrid",{find,category:"All products",brand,cart,subcategory,isLoggedIn,wishList,cat:"all"})
-//   }
-//   catch(error){
-//     console.error(error);  
-//   }
-  
- 
-// } 
-
-
-
-
-// const loadProductList = async (req,res)=>{
-//   try{
-//     const userId = req.session.user_id
-//     let isLoggedIn = req.session.user_id ? true : false;
-
-//     const find = await productModel.find({list:true}).populate({
-//       path: 'subcategory_id',
-//         populate: {
-//             path: 'offer',
-//             model: 'offer'
-//       }
-//   }).populate("offer")
-   
-//     const subcategory = await categoryModal.distinct("subcategory")
-//     const brand = await productModel.distinct("manufacturer")
-//     const wishList = await wishListModel.findOne({userId:userId})
-//     const cart = await cartModal.findOne({userId:userId})
-    
-//     res.render("productGrid",{find,category:"All products",brand,cart,subcategory,isLoggedIn,wishList,cat:"all"})
-//   }
-//   catch(error){
-//     console.error(error);  
-//   }
-  
- 
-// } 
 
 
 const loadProductList = async (req, res) => {
-  // try {
-  //   const userId = req.session.user_id;
-  //   const isLoggedIn = !!req.session.user_id;
-  //   const page = parseInt(req.query.page) || 1; // Current page number
-  //   const limit = 9;
-  //   const productsCount = await productModel.find({ list: true }).count()
-  //   const totalPages = Math.ceil(productsCount / limit);
-
-   
-  //   const path = req.path;
-  //   // Pagination parameters
-  //    // Number of documents per page
-
-  //   // Calculate the index of the first document in the current page
-  //   const startIndex = (page - 1) * limit;
-
-  //   // Query to fetch products with pagination
-  //   const find = await productModel.find({ list: true })
-  //     .populate({
-  //       path: 'subcategory_id',
-  //       populate: {
-  //         path: 'offer',
-  //         model: 'offer'
-  //       }
-  //     })
-  //     .populate("offer")
-  //     .skip(startIndex)
-  //     .limit(limit);
-
-  //   // Fetch distinct subcategories and brands
-  //   const subcategory = await categoryModal.distinct("subcategory");
-  //   const brand = await productModel.distinct("manufacturer");
-
-  //   // Fetch wishlist and cart for the logged-in user
-  //   const wishList = await wishListModel.findOne({ userId });
-  //   const cart = await cartModal.findOne({ userId });
-
-  //   // Render the productGrid EJS template with the retrieved data
-  //   res.render("productGrid", {
-  //     find,
-  //     category: "All products",
-  //     brand,
-  //     cart,
-  //     path,
-  //     subcategory,
-  //     isLoggedIn,
-  //     wishList,
-  //     cat: "all",
-  //     currentPage: page, // Current page number to highlight in pagination
-  //     totalPages // Total number of pages
-  //   });
-  // } catch (error) {
-  //   console.error(error);
-  //   // Handle errors appropriately
-  // }
-
+  
   try {
     const userId = req.session.user_id
     const isLoggedIn = !!req.session.user_id
@@ -292,7 +188,7 @@ const loadProductList = async (req, res) => {
     const filter = {
         list: true,
     }
-    const { category, brand: manufacturer, sort } = req.query
+    const { category, brand: manufacturer, sort ,search} = req.query
     
     // If brand filter is applied
     if (manufacturer && Array.isArray(manufacturer)) {
@@ -312,6 +208,15 @@ const loadProductList = async (req, res) => {
             subcategory: category,
         })
     }
+    if (search) {
+      filter.$or = [
+          { name: { $regex: search, $options: 'i' } }, // Case-insensitive search
+          { manufacturer: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+
+
 
     const sortOptions = {}
     if (req.query.sortBy === '-1') {
@@ -320,6 +225,8 @@ const loadProductList = async (req, res) => {
         sortOptions['price'] = 1
     } 
     
+
+
     const productsCount = await productModel.find(filter).countDocuments()
     const totalPages = Math.ceil(productsCount / limit)
 
@@ -379,9 +286,9 @@ const loadMen = async (req, res) => {
     try {
         const userId = req.session.user_id
         let isLoggedIn = req.session.user_id ? true : false
-        const { category, brand: manufacturer, sort } = req.query
+        const { category, brand: manufacturer, sort,search } = req.query
         const page = parseInt(req.query.page) || 1 // Current page number
-        const limit = 3
+        const limit = 6
         const query = {
             list: true,
         }
@@ -402,14 +309,14 @@ const loadMen = async (req, res) => {
                 subcategory: category,
             })
         }
-        // const products = await productModel
-        //     .find({ list: true })
-        //     .populate('subcategory_id')
 
-        // const filter = products.filter((product) => {
-        //     return product.subcategory_id.name == 'Men'
-        // })
-
+        if (search) {
+          query.$or = [
+              { name: { $regex: search, $options: 'i' } }, // Case-insensitive search
+              { manufacturer: { $regex: search, $options: 'i' } }
+          ];
+        }
+       
         const path = req.path
         const startIndex = (page - 1) * limit
         const find = await productModel
@@ -463,9 +370,9 @@ const loadWomen = async (req, res) => {
     try {
         const userId = req.session.user_id
         let isLoggedIn = req.session.user_id ? true : false
-        const { category, brand: manufacturer, sortBy } = req.query
+        const { category, brand: manufacturer, sortBy,search } = req.query
         const page = parseInt(req.query.page) || 1 // Current page number
-        const limit = 3
+        const limit = 6
 
         const query = {
             list: true,
@@ -488,6 +395,16 @@ const loadWomen = async (req, res) => {
                 subcategory: category,
             })
         }
+        if (search) {
+          query.$or = [
+              { name: { $regex: search, $options: 'i' } }, // Case-insensitive search
+              { manufacturer: { $regex: search, $options: 'i' } }
+          ];
+        }
+
+
+
+
         const sortOptions = {}
         if (req.query.sortBy === '-1') {
             sortOptions['price'] = -1
@@ -548,10 +465,10 @@ const loadKids = async (req, res) => {
     try {
         const userId = req.session.user_id
         let isLoggedIn = req.session.user_id ? true : false
-        const { category, brand: manufacturer, sort } = req.query
+        const { category, brand: manufacturer, sort,search } = req.query
 
         const page = parseInt(req.query.page) || 1 // Current page number
-        const limit = 3
+        const limit = 6
 
         const query = {
             list: true,
@@ -574,6 +491,15 @@ const loadKids = async (req, res) => {
                 subcategory: category,
             })
         }
+        if (search) {
+          query.$or = [
+              { name: { $regex: search, $options: 'i' } }, // Case-insensitive search
+              { manufacturer: { $regex: search, $options: 'i' } }
+          ];
+        }
+
+
+
         const sortOptions = {}
         if (req.query.sortBy === '-1') {
             sortOptions['price'] = -1
@@ -707,48 +633,119 @@ main().catch(console.error);
 
   
 
-const myAccount = async (req,res)=>{
+//   const myAccount = async (req, res) => {
+//     try {
+//         const userId = req.session.user_id;
+//         const find = await userModel.findOne({ _id: userId });
+//         const wallet = await walletModel.findOne({ userId: userId });
 
-try{
+//         const page = req.query.page || 1; // Get page number from query parameter
+//         const limit = 10; // Number of transactions per page
+//         const skip = (page - 1) * limit;
 
-  const userId = req.session.user_id
-  const find = await userModel.findOne({_id:userId})
-  const wallet = await walletModel.findOne({userId:userId})
- 
-  
-  const orders = await orderModal.find({userId:userId}).populate({
-    path: 'products',
-    populate: [
-        {
-            path: 'productId',
-            model: 'products',
-            populate: {
-                path: 'offer',
-                model: 'offer'
-            }
-        },
-        {
-            path: 'productId',
-            model: 'products',
-            populate: {
-                path: 'subcategory_id',
-                model: 'Category',
-                populate: {
-                    path: 'offer',
-                    model: 'offer'
-                }
-            }
-        }
-    ]
-}).sort({_id:-1})
+//         const totalCount = wallet.transactions.length;
+//         const totalPages = Math.ceil(totalCount / limit);
+
+//         const paginatedTransactions = wallet.transactions.slice(skip, skip + limit);
+
+//         const orders = await orderModal
+//             .find({ userId: userId })
+//             .populate({
+//                 path: 'products',
+//                 populate: [
+//                     {
+//                         path: 'productId',
+//                         model: 'products',
+//                         populate: {
+//                             path: 'offer',
+//                             model: 'offer',
+//                         },
+//                     },
+//                     {
+//                         path: 'productId',
+//                         model: 'products',
+//                         populate: {
+//                             path: 'subcategory_id',
+//                             model: 'Category',
+//                             populate: {
+//                                 path: 'offer',
+//                                 model: 'offer',
+//                             },
+//                         },
+//                     },
+//                 ],
+//             })
+//             .sort({ _id: -1 });
 
 
-  res.render("myAccount",{find,orders,wallet})
-}
-catch(error){
-  console.error(error);
-}
-} 
+        
+//         res.render('myAccount', { find, orders, wallet, transactions: paginatedTransactions, currentPage: page, totalPages });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send('Internal Server Error');
+//     }
+// };
+
+
+const myAccount = async (req, res) => {
+  try {
+      const userId = req.session.user_id;
+      const find = await userModel.findOne({ _id: userId });
+      const wallet = await walletModel.findOne({ userId: userId });
+
+      // Sort wallet transactions by date in descending order
+      wallet.transactions.sort((a, b) => b.date - a.date);
+
+      const page = req.query.page || 1; // Get page number from query parameter
+      const limit = 10; // Number of transactions per page
+      const skip = (page - 1) * limit;
+
+      const totalCount = wallet.transactions.length;
+      const totalPages = Math.ceil(totalCount / limit);
+
+      const paginatedTransactions = wallet.transactions.slice(skip, skip + limit);
+      const cart = await cartModal.findOne({userId:userId})
+
+      const orders = await orderModal
+          .find({ userId: userId })
+          .populate({
+              path: 'products',
+              populate: [
+                  {
+                      path: 'productId',
+                      model: 'products',
+                      populate: {
+                          path: 'offer',
+                          model: 'offer',
+                      },
+                  },
+                  {
+                      path: 'productId',
+                      model: 'products',
+                      populate: {
+                          path: 'subcategory_id',
+                          model: 'Category',
+                          populate: {
+                              path: 'offer',
+                              model: 'offer',
+                          },
+                      },
+                  },
+              ],
+          })
+          .sort({ _id: -1 });
+
+      res.render('myAccount', { find, orders, wallet,cart, transactions: paginatedTransactions, currentPage: page, totalPages });
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal Server Error');
+  }
+};
+
+
+
+
+
 
 const editUser = async (req, res) => {
     try {
@@ -890,7 +887,6 @@ const loadCart = async (req,res)=>{
         { $set: { "product.$.total": total } }
       );
  
-        
     }  
   }  
   
@@ -924,7 +920,7 @@ const addTocart = async (req, res) => {
     const {productPrice,productId} = req.body
     const price = parseInt(productPrice)
     let userCart = await cartModal.findOne({ userId: userId });
-
+// console.log(price); 
     if (!userCart) {
     userCart = new cartModal(  
       { userId: userId,  
@@ -1071,170 +1067,227 @@ const checkOutVerification = async (req, res) => {
 };
 
 
-const order = async (req,res)=>{
-  try{ 
-    const id = req.session.user_id
-    const {cartId,selectedAddress,selectedPaymentMethod,total,coupencode} = req.body
-    console.log(req.body);
-    if(coupencode){
-      await coupenModel.updateOne({coupenCode:coupencode},{$push:{users:{userID:id}}})
-    }else{
-      console.log("no coupen");
-    }
+const order = async (req, res) => {
+    try {
+        const id = req.session.user_id
+        let {
+            cartId,
+            selectedAddress,
+            selectedPaymentMethod,
+            total,
+            coupencode,
+        } = req.body
 
-    const uniqueOrderId = generateUniqueID(5);
-    const cart = await cartModal.findOne({userId:id}).populate('product.productId')
-
-    const subTotal = cart.subTotal 
-    if(selectedPaymentMethod == "COD"){
-
-      if (cart && cart.product) {
-        const products = [] 
-        for (const item of cart.product) {
-          const quantity = item.quantity;
-          const productPrice = item.productId.price; 
-          const manufacturer = item.productId.manufacturer;
-          const productName = item.productId.name; 
-          const productTotal =item.total;
-          const productImage = item.productId.product_image[3].resizedFile
-          const productId = item.productId
+        let totalAfterCoupenDiscount 
+        let totalItemsinCart
+        let productPriceAfterCoupen = 0
+        if (coupencode) {
+            await coupenModel.updateOne(
+                { coupenCode: coupencode },
+                { $push: { users: { userID: id } } }
+            )
           
-          products.push({
-            name: productName,
-            manufacturer: manufacturer,
-            productId:productId,
-            quantity: quantity,
-            price: productPrice,
-            total: productTotal,
-            productImage:productImage
-        })
-    
-        await productModel.updateOne({_id:productId},{$inc:{quantity:-quantity}})
-    
-      }
-    
-        const order = new orderModal({
-          userId: id,
-          products: products,
-          addressId:selectedAddress,
-          subTotal: total,
-          order_id:uniqueOrderId,
-          paymentMethod:selectedPaymentMethod
-    })
-    
-        await order.save() 
-    
-        const orderId = order._id
-        const orderTotal = order.subTotal
-    
-    
-        await cartModal.deleteOne({userId:id})  
-        res.status(200).json({codSuccess: true,message: 'Order placed successfully!'});
-    }
-    
+        } else {
+            console.log('no coupen')
+        }
 
-  }else if(selectedPaymentMethod == "online"){
+        const uniqueOrderId = generateUniqueID(5)
+        const cart = await cartModal
+            .findOne({ userId: id })
+            .populate('product.productId')
 
-    if (cart && cart.product) {
-      const products = [] 
-      for (const item of cart.product) {
-        const quantity = item.quantity;
-        const productPrice = item.productId.price; 
-        const manufacturer = item.productId.manufacturer;
-        const productName = item.productId.name; 
-        const productTotal =item.total;
-        const productImage = item.productId.product_image[3].resizedFile
-        const productId = item.productId
-        
-        products.push({
-          name: productName,
-          manufacturer: manufacturer,
-          productId:productId,
-          quantity: quantity,
-          price: productPrice,
-          total: productTotal,
-          productImage:productImage
-        })
-
-      //  await productModel.updateOne({_id:productId},{$inc:{quantity:-quantity}})
-
-    }
-  
-      const order = new orderModal({
-        userId: id,
-        products: products,
-        addressId:selectedAddress,
-        subTotal: total,
-        order_id:uniqueOrderId,
-        paymentMethod:selectedPaymentMethod
-  })
-  
-      await order.save()
-        const orderId = order._id
-        const orderTotal = order.subTotal
- 
-        const razorpayInstance = await generaterazorpay(orderId,orderTotal)
-
-        res.json({ razorpayInstance})
-}
-   
-}else if(selectedPaymentMethod =="wallet"){
-
-  if (cart && cart.product) {
-    const products = [] 
-    for (const item of cart.product) {
-      const quantity = item.quantity;
-      const productPrice = item.productId.price; 
-      const manufacturer = item.productId.manufacturer;
-      const productName = item.productId.name; 
-      const productTotal =item.total;
-      const productImage = item.productId.product_image[3].resizedFile
-      const productId = item.productId
+        const subTotal = cart.subTotal
+        totalItemsinCart = cart.product.length
       
-      products.push({
-        name: productName,
-        manufacturer: manufacturer,
-        productId:productId,
-        quantity: quantity,
-        price: productPrice,
-        total: productTotal,
-        productImage:productImage
-      })
-
-      await productModel.updateOne({_id:productId},{$inc:{quantity:-quantity}})
-
-  }
-
-    const order = new orderModal({
-      userId: id,
-      products: products,
-      addressId:selectedAddress,
-      subTotal: total,
-      order_id:uniqueOrderId,
-      paymentMethod:selectedPaymentMethod
-})
-
-    await order.save()
-      const orderId = order._id
-      const orderTotal = order.subTotal
-
-     await walletModel.updateOne({userId:id},{$inc:{balance:-orderTotal},$push:{transactions:{amount:orderTotal,type:"Debit"}}})
+        if(coupencode){
+            const coupen = await coupenModel.findOne({ coupenCode: coupencode })
+            const discountPercentage = coupen.discount
+            const discount = subTotal * discountPercentage/100
+            totalAfterCoupenDiscount = subTotal - discount
+            productPriceAfterCoupen = discount/totalItemsinCart
+           
+        }
 
 
 
-      await cartModal.deleteOne({userId:id})  
-      res.status(200).json({codSuccess: true,message: 'Order placed successfully!'});
-}
- 
-}
-  else{
-    res.json({message:"error"})
-  }
-  
-  }
-  catch(error){
-    console.error(error);
-  }   
+
+        if (selectedPaymentMethod == 'COD') {
+            if (cart && cart.product) {
+                const products = []
+                for (const item of cart.product) {
+                    const quantity = item.quantity
+                    const productPrice = item.price - productPriceAfterCoupen
+                    const manufacturer = item.productId.manufacturer
+                    const productName = item.productId.name
+                    const productTotal = item.total - productPriceAfterCoupen
+                    const productImage = item.productId.product_image[3].resizedFile
+                    
+                    const productId = item.productId
+
+                    products.push({
+                        name: productName,
+                        manufacturer: manufacturer,
+                        productId: productId,
+                        quantity: quantity,
+                        price: productPrice,
+                        total: productTotal,
+                        productImage: productImage,
+                    })
+
+                    await productModel.updateOne(
+                        { _id: productId },
+                        { $inc: { quantity: -quantity } }
+                    )
+                }
+                if (coupencode) {
+                  total = totalAfterCoupenDiscount
+                }
+
+
+
+                const order = new orderModal({
+                    userId: id,
+                    products: products,
+                    addressId: selectedAddress,
+                    subTotal: total,
+                    order_id: uniqueOrderId,
+                    paymentMethod: selectedPaymentMethod,
+                    paymentStatus: 'Cash On Delivery',
+                })
+
+                await order.save()
+
+                const orderId = order._id
+                const orderTotal = order.subTotal
+
+                await cartModal.deleteOne({ userId: id })
+                res.status(200).json({
+                    codSuccess: true,
+                    message: 'Order placed successfully!',
+                })
+            }
+        } else if (selectedPaymentMethod == 'online') {
+            if (cart && cart.product) {
+                const products = []
+                for (const item of cart.product) {
+                    const quantity = item.quantity
+                    const productPrice = item.price - productPriceAfterCoupen
+                    const manufacturer = item.productId.manufacturer
+                    const productName = item.productId.name
+                    const productTotal = item.total - productPriceAfterCoupen
+                    const productImage =
+                        item.productId.product_image[3].resizedFile
+                    const productId = item.productId
+
+                    products.push({
+                        name: productName,
+                        manufacturer: manufacturer,
+                        productId: productId,
+                        quantity: quantity,
+                        price: productPrice,
+                        total: productTotal,
+                        productImage: productImage,
+                    })
+
+                    //  await productModel.updateOne({_id:productId},{$inc:{quantity:-quantity}})
+                }
+
+                const order = new orderModal({
+                    userId: id,
+                    products: products,
+                    addressId: selectedAddress,
+                    subTotal: total,
+                    order_id: uniqueOrderId,
+                    paymentMethod: selectedPaymentMethod,
+                    paymentStatus: 'Pending',
+                })
+
+                await order.save()
+                const orderId = order._id
+                let orderTotal
+                if (coupencode) {
+                  orderTotal = totalAfterCoupenDiscount
+                }else{
+                  orderTotal = order.subTotal
+                }
+              
+              
+
+                const razorpayInstance = await generaterazorpay(
+                    orderId,
+                    orderTotal
+                )
+                res.json({ razorpayInstance })
+            }
+        } else if (selectedPaymentMethod == 'wallet') {
+            if (cart && cart.product) {
+                const products = []
+                for (const item of cart.product) {
+                    const quantity = item.quantity
+                    const productPrice = item.price - productPriceAfterCoupen
+                    const manufacturer = item.productId.manufacturer
+                    const productName = item.productId.name
+                    const productTotal = item.total - productPriceAfterCoupen
+                    const productImage =
+                        item.productId.product_image[3].resizedFile
+                    const productId = item.productId
+
+                    products.push({
+                        name: productName,
+                        manufacturer: manufacturer,
+                        productId: productId,
+                        quantity: quantity,
+                        price: productPrice,
+                        total: productTotal,
+                        productImage: productImage,
+                    })
+
+                    await productModel.updateOne(
+                        { _id: productId },
+                        { $inc: { quantity: -quantity } }
+                    )
+                }
+
+                const order = new orderModal({
+                    userId: id,
+                    products: products,
+                    addressId: selectedAddress,
+                    subTotal: total,
+                    order_id: uniqueOrderId,
+                    paymentMethod: selectedPaymentMethod,
+                    paymentStatus: 'Success',
+                })
+
+                await order.save()
+                const orderId = order._id
+              
+                if (coupencode) {
+                  orderTotal = totalAfterCoupenDiscount
+                }else{
+                  orderTotal = order.subTotal
+                }
+                await walletModel.updateOne(
+                    { userId: id },
+                    {
+                        $inc: { balance: -orderTotal },
+                        $push: {
+                            transactions: { amount: orderTotal, type: 'Debit' },
+                        },
+                    }
+                )
+
+                await cartModal.deleteOne({ userId: id })
+                res.status(200).json({
+                    codSuccess: true,
+                    message: 'Order placed successfully!',
+                })
+            }
+        } else {
+            res.json({ message: 'error' })
+        }
+    } catch (error) {
+        console.error(error)
+    }
 }
 
 //=====================function to generate Razorpay ===================
@@ -1252,58 +1305,66 @@ function generaterazorpay(orderId,totalPrice){
 //======================================================================
 
 
-const verifyPayment = async (req,res)=>{
-  
-  try{
+const verifyPayment = async (req, res) => {
+    try {
+        const { payment, order: orderData } = req.body
+        let hmac = crypto.createHmac('sha256', 'BnbkfGmhHXITc2ZOkHCgfk1M')
+        hmac.update(
+            payment.razorpay_order_id + '|' + payment.razorpay_payment_id
+        )
+        hmac = hmac.digest('hex')
 
-    const {payment,order: orderData} =req.body
-    let hmac = crypto.createHmac('sha256', 'BnbkfGmhHXITc2ZOkHCgfk1M');
-    hmac.update(payment.razorpay_order_id +"|"+ payment.razorpay_payment_id)
-    hmac = hmac.digest('hex')
+        if (hmac == payment.razorpay_signature) {
+            const orderId = orderData.razorpayInstance.receipt
+            const order = await orderModal.findOne({ _id: orderId })
+            const userId = order.userId
+            if (order) {
+                await orderModal.updateOne(
+                    { _id: orderId },
+                    { $set: { paymentStatus: 'Success' } }
+                )
+                await cartModal.deleteOne({ userId: userId })
 
-    if(hmac == payment.razorpay_signature){
-      const orderId = orderData.razorpayInstance.receipt
-      const order = await orderModal.findOne({_id:orderId})
-      const userId = order.userId
-      if(order){
+                for (const item of order.products) {
+                    const quantity = item.quantity
+                    const productId = item.productId
+                    await productModel.updateOne(
+                        { _id: productId },
+                        { $inc: { quantity: -quantity } }
+                    )
+                }
+                res.status(200).json({
+                    onlinePaymentsuccess: true,
+                    message: 'Order placed successfully!',
+                })
+            } else {
+                res.json({ message: 'cannot find order document' })
+            }
+        } else {
+            console.log('signature isnt matching')
 
-        await cartModal.deleteOne({userId:userId}) 
-
-          for (const item of order.products) {
-            const quantity = item.quantity;
-            const productId = item.productId;
-            await productModel.updateOne({_id:productId},{$inc:{quantity:-quantity}})
+            res.json({ message: 'payament signature isnt matching' })
         }
-          res.status(200).json({onlinePaymentsuccess: true,message: 'Order placed successfully!'});
-      }else{
-        res.json({message:"cannot find order document"})
-      }
-  }else{
- 
-    console.log("signature isnt matching");
-
-
-    res.json({message:"payament signature isnt matching"})
-  }
-  } 
-  catch(error){
-    console.error(error);
-  }
-  }
+    } catch (error) {
+        console.error(error)
+    }
+}
   //======================
 
-  const failedPayment = async (req,res)=>{
-    try{
-      const {payment, order: orderData} = req.body
-      const orderId = orderData.razorpayInstance.receipt
-      const del =await orderModal.deleteOne({_id:orderId})
-      console.log(del);
-      res.json({success:true})
-    }
-    catch(error){
-      console.error(error);
-    }
-     
+  const failedPayment = async (req, res) => {
+      try {
+          const { payment, order: orderData } = req.body
+          const orderId = orderData.razorpayInstance.receipt
+          const del = await orderModal.updateOne(
+              { _id: orderId },
+              { $set: { paymentStatus: 'Failed' } }
+          )
+        
+
+          res.json({ success: true })
+      } catch (error) {
+          console.error(error)
+      }
   }
 
   const paymentFailed = (req,res)=>{
@@ -1314,6 +1375,41 @@ const verifyPayment = async (req,res)=>{
       console.error(error);
     }
   }
+
+  const retryPayment = async (req, res) => {
+      try {
+          const { orderId } = req.body
+
+          const order = await orderModal.findOne({ _id: orderId })
+
+          if (order) {
+              // Check if payment method is online
+              if (order.paymentMethod === 'online') {
+                  // Generate Razorpay instance and initiate payment
+                  const razorpayInstance = await generaterazorpay(
+                      orderId,
+                      order.subTotal
+                  )
+                  res.json({ razorpayInstance })
+              } else {
+                  res.json({
+                      message:
+                          'Retry payment is only available for online payments.',
+                  })
+              }
+          } else {
+              res.json({ message: 'Order not found.' })
+          }
+      } catch (error) {
+          console.error(error)
+          res.status(500).json({ error: 'Internal server error.' })
+      }
+  }
+
+
+
+
+
 
 //========
 const orderDetails = async (req,res)=>{
@@ -1336,27 +1432,6 @@ const orderDetails = async (req,res)=>{
   } 
 }
 
-// const p = async (req,res)=>{
-//   try{
-  
-//   const userId = req.session.user_id
-//   let isLoggedIn
-//     if(req.session.user_id){ 
-//        isLoggedIn = true
-//     }else{
-//       isLoggedIn = false
-//     }
-//   const find = await productModel.find({list:true}).populate("subcategory_id")
-//   const subcategory = await categoryModal.distinct("subcategory")
-//   const brand = await productModel.distinct("manufacturer")
-//   const wishList = await wishListModel.findOne({userId:userId})
-//   res.render("productGrid",{find,category:"All products",brand,subcategory,isLoggedIn,wishList})
-//   }
-//   catch(error){
-//     console.error(error);
-//   }
-   
-// } 
 
 
 const cancelRequest = async (req,res)=>{
@@ -1372,7 +1447,7 @@ try{
 
     
   const order =  await orderModal.findOne({_id:orderId,userId:userId})
-
+  
   const cancelledProduct = order.products.find(item => item._id == productId)
   const cancelledProductId = cancelledProduct.productId
   const quantityOfCanceled = cancelledProduct.quantity
@@ -1380,7 +1455,7 @@ try{
   const totalPriceOfCancelled = quantityOfCanceled * priceOfCanceled
   const paymentMethod = order.paymentMethod
  
-  console.log("payment menthod"+paymentMethod);
+
 
   await productModel.updateOne({_id:cancelledProductId},{$inc:{quantity:quantityOfCanceled}})
  
@@ -1476,7 +1551,9 @@ const loadWishList = async (req,res)=>{
     let isLoggedIn = req.session.user_id ? true : false;
     const userId = req.session.user_id
     const wishList = await wishListModel.findOne({userId:userId}).populate("product.productId")
-    res.render("wishList",{wishList,isLoggedIn})
+    const cart = await cartModal.findOne({userId:userId})
+
+    res.render("wishList",{wishList,isLoggedIn,cart})
 }
 catch(error){ 
   console.error(error);
@@ -1505,15 +1582,20 @@ const applyCoupen =  async(req,res)=>{
     const {coupencode} = req.body
     const cart =  await cartModal.findOne({userId:userId})
     const coupen = await coupenModel.findOne({coupenCode:coupencode})
+    const coupenId = coupen._id
     const couponAlreadyUsed = coupen?.users?.find((user)=> user.userID == userId )
     let subTotal = cart.subTotal
+
+   
     if(couponAlreadyUsed){
       res.json({success:true,alreadyused:true,message:"Coupen Already Used",subTotal:subTotal})
+  
     }else{
       const {discount,validUntill,minPurchaseAmount} = coupen
-      
-      console.log(coupen);
-      if(subTotal >=minPurchaseAmount && validUntill >Date.now()){
+    
+  
+      if(subTotal >=minPurchaseAmount && new Date(validUntill) > Date.now()){
+        await cartModal.updateOne({userId:userId},{$set:{appliedCoupen:coupenId}})
       discountamount = subTotal*discount/100
       subTotal = subTotal - discountamount
       res.json({success:true,subTotal:subTotal})
@@ -1557,219 +1639,134 @@ const loadProduct = async (req,res)=>{
 
 
 
-
-
-// const filter = async (req, res) => {
-//   try {
-//       const userId = req.session.user_id;
-//       const isLoggedIn = req.session.user_id ? true : false;
-
-//       const { category, brand: manufacturer, sort, mainCategory } = req.query;
-//    console.log(req.query);
-
-//       const filter = {
-//           list: true
-//       };
-
-//       if (manufacturer && Array.isArray(manufacturer)) {
-//           filter.manufacturer = { $in: manufacturer }; // Use the array directly
-//       } else if (manufacturer) {
-//           // Handle the case where manufacturer is a single value
-//           filter.manufacturer = manufacturer;
-//       }
-
-//       if (category) {
-//           // If category is provided, filter based on category and mainCategory
-//           filter.subcategory_id = { 
-//               $in: await categoryModal.find({  
-//                   subcategory: category, 
-                 
-//               })
-//           };
-//       } else if (mainCategory && mainCategory !== "all") {
-//           // If no category is provided, filter based only on mainCategory
-//           filter.subcategory_id = { 
-//               $in: await categoryModal.find({ name: mainCategory })
-//           };
-//       }
-
-//       // Query MongoDB to find products that meet the filter criteria
-//       let find;
-//       if (mainCategory === "all") {
-//         title = "All products";
-//         find = await productModel.find(filter).populate("subcategory_id");
-//       } else {
-//         find = await productModel.find(filter).populate({
-//               path: 'subcategory_id',
-//               match: { 'name': mainCategory }
-//         });
-//         title = `${mainCategory}'s shoes`;
-//       }
-// console.log(filter);
-//       const subcategory = await categoryModal.distinct("subcategory");
-//       const brand = await productModel.distinct("manufacturer");
-//       const wishList = await wishListModel.findOne({ userId: userId });
-//       const cart =  await cartModal.findOne({userId:userId})
-//       res.render("productGrid", { find,cart, category: title, brand, subcategory, isLoggedIn, wishList, cat: mainCategory });
-
-//   } catch (error) {
-//       console.error(error);
-//   }
-// }
-
-
-
-
-
-
-// const sortByPrice = async (req,res)=>{
-//  try{
-
-//   const userId = req.session.user_id;
-//       const isLoggedIn = req.session.user_id ? true : false;
-
-//       const { category, brand: manufacturer, sort, mainCategory } = req.query;
-   
-//       console.log(sort);
-//       const filter = { 
-//           list: true
-//       };
-
-//       if (manufacturer && Array.isArray(manufacturer)) {
-//           filter.manufacturer = { $in: manufacturer }; // Use the array directly
-//       } else if (manufacturer) {
-//           // Handle the case where manufacturer is a single value
-//           filter.manufacturer = manufacturer;
-//       }
-
-//       if (category) {
-//           // If category is provided, filter based on category and mainCategory
-//           filter.subcategory_id = { 
-//               $in: await categoryModal.find({ 
-//                   subcategory: category, 
-//                   ...(mainCategory && mainCategory !== "all" ? { name: mainCategory } : {})
-//               })
-//           };
-//       } else if (mainCategory && mainCategory !== "all") {
-//           // If no category is provided, filter based only on mainCategory
-//           filter.subcategory_id = { 
-//               $in: await categoryModal.find({ name: mainCategory })
-//           };
-//       }
-
-//       // Query MongoDB to find products that meet the filter criteria
-//       let find;
-//       let sortOption = {};
-//         if (sort === "1") {
-//             sortOption = { price: 1 }; // Low to High
-//         } else if (sort === "-1") {
-//             sortOption = { price: -1 }; // High to Low
-//         }
-//       if (mainCategory === "all") { 
-//         title = "All products";
-
-//         find = await productModel.find(filter).populate("subcategory_id").sort(sortOption)
-//       } else {
-//         find = await productModel.find(filter).populate({
-//               path: 'subcategory_id',
-//               match: { 'name': mainCategory }
-//         }).sort(sortOption)
-//         title = `${mainCategory}'s shoes`;
-//       }
-
-//       const subcategory = await categoryModal.distinct("subcategory");
-//       const brand = await productModel.distinct("manufacturer");
-//       const wishList = await wishListModel.findOne({ userId: userId });
-//       const cart =  await cartModal.findOne({userId:userId})
-//       res.render("productGrid", { find, category: title,cart, brand, subcategory, isLoggedIn, wishList, cat: mainCategory });
-
-
-//  }catch(error){
-//   console.error(error);
-//  }
-// }
-
-
-const searchProduct = async(req,res)=>{
-
-}
-
-
-
-const applyFilter = async (req, res) => {
+const loadInvoice = async (req, res) => {
     try {
-        const userId = req.session.user_id
-        const isLoggedIn = !!req.session.user_id
-        const page = parseInt(req.query.page) || 1 // Current page number
-        const limit = 6
-        const path = req.path
-        const filter = {
-            list: true,
-        }
-        const { category, brand: manufacturer, sort } = req.query
-        console.log(req.query)
-        // If brand filter is applied
-        if (manufacturer && Array.isArray(manufacturer)) {
-            filter.manufacturer = { $in: manufacturer }
-        } else if (manufacturer) {
-            filter.manufacturer = manufacturer
+        const productId = req.query.productId // Use req.params for URL parameters
+        const orderId = req.query.orderId
+
+        const orderData = await orderModal
+            .findOne({ _id: orderId })
+            .populate('products.productId')
+            .populate('userId')
+
+        const data = {
+            orderData,
         }
 
-        if (category && Array.isArray(category)) {
-            filter.subcategory_id = {
-                $in: await categoryModal.find({
-                    subcategory: category,
-                }),
-            }
-        } else if (category) {
-            filter.subcategory_id = await categoryModal.find({
-                subcategory: category,
-            })
-        }
+        const ejsTemplate = path.resolve(__dirname, '../Views/user/invoice.ejs')
+        const ejsData = await ejs.renderFile(ejsTemplate, data)
 
-        const sortOptions = {}
-        if (req.query.sortBy === '-1') {
-            sortOptions['price'] = -1
-        } else if (req.query.sortBy === '1') {
-            sortOptions['price'] = 1
-        } 
-        
-        const productsCount = await productModel.find(filter).countDocuments()
-        const totalPages = Math.ceil(productsCount / limit)
-
-        const startIndex = (page - 1) * limit
-
-        const products = await productModel
-            .find(filter)
-            .populate('subcategory_id')
-            .sort(sortOptions)
-            .skip(startIndex)
-            .limit(limit)
-
-        const subcategory = await categoryModal.distinct('subcategory')
-        const brand = await productModel.distinct('manufacturer')
-
-        const wishList = await wishListModel.findOne({ userId })
-        const cart = await cartModal.findOne({ userId })
-
-        res.render('productGrid', {
-            find: products,
-            category: 'All products',
-            brand,
-            cart,
-            subcategory,
-            isLoggedIn,
-            wishList,
-            cat: 'all',
-            path,
-            currentPage: page, 
-            totalPages, 
+               // Launch Puppeteer and generate PDF
+        const browser = await puppeteer.launch({ headless: true })
+        const page = await browser.newPage()
+        await page.setContent(ejsData, { waitUntil: 'networkidle0' })
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
         })
+
+              // Close the browser
+        await browser.close()
+
+               // Set headers for inline display in the browser
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': 'inline; filename=order_invoice.pdf',
+        }).send(pdfBuffer)
     } catch (error) {
         console.error(error)
-        res.status(500).send('Internal Server Error')
     }
 }
+
+
+ 
+
+const loadEmailSubmit = (req, res) => {
+    try {
+        res.render('resetPassword')
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+
+const sendResetLink = async (req, res) => {
+    try {
+      const {email} = req.body
+      const user = await userModel.findOne({email:email})
+      const userId = user._id
+      res.json({userId})
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+
+const loadResetPassword = (req,res)=>{
+  try{
+    const {userId} = req.query
+    res.render("newPassword",{userId})
+  }
+  catch(error){
+    console.error(error);
+  }
+}
+
+
+const resetPassword = async (req, res) => {
+    try {
+        const { newPassword, confirmPassword,userId } = req.body
+     
+        if (newPassword === confirmPassword) {
+            const hashedPassword = await securePassword(newPassword)
+            await userModel.updateOne({_id:userId},{$set:{password:hashedPassword}})
+            res.redirect("/")
+        } 
+    } catch (error) {
+        console.error(error)
+    }  
+}
+
+
+const sendResetEmail = async (req, res) => {
+    try {
+        const { userId, email } = req.query
+        const resetLink = `http://localhost:3000/reset?userId=${userId}`;
+
+        const transporter = nodemailer.createTransport({
+            host: process.env.MAIL_HOST,
+            port: process.env.SMTP_PORT,
+            secure: false,
+            auth: {
+                // TODO: replace `user` and `pass` values from <https://forwardemail.net>
+                user: process.env.MAIL_USER,
+                pass: process.env.MAIL_PASS,
+            },
+        })
+
+        // async..await is not allowed in global scope, must use a wrapper
+        async function main() {
+            // send mail with defined transport object
+            try {
+                const info = await transporter.sendMail({
+                    from: process.env.MAIL_USER, // sender address
+                    to: email, // list of receivers
+                    subject: 'Click The link To Reset Password', // Subject line
+                    html: `<p>Hello,</p><p>Please click the following link to reset your password:</p><p><a href="${resetLink}">${resetLink}</a></p>`,
+                })
+                console.log('Message sent: %s', info.messageId)
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        main().catch(console.error)
+
+         res.render("resetPassword",{message:"Reset PasswordLink has been sended to your email. Please do check"})
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 
 
 module.exports = { 
@@ -1781,7 +1778,7 @@ module.exports = {
   loadLogin, 
   verifyLogin, 
   loadProductList,
-  loadMen,
+  loadMen, 
   loadWomen,
   loadKids, 
   loadProductDetails,
@@ -1814,6 +1811,13 @@ module.exports = {
   paymentFailed,
   checkOutVerification,
   // filter,
-  searchProduct,
-  applyFilter
+  
+  // applyFilter,
+  loadInvoice,
+  retryPayment,
+  loadEmailSubmit,
+  sendResetLink,
+  resetPassword,
+  loadResetPassword,
+  sendResetEmail
 } 

@@ -26,6 +26,10 @@ const cartSchema = mongoose.Schema({
             require:true
         } 
      }], 
+     appliedCoupen:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"coupen",
+     },
     subTotal:{   
         type:Number,
         default:0

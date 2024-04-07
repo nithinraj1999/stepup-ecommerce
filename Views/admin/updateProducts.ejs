@@ -82,7 +82,7 @@
             <span class="nav-link">Navigation</span>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="/admin/dashboard">
               <span class="menu-icon">
                 <i class="mdi mdi-speedometer"></i>
               </span>
@@ -153,14 +153,14 @@
               <span class="menu-title">Sales Report</span>
             </a>
           </li>
-          <li class="nav-item menu-items">
+          <!-- <li class="nav-item menu-items">
             <a class="nav-link" href="">
               <span class="menu-icon">
                 <i class="mdi mdi-file-document-box"></i>
               </span>
               <span class="menu-title">Banners</span>
             </a>
-          </li>
+          </li> -->
         </ul>
       </nav>
       <!-- partial -->
@@ -342,7 +342,7 @@
               </div>
               <div class="mb-3">
                 <label for="exampleFormControlTextarea1" class="form-label">Product description</label>
-                <input class="form-control" required pattern="^\S.*$" value="<%=find?.description %>" va  name="description" id="exampleFormControlTextarea1" rows="3">
+                <textarea class="form-control" required pattern="^\S.*$"   name="description" id="exampleFormControlTextarea1" rows="3"> <%=find?.description %></textarea>
               </div>
               <div class="mb-3" style="display: flex;">
                 <div style="margin-right: 10px;">

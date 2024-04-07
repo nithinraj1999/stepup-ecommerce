@@ -24,7 +24,7 @@ const CoupenSchema = mongoose.Schema({
     minPurchaseAmount:{
         type:Number,
         required:true
-    }, 
+    },
     users:[{
         userID:{
             type:mongoose.Schema.Types.ObjectId,

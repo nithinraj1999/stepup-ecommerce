@@ -84,7 +84,7 @@
             <span class="nav-link">Navigation</span>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="/admin/dashboard">
               <span class="menu-icon">
                 <i class="mdi mdi-speedometer"></i>
               </span>
@@ -163,14 +163,14 @@
               <span class="menu-title">Sales Report</span>
             </a>
           </li>
-          <li class="nav-item menu-items">
+          <!-- <li class="nav-item menu-items">
             <a class="nav-link" href="">
               <span class="menu-icon">
                 <i class="mdi mdi-file-document-box"></i>
               </span>
               <span class="menu-title">Banners</span>
             </a>
-          </li>
+          </li> -->
         </ul>
       </nav>
       <!-- partial -->
@@ -340,11 +340,11 @@
                 <div class="row g-3">
                   <div class="col">
                     <label for="exampleFormControlTextarea1" class="form-label">Product Name</label>
-                    <input type="text" class="form-control" required name="name"  aria-label="First name">
+                    <input type="text" class="form-control" required name="name"  pattern="[A-Za-z]+( [A-Za-z]+)*"  aria-label="First name">
                   </div>
                   <div class="col">
                     <label for="exampleFormControlTextarea1" class="form-label">Product Manufacturer</label>
-                    <input type="text" class="form-control" required  name="manufacturer" aria-label="Last name">
+                    <input type="text" class="form-control" required  name="manufacturer"pattern="[A-Za-z]+( [A-Za-z]+)*" aria-label="Last name">
                   </div>
                   <div class="col">
                     <label for="exampleFormControlTextarea1" class="form-label">Product Price</label>
@@ -354,7 +354,7 @@
               </div>
               <div class="mb-3">
                 <label for="exampleFormControlTextarea1" class="form-label">Product description</label>
-                <textarea class="form-control" required pattern="^\S.*$" name="description" id="exampleFormControlTextarea1" rows="3"></textarea>
+                <textarea class="form-control"required pattern="^\S.*$" name="description" id="exampleFormControlTextarea1" rows="3"></textarea>
               </div>
               <div class="mb-3" style="display: flex;">
                 
@@ -383,12 +383,34 @@
                     
 
             </div>
+
+            <style>
+              .image-preview {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .image-preview img {
+        max-width: 200px;
+        max-height: 200px;
+        margin: 5px;
+    }
+    .remove-button {
+        background-color: red;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+          </style>
+            
             <div class="row g-3">
               <div class="col">
                 <label for="exampleFormControlTextarea1" class="form-label">Product image 1</label>
-                <input type="file" class="form-control" required name="avatar"  multiple >
-              </div>
-
+                <input type="file" class="form-control" required name="avatar" multiple onchange="displaySelectedImages(event)">
+            </div>
+              <div class="image-preview" id="imagePreview">
+                <!-- Selected images will be displayed here -->
+            </div>
 
               <div class="mb-3">
                 <button class="btn btn-primary" type="submit">Add Product</button>
@@ -414,10 +436,8 @@
     <script>
 
       function getSubcategories(mainCategory){
-
         axios.get(`/admin/load-subcategories?mainCategory=${mainCategory}`)
         .then(response =>{
-
           console.log(response.data.subcategory);
           const subcategoryDropdown = document.getElementById('subcategoryDropdown');
                 subcategoryDropdown.innerHTML = '';
@@ -435,6 +455,26 @@
           console.log(error);
         })
       }
+
+      function displaySelectedImages(event) {
+        const previewContainer = document.getElementById('imagePreview');
+        previewContainer.innerHTML = ''; // Clear previous selected images
+
+        const files = event.target.files;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+
+            reader.onload = function() {
+                const img = document.createElement('img');
+                img.src = reader.result;
+
+                previewContainer.appendChild(img); // Append each image to the preview container
+            }
+
+            reader.readAsDataURL(file);
+        }
+    }
     </script>
 
 

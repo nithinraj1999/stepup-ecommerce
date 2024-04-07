@@ -9,10 +9,11 @@ const orderModel = require("../Models/orderModel")
 const walletModel = require("../Models/walletModel")
 const coupenModel = require("../Models/coupenModel")
 const offerModel = require("../Models/offer")
+const { table } = require("console")
 
 const loginLoad = (req, res) => {
   if(req.session.admin_id){
-    res.render("adminDashboard")
+    res.redirect("/admin/dashboard")
   }else{
     res.render("adminLogin");
   }
@@ -26,7 +27,8 @@ const verifyLogin = async (req,res)=>{
     if(find) {
        if(find.password == password){
         req.session.admin_id = find._id
-        res.render("adminDashboard")
+        // res.render("adminDashboard")
+        res.redirect("/admin/dashboard")
         }else{
         res.render("adminLogin")
        } 
@@ -91,7 +93,7 @@ const loadCategory = (req,res)=>{
 const addCategory = async (req,res)=>{
     const {maincategory} = req.body
     const subcate =req.body.subcategory
-    const {description} =req.body
+    const {description} =req.body 
     subcategory = subcate.toLowerCase();
     const find = await category.find({name:maincategory,subcategory:subcategory})
     if(find.length ==0){
@@ -119,21 +121,22 @@ const editCategory = async (req,res)=>{
 
   const {action} = req.body
   const id = req.query.id 
+  const offer = await offerModel.find({})
   if(action ==="block"){
     
      await category.updateOne({_id:id},{$set:{isBlock:true}})
      const find = await category.find({});
-    res.render("editCategory",{find})
+    res.render("editCategory",{find,offer})
 
   }else if(action === "unblock"){
    await category.updateOne({_id:id},{$set:{isBlock:false}})
     const find = await category.find({});
-    res.render("editCategory",{find})
+    res.render("editCategory",{find,offer})
 
   }else if(action === "delete"){
     await category.deleteOne({_id:id})
      const find = await category.find({});
-     res.render("editCategory",{find})
+     res.render("editCategory",{find,offer})
 
   }else if(action === "update"){
     const find = await category.findOne({_id:id})
@@ -208,14 +211,14 @@ const addProduct = async (req,res)=>{
         }))
 
         const productCollection = new productModal({
-        name:name,
-        manufacturer:manufacturer,
-        price:price,
-        description:description,
-        subcategory_id:subcategory_id,
-        quantity:quantity,
-        product_image:productImages
-      })
+            name: name,
+            manufacturer: manufacturer,
+            price: price,
+            description: description,
+            subcategory_id: subcategory_id,
+            quantity: quantity,
+            product_image: productImages,
+        })
         
        
       const save =await productCollection.save() 
@@ -230,21 +233,12 @@ const addProduct = async (req,res)=>{
 
 const allProducts = async (req, res) => {
   try {
-    const ITEMS_PER_PAGE = 8; // Number of items to display per page
-    
-    // Extract page number from query parameters or default to 1
+    const ITEMS_PER_PAGE = 8; 
     const page = parseInt(req.query.page) || 1;
-    
-    // Count total number of products
     const totalProductsCount = await productModal.countDocuments();
-    
-    // Calculate total pages
     const totalPages = Math.ceil(totalProductsCount / ITEMS_PER_PAGE);
-
-    // Calculate how many products to skip
     const skip = (page - 1) * ITEMS_PER_PAGE;
 
-    // Fetch products for the current page
     const find = await productModal
       .find({})
       .populate("subcategory_id")
@@ -254,7 +248,6 @@ const allProducts = async (req, res) => {
 
     const offer = await offerModel.find({});
 
-    // Pass data to the view
     res.render("allProducts", { find, offer, totalPages, currentPage: page });
   } catch (error) {
     console.log(error);
@@ -379,16 +372,17 @@ const deleteimage = async (req,res)=>{
   res.redirect(`/admin/update-product?id=${product_id}`)
 
 }
+
+
+
+
 const loadOrders = async (req, res) => {
-
- 
     const page = parseInt(req.query.page) || 1
-
     const limit = 7
     const skip = (page - 1) * limit
     try {
         const orders = await orderModel
-            .find({})
+            .find({ paymentStatus:{$ne:"Failed"}})
             .populate('userId')
             .sort({ _id: -1 })
             .skip(skip)
@@ -403,7 +397,7 @@ const loadOrders = async (req, res) => {
             totalPages,
             currentPage: page,
         })
-    } catch (error) { 
+    } catch (error) {
         console.error('Error fetching orders:', error)
     }
 }
@@ -425,76 +419,74 @@ const orderStatus = async(req,res) =>{
 } 
  
 
-const orderRequest = async (req,res)=>{
-  try{
-    const {status,orderId,productId} = req.body
-    if(status == "Reject Request"){
+const orderRequest = async (req, res) => {
+    try {
+        const { status, orderId, productId } = req.body
+        if (status == 'Reject Request') {
+            await orderModel.updateOne(
+                { _id: orderId, 'products._id': productId },
+                { $set: { 'products.$.orderStatus': 'Delivered' } }
+            )
+        } else {
+            await orderModel.updateOne(
+                { _id: orderId, 'products._id': productId },
+                { $set: { 'products.$.orderStatus': 'Product Returned' } }
+            )
 
-      await orderModel.updateOne(
-        { "_id": orderId, "products._id": productId },
-        { $set: { "products.$.orderStatus":"Delivered"} }
-      );
-    
-    }else{
-      await orderModel.updateOne(
-        { "_id": orderId, "products._id": productId },
-        { $set: { "products.$.orderStatus": "Product Returned"} }
-      );
+            const order = await orderModel.findOne({ _id: orderId })
 
-      const order =  await orderModel.findOne({_id:orderId})
+            const returnedProduct = order.products.find(
+                (item) => item._id == productId
+            )
+            const returnedProductId = returnedProduct.productId
+            const quantityOfReturned = returnedProduct.quantity
 
-     const returnedProduct = order.products.find(item => item._id == productId)
-     const returnedProductId = returnedProduct.productId
-     const quantityOfReturned = returnedProduct.quantity
+            await productModal.updateOne(
+                { _id: returnedProductId },
+                { $inc: { quantity: quantityOfReturned } }
+            )
 
+            const orders = await orderModel.findOne({
+                _id: orderId,
+                'products._id': productId,
+            })
+            const orderStatus = orders.products[0].orderStatus
 
-     await productModal.updateOne({_id:returnedProductId},{$inc:{quantity:quantityOfReturned}})
-    
-    const orders =await orderModel.findOne({ "_id": orderId,"products._id": productId })
-    const orderStatus = orders.products[0].orderStatus
+            const priceOfReturned = returnedProduct.price
+            const totalPriceOfReturned = priceOfReturned * quantityOfReturned
 
-     
+            const userId = order.userId
 
+            const wallet = await walletModel.findOne({ userId: userId })
+            if (!wallet) {
+                const addBalaceToWallet = new walletModel({
+                    userId: userId,
+                    balance: priceOfReturned,
+                    transactions: [
+                        {
+                            amount: totalPriceOfReturned,
+                        },
+                    ],
+                })
 
-   const  priceOfReturned = returnedProduct.price
-   const totalPriceOfReturned = priceOfReturned * quantityOfReturned
+                await addBalaceToWallet.save()
+            } else {
+                await walletModel.updateOne(
+                    { userId: userId },
+                    {
+                        $inc: { balance: totalPriceOfReturned },
+                        $push: {
+                            transactions: { amount: totalPriceOfReturned },
+                        },
+                    }
+                )
+            }
+        }
 
-   const userId = order.userId
-
-
-    const wallet = await walletModel.findOne({userId:userId})
-    if(!wallet){
-      const addBalaceToWallet = new walletModel({
-      userId:userId,
-      balance:priceOfReturned,
-      transactions:[{
-        amount:totalPriceOfReturned,
-      }]
-    })
-  
-    await addBalaceToWallet.save()
-  
-    }else{
-  
-      await walletModel.updateOne({userId:userId},{$inc:{balance:totalPriceOfReturned},$push:{transactions:{amount:totalPriceOfReturned}}})
+        res.json({ status, orderStatus })
+    } catch (error) {
+        console.error(error)
     }
-
-
-  }
-
-
-
-    
-
-    
-    res.json({ status, orderStatus });
- 
-  }
-  catch(error){
-    console.error(error);
-  }
- 
-
 }
  
     
@@ -502,33 +494,22 @@ const orderRequest = async (req,res)=>{
 
 
 const loadCoupenPage = async (req, res) => {
-  try {
-    const ITEMS_PER_PAGE = 5; // Number of coupons to display per page
+    try {
+        const ITEMS_PER_PAGE = 5
+        const page = parseInt(req.query.page) || 1
+        const totalCouponsCount = await coupenModel.countDocuments()
+        const totalPages = Math.ceil(totalCouponsCount / ITEMS_PER_PAGE)
+        const skip = (page - 1) * ITEMS_PER_PAGE
+        const coupens = await coupenModel
+            .find({})
+            .skip(skip)
+            .limit(ITEMS_PER_PAGE)
 
-    // Extract page number from query parameters or default to 1
-    const page = parseInt(req.query.page) || 1;
-
-    // Count total number of coupons
-    const totalCouponsCount = await coupenModel.countDocuments();
-
-    // Calculate total pages
-    const totalPages = Math.ceil(totalCouponsCount / ITEMS_PER_PAGE);
-
-    // Calculate how many coupons to skip
-    const skip = (page - 1) * ITEMS_PER_PAGE;
-
-    // Fetch coupons for the current page
-    const coupens = await coupenModel
-      .find({})
-      .skip(skip)
-      .limit(ITEMS_PER_PAGE);
-
-    // Pass data to the view
-    res.render("coupens", { coupens, totalPages, currentPage: page });
-  } catch (error) {
-    console.error(error);
-  }
-};
+        res.render('coupens', { coupens, totalPages, currentPage: page })
+    } catch (error) {
+        console.error(error)
+    }
+}
 
 
 
@@ -563,16 +544,14 @@ const addNewCoupen = async (req, res) => {
 }  
 
 
-const deleteCoupen = async (req,res)=>{
-  try{
-    const {couponId} =req.body
-   await coupenModel.deleteOne({_id:couponId})
-   res.json({success:true})
-  }
-  catch(error){
-    console.error(error);
-  }
- 
+const deleteCoupen = async (req, res) => {
+    try {
+        const { couponId } = req.body
+        await coupenModel.deleteOne({ _id: couponId })
+        res.json({ success: true })
+    } catch (error) {
+        console.error(error)
+    }
 }
 
 const loadEditCoupen = async (req,res)=>{
@@ -803,9 +782,16 @@ const loadSalesReport = async (req, res) => {
 } 
 
 
-const monthlyReport = async(req,res)=>{
-const {month} = req.body
-  res.redirect(`/admin/monthly-report?month=${month}`)
+const monthlyReport = async (req, res) => {
+  try{
+
+  
+    const { month } = req.body
+    res.redirect(`/admin/monthly-report?month=${month}`)
+  }
+  catch(error){
+    console.error(error);
+  }
 }
 
 
@@ -917,9 +903,162 @@ const getCutomDatereport = async (req, res) => {
 }
 
 
+const loadDashBoard = async (req, res) => {
+    try {
+      const subTotalSum = await orderModel.aggregate([{$group:{_id:null,total:{$sum:"$subTotal"}}}])
+      const totalRevenue = subTotalSum[0].total
+      const totalOrder = await orderModel.find({}).count()
+      const pendingOrdersRequest = await orderModel.find({ "products": { $elemMatch: { orderStatus: "Requested Return" } } }).count()
+    //   const totalProductReturned =  await orderModel.find({ "products": { $elemMatch: { orderStatus: "Product Returned" } } }).count()
+       const totalProductCancelled = await orderModel.find({ "products": { $elemMatch: { orderStatus: "Canceled" } } }).count()
+    const totalReturnedProducts = await orderModel.aggregate([
+        { $unwind: "$products" }, // Unwind the products array
+        { $match: { "products.orderStatus": "Product Returned" } }, // Match only returned products
+        { $group: { _id: null, count: { $sum: 1 } } } // Group to count returned products
+      ]);
+      
+      const returnedProductCount = totalReturnedProducts.length > 0 ? totalReturnedProducts[0].count : 0;
+      
+      const placed = await orderModel.find({ "products": { $elemMatch: { orderStatus: "Placed" } } }).count()
+      const shipped = await orderModel.find({ "products": { $elemMatch: { orderStatus: "Shipped" } } }).count()
+      const packed = await orderModel.find({ "products": { $elemMatch: { orderStatus: "Packed" } } }).count()
+      const delivered = await orderModel.find({ "products": { $elemMatch: { orderStatus: "Delivered" } } }).count()
+
+      const currentYear = new Date().getFullYear();
+      // Get orders for the current year
+      const orders = await orderModel.find({
+          orderDate: {
+              $gte: new Date(`${currentYear}-01-01`),
+              $lte: new Date(`${currentYear}-12-31T23:59:59.999`)
+          }
+      });  
+  
+      // Calculate total earnings for each month
+      const monthlyEarnings = Array(12).fill(0); // Initialize array for 12 months with zeros
+      orders.forEach(order => {
+          const month = order.orderDate.getMonth(); // Month is zero-based (0 for January)
+          monthlyEarnings[month] += order.subTotal;
+      });
+
+      const topSellingProducts = await orderModel.aggregate([
+        { $unwind: "$products" }, // Unwind the products array
+        {
+            $group: {
+                _id: "$products.productId",
+                totalQuantity: { $sum: "$products.quantity" }
+            }
+        }, // Group by productId and sum the quantities
+        { $sort: { totalQuantity: -1 } }, // Sort by totalQuantity in descending order
+        { $limit: 10 }, // Limit to top 10 selling products
+        {
+            $lookup: {
+                from: "products", // The name of the collection to join with
+                localField: "_id", // The field from the input documents
+                foreignField: "_id", // The field from the documents of the "products" collection
+                as: "product" // The output array field
+            }
+        },
+        {
+            $addFields: {
+                productName: { $arrayElemAt: ["$product.name", 0] } // Extract the name from the product array
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                totalQuantity: 1,
+                productName: 1
+            }
+        }
+    ]);
+    
+  
+    const topSellingCategories = await orderModel.aggregate([
+      { $unwind: "$products" },
+      {
+          $lookup: {
+              from: "products",
+              localField: "products.productId",
+              foreignField: "_id",
+              as: "product"
+          }
+      },
+      { $unwind: "$product" },
+      {
+          $lookup: {
+              from: "categories",
+              localField: "product.subcategory_id",
+              foreignField: "_id",
+              as: "category"
+          }
+      },
+      { $unwind: "$category" },
+      {
+          $group: {
+              _id: "$category.name",
+              totalQuantity: { $sum: "$products.quantity" }
+          }
+      },
+      { $sort: { totalQuantity: -1 } },
+      { $limit: 3 }
+  ]);
 
 
-module.exports = { 
+  
+        // Find top 10 selling brands
+        const totalSalesByBrand = await orderModel.aggregate([
+          { $unwind: "$products" },
+          {
+              $lookup: {
+                  from: "products",
+                  localField: "products.productId",
+                  foreignField: "_id",
+                  as: "product"
+              }
+          },
+          { $unwind: "$product" },
+          {
+              $group: {
+                  _id: "$product.manufacturer",
+                  totalQuantity: { $sum: "$products.quantity" }
+              }
+          },
+          { $sort: { totalQuantity: -1 } } // Sort by brand name
+      ]);
+
+
+
+
+
+      // Calculate average monthly earnings
+      const totalEarnings = monthlyEarnings.reduce((total, earnings) => total + earnings, 0);
+      const averageMonthlyEarnings = totalEarnings / 12;
+      const roundedAverageMonthlyEarnings = Math.round(averageMonthlyEarnings * 100) / 100; // Round to 2 decimal places
+
+      res.render('dashboard', {
+          totalRevenue,
+          totalOrder,
+          returnedProductCount,
+          totalProductCancelled,
+          roundedAverageMonthlyEarnings,
+          pendingOrdersRequest,
+          placed,
+          packed,
+          delivered,
+          shipped,
+          monthlyEarnings,
+          topSellingProducts,
+          topSellingCategories,
+          totalSalesByBrand
+      }) 
+    } catch (error) { 
+        console.error(error)
+    }
+}
+ 
+ 
+ 
+module.exports = {  
   loginLoad,
   verifyLogin,
   loadUser,
@@ -963,7 +1102,8 @@ module.exports = {
   loadyearlyReport,
   loadDailyReport,
   cutomDatereport,
-  getCutomDatereport
+  getCutomDatereport,
+  loadDashBoard
 
 }; 
 

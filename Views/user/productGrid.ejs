@@ -927,200 +927,6 @@
 //===============================
 
 
-// // Define selectedBrands and selectedCategories arrays
-// let selectedBrands = [];
-// let selectedCategories = [];
-
-// // Function to update the selected brands or categories array and store them in local storage
-// // Function to update the selected brands or categories array and store them in local storage
-// function updateSelectedValues(checkboxes, selectedValues, storageKey) {
-//     selectedValues.length = 0; // Clear the selected values array
-//     // Loop through each checkbox
-//     checkboxes.forEach(checkbox => {
-//         // Check if the checkbox is checked
-//         if (checkbox.checked) {
-//             // Get the value of the checkbox
-//             const value = checkbox.value;
-//             // Add the value to the selectedValues array
-//             selectedValues.push(value);
-//         }
-//     });
-//     // Store the selected values in local storage
-//     localStorage.setItem(storageKey, JSON.stringify(selectedValues));
-// }
-
-// // Function to construct query parameters string
-// function constructQueryParams(selectedBrands, selectedCategories, sortBy, mainCategory) {
-//     const params = [];
-//     selectedBrands.forEach(brand => params.push(`brand=${encodeURIComponent(brand)}`));
-//     selectedCategories.forEach(category => params.push(`category=${encodeURIComponent(category)}`));
-    
-//     if (mainCategory) {
-//         params.push(`mainCategory=${encodeURIComponent(mainCategory)}`);
-//     }
-//     if(sortBy){
-//         params.push(`sort=${encodeURIComponent(sortBy)}`);
-//     }
-//     return params.join('&');
-// }
-
-// // Function to retrieve selected values from local storage
-// function retrieveSelectedValues(storageKey) {
-//     const storedValues = localStorage.getItem(storageKey);
-//     return storedValues ? JSON.parse(storedValues) : [];
-// }
-
-// // Function to handle "Apply Filter" button click
-// function applyFilter() {
-//     // Update the selected brands and categories arrays
-//     updateSelectedValues(brandCheckboxes, selectedBrands, 'selectedBrands');
-//     updateSelectedValues(categoryCheckboxes, selectedCategories, 'selectedCategories');
-    
-//     // Get the selected sorting option
-//     const sortBy = document.getElementById('sortby').value;
-    
-//     // Get the main category
-//     const mainCategory = '<%=cat %>';
-
-//     // Construct query parameters string
-//     const queryParams = constructQueryParams(selectedBrands, selectedCategories, sortBy, mainCategory);
-   
-//     // Construct the full URL with query parameters
-//     const baseURL = 'http://localhost:3000'; // Replace this with your actual base URL
-//     const urlWithParams = '/filter' + '?' + queryParams; // Append "?" operator here
-//     // Update the URL
-//     window.location.href = urlWithParams; 
-// }
-
-// // Attach click event listener to "Apply Filter" button
-// const applyFilterButton = document.getElementById('apply-filter');
-// applyFilterButton.addEventListener('click', applyFilter);
-
-// // Attach change event listeners to brand checkboxes
-// const brandCheckboxes = document.querySelectorAll('.filter-brand');
-// brandCheckboxes.forEach(checkbox => {
-//     checkbox.addEventListener('change', function() {
-//         updateSelectedValues(brandCheckboxes, selectedBrands, 'selectedBrands');
-//     });
-// });
-
-// // Attach change event listeners to category checkboxes
-// const categoryCheckboxes = document.querySelectorAll('.filter-category');
-// categoryCheckboxes.forEach(checkbox => {
-//     checkbox.addEventListener('change', function() {
-//         updateSelectedValues(categoryCheckboxes, selectedCategories, 'selectedCategories');
-//     });
-// });
-
-// // Retrieve selected values from local storage and update checkboxes
-// window.addEventListener('DOMContentLoaded', function() {
-//     const storedBrands = retrieveSelectedValues('selectedBrands');
-//     const storedCategories = retrieveSelectedValues('selectedCategories');
-
-//     // Update brand checkboxes
-//     brandCheckboxes.forEach(checkbox => {
-//         if (storedBrands.includes(checkbox.value)) {
-//             checkbox.checked = true;
-//         }
-//     });
-
-//     // Update category checkboxes
-//     categoryCheckboxes.forEach(checkbox => {
-//         if (storedCategories.includes(checkbox.value)) {
-//             checkbox.checked = true;
-//         }
-//     });
-// });
-
-
-
-
-// // //=================== sort   =========================
-
-
-//  // Function to handle sorting by price
-// function sortByPrice(sortOrder) {
-//     // Store the selected sorting option in local storage
-//     localStorage.setItem('sortOrder', sortOrder);
-    
-//     // Retrieve selected filter values from local storage
-//     const selectedBrands = retrieveSelectedValues('selectedBrands');
-//     const selectedCategories = retrieveSelectedValues('selectedCategories');
-    
-//     const mainCategory = '<%=cat %>'; // Assuming you have a way to get the main category value
-
-//     // Construct query parameters string
-//     const queryParams = constructQueryParams(selectedBrands, selectedCategories, sortOrder, mainCategory);
-//     console.log(queryParams);
-//     // Construct the full URL with query parameters
-//     const baseURL = 'http://localhost:3000'; // Replace this with your actual base URL
-//     const urlWithParams = '/sort-product' + '?' + queryParams; // Assuming the route is named sort-product
-//     // Redirect to the URL
-//     window.location.href = urlWithParams;
-
-// }
-
-// // Function to clear data in local storage unless navigating to specific paths
-// function clearLocalStorage() {
-//     const allowedPaths = ['/products', '/men', '/women', '/kids','/filter']; // Paths to retain data for
-//     const currentPath = window.location.pathname;
-
-//     if (!allowedPaths.includes(currentPath)) {
-//         localStorage.removeItem('selectedBrands');
-//         localStorage.removeItem('selectedCategories');
-//         localStorage.removeItem('sortOrder');
-//     }
-// }
-
-// // Attach event listener to the window's beforeunload event
-// window.addEventListener('beforeunload', clearLocalStorage);
-
-// window.addEventListener('DOMContentLoaded', function() {
-//     // Retrieve selected sorting order from local storage
-//     const sortOrder = localStorage.getItem('sortOrder');
-
-//     // Update the selected option in the <select> element only if sortOrder is not null
-//     if (sortOrder !== null) {
-//         document.getElementById('sortby').value = sortOrder;
-//     }
-// });
-
-
-
-//======================= product search ================================
-
-// document.getElementById("search-button").addEventListener("click", function() {
-//             var searchValue = document.getElementById("product-search").value;
-//             window.location.href = `/product-search?search=${searchValue}`
-//         });
-
-//================== search sort filter =================================
-
-// function applyFilter() {
-//     const categoryFilters = Array.from(document.querySelectorAll('.filter-category:checked')).map(input => input.value);
-//     const brandFilters = Array.from(document.querySelectorAll('.filter-brand:checked')).map(input => input.value);
-//     const sortBy = document.getElementById('sortby').value;
-//     const searchQuery = document.getElementById('product-search').value.trim();
-//    const queryParams = [];
-
-//     if (categoryFilters.length > 0) {
-//         queryParams.push(`category=${categoryFilters.join('&category=')}`);
-//     }
-//     if (brandFilters.length > 0) {
-//         queryParams.push(`brand=${brandFilters.join('&brand=')}`); // Join using & instead of ,
-//     }
-//     if (sortBy) {
-//         queryParams.push(`sortBy=${sortBy}`);
-//     }
-//     if (searchQuery) {
-//         queryParams.push(`search=${searchQuery}`);
-//     }
-    
-//     const queryString = queryParams.length > 0 ? '?' + queryParams.join('&') : '';
-//     window.location.href = '/apply-filter' + queryString;
-    
-// }
-
 
 let queryParams = [];
 
@@ -1128,6 +934,7 @@ function applyFilter() {
     const categoryFilters = Array.from(document.querySelectorAll('.filter-category:checked')).map(input => input.value);
     const brandFilters = Array.from(document.querySelectorAll('.filter-brand:checked')).map(input => input.value);
     const sortBy = document.getElementById('sortby').value;
+  
     const searchQuery = document.getElementById('product-search').value.trim();
 
     if (categoryFilters.length > 0) {
@@ -1232,10 +1039,6 @@ function clearFilter(){
     const path = "<%=path %>"
     window.location.href = path
 }
-
-
-
-
 
 
 
