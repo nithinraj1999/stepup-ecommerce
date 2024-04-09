@@ -46,7 +46,7 @@ const loadHomePage = (req,res)=>{
     }
   if(req.session.user_id){
     res.render("home",{isLoggedIn})
-  }else{
+  }else{  
     res.render("home",{isLoggedIn})
   }
    

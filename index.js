@@ -5,6 +5,7 @@ const app = express();
 const mongoose = require("mongoose");
 mongoose.connect("mongodb+srv://vnithinraj99:DDzgIwdJOSOfkzSQ@cluster0.izvom4q.mongodb.net/dummy");
 
+
 const userRoute = require("./routes/userRoute");
 const adminRoute = require("./routes/adminRoute");
 
@@ -13,7 +14,7 @@ const adminRoute = require("./routes/adminRoute");
 app.set("view engine", "ejs");
 
 
-app.use(express.static(__dirname + "/views"));
+app.use(express.static(__dirname + "/Views"));
 app.use(express.static(__dirname + "/public"));
 
 
