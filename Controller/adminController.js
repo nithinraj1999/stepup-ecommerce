@@ -11,6 +11,13 @@ const coupenModel = require("../Models/coupenModel")
 const offerModel = require("../Models/offer")
 const { table } = require("console")
 
+
+const express = require("express")
+const app = express()
+
+app.set("view engine", "ejs")
+app.set(path.join(__dirname, "views", "admin"))
+
 const loginLoad = (req, res) => {
   if(req.session.admin_id){
     res.redirect("/admin/dashboard")

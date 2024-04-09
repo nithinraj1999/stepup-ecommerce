@@ -20,12 +20,17 @@ const moment = require('moment');
 const path = require("path")
 const ejs = require('ejs');
 const puppeteer = require('puppeteer');
-
+const express = require("express")
+const app = express()
 var instance = new Razorpay(
   { 
     key_id: process.env.KEY_ID, 
     key_secret: process.env.KEY_SECRET 
   })
+
+
+app.set("view engine", "ejs")
+app.set(path.join(__dirname, "views", "user"))
   
 
 const securePassword = async (password) => {

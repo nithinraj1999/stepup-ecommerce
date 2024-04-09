@@ -9,17 +9,14 @@ mongoose.connect("mongodb+srv://vnithinraj99:DDzgIwdJOSOfkzSQ@cluster0.izvom4q.m
 const userRoute = require("./routes/userRoute");
 const adminRoute = require("./routes/adminRoute");
 
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'))
 
-
-app.set("view engine", "ejs");
-
-
-app.use(express.static(__dirname + "/Views"));
+app.use(express.static(__dirname + "/views"));
 app.use(express.static(__dirname + "/public"));
-
 
 app.use("/",userRoute);
 app.use("/admin",adminRoute);
 
+
 app.listen(3000, () => console.log("Running....http://localhost:3000"));
-    
