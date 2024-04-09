@@ -3,8 +3,8 @@ const multer  =require("multer")
 const path = require("path")
 const app = express();
 const mongoose = require("mongoose");
-// mongoose.connect("mongodb://127.0.0.1:27017/dummy");
 mongoose.connect("mongodb+srv://vnithinraj99:DDzgIwdJOSOfkzSQ@cluster0.izvom4q.mongodb.net/dummy");
+
 const userRoute = require("./routes/userRoute");
 const adminRoute = require("./routes/adminRoute");
 
