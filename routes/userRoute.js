@@ -30,10 +30,6 @@ userRoute.get("/",auth.isBlocked,controller.loadHomePage)
 userRoute.get("/signup",controller.loadsignup)
 userRoute.post("/signup",controller.signup) 
 
-
-
-
-
 userRoute.get("/load-otp",controller.loadOTP)
 userRoute.post("/resend-otp",controller.resendOTP)
 userRoute.post("/otp-verification",controller.verifyOTP)
@@ -62,6 +58,8 @@ userRoute.post("/address",auth.isBlocked,controller.addAddress)
 userRoute.get("/edit-address/:id",auth.isBlocked,controller.loadEditAddress)
 userRoute.post("/edit-address",auth.isBlocked,controller.editAddress)
 userRoute.post("/delete-address",auth.isBlocked,controller.deleteAddress)
+
+userRoute.get("/wallet",auth.isBlocked,auth.isLogin,controller.loadWallet)  
 
 //===================== Cart=====================
 

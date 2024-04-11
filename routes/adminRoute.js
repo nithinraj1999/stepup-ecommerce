@@ -72,18 +72,18 @@ adminRoute.post("/customer-Request",adminController.orderRequest)
 
 //====================== coupens =================
 
-adminRoute.get("/coupens",adminController.loadCoupenPage)
+adminRoute.get("/coupens",auth.isLogin,adminController.loadCoupenPage)
 adminRoute.post("/add-new-coupen",adminController.addNewCoupen)
 adminRoute.post("/delete-coupon",adminController.deleteCoupen)
 adminRoute.post("/load-edit-coupen",adminController.loadEditCoupen)
 adminRoute.post("/edit-coupen",adminController.editCoupen)
 //===================  offer ======================================
 
-adminRoute.get("/offer",adminController.offer)
+adminRoute.get("/offer",auth.isLogin,adminController.offer)
 adminRoute.post("/add-offer",adminController.addOffer) 
 
 adminRoute.post("/delete-offer",adminController.deleteOffer)
-adminRoute.get("/load-edit-offer",adminController.loadEditOffer)
+adminRoute.get("/load-edit-offer",auth.isLogin,adminController.loadEditOffer)
 adminRoute.post("/edit-offer",adminController.editOffer)
 
 
@@ -97,20 +97,20 @@ adminRoute.post("/apply-product-offer",adminController.applyProductOffer)
 adminRoute.post("/remove-product-offer",adminController.removeProductOffer) 
 
 //==================== sales report ===================
-adminRoute.get("/sales",adminController.loadSalesReport) 
+adminRoute.get("/sales",auth.isLogin,adminController.loadSalesReport) 
 adminRoute.post("/monthly-report",adminController.monthlyReport) 
-adminRoute.get("/monthly-report",adminController.loadMonthlyReport) 
-adminRoute.get("/weekly-report",adminController.loadWeeklyReport) 
-adminRoute.get("/yearly-report",adminController.loadyearlyReport) 
-adminRoute.get("/daily-report",adminController.loadDailyReport) 
+adminRoute.get("/monthly-report",auth.isLogin,adminController.loadMonthlyReport) 
+adminRoute.get("/weekly-report",auth.isLogin,adminController.loadWeeklyReport) 
+adminRoute.get("/yearly-report",auth.isLogin,adminController.loadyearlyReport) 
+adminRoute.get("/daily-report",auth.isLogin,adminController.loadDailyReport) 
 adminRoute.post("/custom-date-report",adminController.cutomDatereport) 
-adminRoute.get("/custom-date-report",adminController.getCutomDatereport) 
+adminRoute.get("/custom-date-report",auth.isLogin,adminController.getCutomDatereport) 
 
 
 //==================== dashboard ======================
 
 
-adminRoute.get("/dashboard",adminController.loadDashBoard) 
+adminRoute.get("/dashboard",auth.isLogin,adminController.loadDashBoard) 
 
 
 

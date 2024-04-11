@@ -19,11 +19,16 @@ app.set("view engine", "ejs")
 app.set(path.join(__dirname, "views", "admin"))
 
 const loginLoad = (req, res) => {
-  if(req.session.admin_id){
-    res.redirect("/admin/dashboard")
-  }else{
-    res.render("adminLogin");
-  }
+    try{
+        if(req.session.admin_id){
+            res.redirect("/admin/dashboard")
+          }else{
+            res.render("adminLogin");
+          }
+    }catch(error){
+        console.error(error);
+    }
+  
 };
 
 const verifyLogin = async (req,res)=>{
@@ -82,109 +87,154 @@ const loadUser = async (req, res) => {
 
  
 const restrict = async (req,res)=>{
-  const id = req.query.id
-  let find = await userModel.findOne({_id:id})  
-  if(find.isBlock==false){
-     await userModel.updateOne({_id:id},{$set:{isBlock:true}})        
-       res.redirect("/admin/user")          
-  }else{ 
-      await userModel.updateOne({_id:id},{$set:{isBlock:false}})
-      res.redirect("/admin/user")      
-  }
+    try{
+        const id = req.query.id
+        let find = await userModel.findOne({_id:id})  
+        if(find.isBlock==false){
+           await userModel.updateOne({_id:id},{$set:{isBlock:true}})        
+             res.redirect("/admin/user")          
+        }else{ 
+            await userModel.updateOne({_id:id},{$set:{isBlock:false}})
+            res.redirect("/admin/user")      
+        }
+    }catch(error){
+        console.error(error);
+    }
+ 
 }
 
 const loadCategory = (req,res)=>{
-    res.render("category")
+    try{
+        res.render("category")
+    }catch(error){
+        console.error(error);
+    }
+   
 }
 
 const addCategory = async (req,res)=>{
-    const {maincategory} = req.body
-    const subcate =req.body.subcategory
-    const {description} =req.body 
-    subcategory = subcate.toLowerCase();
-    const find = await category.find({name:maincategory,subcategory:subcategory})
-    if(find.length ==0){
-      const categoryCollection = new category({
-        name:maincategory,
-        subcategory:subcategory,
-        description:description
-    })
-    await categoryCollection.save()
-   res.render("category", {alertMessage: null});
-    }else{
-    
-     res.render("category", {exist:"Category Already Exists"});
+    try{
+        const {maincategory} = req.body
+        const subcate =req.body.subcategory
+        const {description} =req.body 
+        subcategory = subcate.toLowerCase();
+        const find = await category.find({name:maincategory,subcategory:subcategory})
+        if(find.length ==0){
+          const categoryCollection = new category({
+            name:maincategory,
+            subcategory:subcategory,
+            description:description
+        })
+        await categoryCollection.save()
+       res.render("category", {alertMessage: null});
+        }else{
+        
+         res.render("category", {exist:"Category Already Exists"});
+        }
+    }catch(error){
+        console.error(error);
     }
+    
       
 }
 
 const loadEditCategory = async (req,res)=>{
-    const find = await category.find({}).populate("offer")
-    const offer = await offerModel.find({})
-    res.render("editCategory",{find,offer})
+    try{
+        const find = await category.find({}).populate("offer")
+        const offer = await offerModel.find({})
+        res.render("editCategory",{find,offer})
+    }catch(error){
+        console.error(error);
+    }
+   
 }
 
 const editCategory = async (req,res)=>{ 
+    try{
+        const {action} = req.body
+        const id = req.query.id 
+        const offer = await offerModel.find({})
+        if(action ==="block"){
+          
+           await category.updateOne({_id:id},{$set:{isBlock:true}})
+           const find = await category.find({});
+          res.render("editCategory",{find,offer})
+      
+        }else if(action === "unblock"){
+         await category.updateOne({_id:id},{$set:{isBlock:false}})
+          const find = await category.find({});
+          res.render("editCategory",{find,offer})
+      
+        }else if(action === "delete"){
+          await category.deleteOne({_id:id})
+           const find = await category.find({});
+           res.render("editCategory",{find,offer})
+      
+        }else if(action === "update"){
+          const find = await category.findOne({_id:id})
+          res.redirect(`/admin/updatecategory?id=${id}`)
+        }else{  
+          console.log("unknown button clicked");
+        }
+    }catch(error){
+        console.error(error);
+    }
 
-  const {action} = req.body
-  const id = req.query.id 
-  const offer = await offerModel.find({})
-  if(action ==="block"){
-    
-     await category.updateOne({_id:id},{$set:{isBlock:true}})
-     const find = await category.find({});
-    res.render("editCategory",{find,offer})
-
-  }else if(action === "unblock"){
-   await category.updateOne({_id:id},{$set:{isBlock:false}})
-    const find = await category.find({});
-    res.render("editCategory",{find,offer})
-
-  }else if(action === "delete"){
-    await category.deleteOne({_id:id})
-     const find = await category.find({});
-     res.render("editCategory",{find,offer})
-
-  }else if(action === "update"){
-    const find = await category.findOne({_id:id})
-    res.redirect(`/admin/updatecategory?id=${id}`)
-  }else{  
-    console.log("unknown button clicked");
-  }
+  
 }
 
 const loadUpdateCategory = async (req,res)=>{
-   const id = req.query.id 
-   const find = await category.findOne({_id:id})
-   res.render("updateCategory",{find})
+    try{
+        const id = req.query.id 
+        const find = await category.findOne({_id:id})
+        res.render("updateCategory",{find})
+    }catch(error){
+        console.error(error);
+    }
+   
 }
 
 const updateCategory = async(req,res)=>{ 
-  const id = req.query.id
-  const {maincategory,subcategory,description} = req.body
-  const lowerSubcategory = subcategory.toLowerCase()
+    try{
+        const id = req.query.id
+        const {maincategory,subcategory,description} = req.body
+        const lowerSubcategory = subcategory.toLowerCase()
+        
+        const find = await category.find({name:maincategory,subcategory:lowerSubcategory})
+        if(find.length ==0){
+            await category.updateOne({_id:id},{$set:{name:maincategory,subcategory:lowerSubcategory,description:description}})
+            res.redirect("/admin/editcategory")
+        }else{
+            const find = await category.findOne({_id:id})
+            res.render("updateCategory",{find,exist:"Category Already Exist"})
+        } 
+    }catch(error){
+        console.error(error);
+    }
   
-  const find = await category.find({name:maincategory,subcategory:lowerSubcategory})
-  if(find.length ==0){
-      await category.updateOne({_id:id},{$set:{name:maincategory,subcategory:lowerSubcategory,description:description}})
-      res.redirect("/admin/editcategory")
-  }else{
-      const find = await category.findOne({_id:id})
-      res.render("updateCategory",{find,exist:"Category Already Exist"})
-  } 
 }
 
 
 const loadAddProduct = async (req,res)=>{
-  const find = await category.distinct("subcategory")
-  res.render("addProduct",{find})
+    try{
+        const find = await category.distinct("subcategory")
+        res.render("addProduct",{find})
+    }catch(error){
+        console.error(error);
+    }
+  
 }
 
 const loadSubcategories = async (req,res)=>{
-  const {mainCategory} = req.query
-  const subcategory = await category.distinct("subcategory",{name:mainCategory})
-
-  res.status(200).json({ message: "Subcategories loaded successfully",subcategory});
+    try{
+        const {mainCategory} = req.query
+        const subcategory = await category.distinct("subcategory",{name:mainCategory})
+      
+        res.status(200).json({ message: "Subcategories loaded successfully",subcategory});
+    }catch(error){
+        console.error(error);
+    }
+ 
 }
 
 
@@ -366,17 +416,22 @@ const updateProduct = async(req,res)=>{
 
 
 const deleteimage = async (req,res)=>{
-  const {product_id,img_id} = req.query
-  await productModal.updateOne(
-  {_id:product_id},
-  {
-    $pull:{
-      product_image:{
-        _id:img_id
-      }}
-  })
-  const find = await productModal.find({})
-  res.redirect(`/admin/update-product?id=${product_id}`)
+    try{
+        const {product_id,img_id} = req.query
+        await productModal.updateOne(
+        {_id:product_id},
+        {
+          $pull:{
+            product_image:{
+              _id:img_id
+            }}
+        })
+        const find = await productModal.find({})
+        res.redirect(`/admin/update-product?id=${product_id}`)
+    }catch(error){
+        console.error(error);
+    }
+  
 
 }
 
