@@ -180,8 +180,8 @@
                                         <h6>Available Coupons</h6>
                                         <% coupens?.forEach((coupen)=>{ %>
                                             <div class="coupon">
-                                                <p><%= coupen?.coupenCode %>
-                                                    <i class="fas fa-copy copy-icon" onclick="copyToClipboard('<%= coupen?.coupenCode %>')"></i>
+                                                <p><%= coupen?.coupenCode %>    (<%= coupen?.discount %>% ) 
+                                                    <i class="fas fa-copy copy-icon blink" onclick="copyToClipboard('<%= coupen?.coupenCode %>')"></i>
 
                                                 </p>
                                             </div>
@@ -194,6 +194,7 @@
                             </div>
                           </div>
                           
+                         
             			<form action="#">
 		                	<div class="row">
 		                		<div class="col-lg-9">
@@ -962,7 +963,16 @@ function applyCoupen(event) {
 //================ copy coupen to clipboard ===================
 
 function copyToClipboard(code) {
+    const copyIcon = document.getElementById('copyIcon');
+  copyIcon.classList.add('blink');
+
+  // Remove the blink class after the animation ends
+  setTimeout(function() {
+    copyIcon.classList.remove('blink');
+  }, 1000);
+    
     navigator.clipboard.writeText(code).then(function() {
+        
         console.log('Coupon code copied to clipboard');
     }).catch(function(error) {
         console.error('Error in copying text: ', error);

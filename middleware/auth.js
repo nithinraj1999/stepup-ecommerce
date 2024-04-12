@@ -31,7 +31,7 @@ const isLogout = async (req,res,next)=>{
 
 const isBlocked=async (req,res,next)=>{
     try{
-        
+    
         let check= await userModel.findById(req.session.user_id)
 
         if(req.session.user_id&&check.isBlock){

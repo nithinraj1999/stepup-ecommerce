@@ -187,7 +187,7 @@
 
 							    		</div><!-- End .form-group -->
                                         <div id="timer" style="color: red;">Timer: <span id="timerDisplay">60</span> seconds</div>                                            <div id="resend" style="display:none;">
-                                                <a type="text" href="" onclick="resendOTP()" >Resend OTP</a>
+                                                <a type="text" href="" onclick="resendOTP(event)" >Resend OTP</a>
                                             </div>		
 							    		<div class="form-footer">
 							    			<button type="submit" class="btn btn-outline-primary-2">
@@ -441,7 +441,8 @@
 
     <script>
         
-   function resendOTP(){
+   function resendOTP(event){
+    event.preventDefault()
     const data = {
         email:document.getElementById('hidden-mail').value,
     }

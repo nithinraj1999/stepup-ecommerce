@@ -119,6 +119,8 @@ const resendOTP = async (req, res) => {
 
 const verifyOTP = async (req, res) => {
     try {
+        const  userOTP =parseInt(req.body.otp)
+        console.log(typeof a);
         let isLoggedIn
         if (req.session.user_id) {
             isLoggedIn = true
@@ -132,11 +134,12 @@ const verifyOTP = async (req, res) => {
             .sort({ _id: -1 })
             .limit(1)
 
-        if (found.length == 0) {
+        if (found.length == 0) { 
             res.render('home', { isLoggedIn })
         } else if (found) {
             const otp = found[0].otp
-            if (otp === req.body.otp) {
+
+            if (otp === userOTP ) {
                 await userModel.updateOne(
                     { email: email },
                     { $set: { isVerified: true } }
@@ -163,7 +166,6 @@ const loadLogin = (req, res) => {
         } else {
             isLoggedIn = false
         }
-
         res.render('login', { isLoggedIn })
     } catch (error) {
         console.error(error)
@@ -603,11 +605,12 @@ async function otp(email) {
             lowerCaseAlphabets: false,
             specialChars: false,
         })
-
+console.log(otp);
         const otpDOC = new otpModel({
             email: email,
             otp: otp,
         })
+        console.log(otpDOC);
 
         await otpDOC.save()
 
@@ -1845,9 +1848,9 @@ const resetPassword = async (req, res) => {
 
 const sendResetEmail = async (req, res) => {
     try {
+
         const { userId, email } = req.query
         const resetLink = `http://localhost:3000/reset?userId=${userId}`
-
         const transporter = nodemailer.createTransport({
             host: process.env.MAIL_HOST,
             port: process.env.SMTP_PORT,
@@ -1858,7 +1861,6 @@ const sendResetEmail = async (req, res) => {
                 pass: process.env.MAIL_PASS,
             },
         })
-
         // async..await is not allowed in global scope, must use a wrapper
         async function main() {
             // send mail with defined transport object

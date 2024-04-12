@@ -27,6 +27,8 @@
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <!-- Main CSS File -->
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
 </head>
 
 <body>
@@ -214,10 +216,13 @@
 							    			<input type="tel" class="form-control" pattern="[0-9]{10}"    pattern="^\S.*$" name="phone" required>
 							    		</div><!-- End .form-group -->
 							    		<div class="form-group">
-							    			<label for="register-password-2">Password *</label>
-                                            <input type="password" class="form-control" id="register-password-2" pattern="^[^\s]{6,}$" title="Password must be at least 6 characters long and not contain blank spaces" name="password" required>
-
-							    		</div><!-- End .form-group -->
+                                            <label for="register-password-2">Password *</label>
+                                            <div class="password-container">
+                                                <input type="password" class="form-control" id="register-password-2" pattern="^[^\s]{6,}$" title="Password must be at least 6 characters long and not contain blank spaces" name="password" required>
+                                                <i class="fa fa-eye" id="togglePassword" onclick="displayPassword()"></i>
+                                            </div>
+                                        </div>
+                                        
 
 							    		<div class="form-footer">
 							    			<button type="submit" class="btn btn-outline-primary-2">
@@ -487,6 +492,34 @@
             </div><!-- End .modal-content -->
         </div><!-- End .modal-dialog -->
     </div><!-- End .modal -->
+<style>
+    .password-container {
+  position: relative;
+}
+
+#togglePassword {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+#togglePassword:hover {
+  color: blue; /* Change color on hover if desired */
+}
+
+</style>
+<script>
+function displayPassword(){
+    const passwordField = document.getElementById("register-password-2")
+    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordField.setAttribute('type', type);
+    
+}
+
+
+    </script>
 
     <!-- Plugins JS File -->
     <script src="assets/js/jquery.min.js"></script>
