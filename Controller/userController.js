@@ -120,7 +120,7 @@ const resendOTP = async (req, res) => {
 const verifyOTP = async (req, res) => {
     try {
         const  userOTP =parseInt(req.body.otp)
-        console.log(typeof a);
+       
         let isLoggedIn
         if (req.session.user_id) {
             isLoggedIn = true
