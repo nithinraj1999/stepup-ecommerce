@@ -43,7 +43,7 @@ adminRoute.use(bodyParser.urlencoded({ extended: true }));
 adminRoute.get("/",adminController.loginLoad)
 adminRoute.post("/",adminController.verifyLogin)
 
-adminRoute.get("/logout",adminController.logout); 
+adminRoute.get("/logout",adminController.logout);  
 adminRoute.get("/user",auth.isLogin,adminController.loadUser)
 adminRoute.post("/user",adminController.restrict)
 

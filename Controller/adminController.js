@@ -1,4 +1,4 @@
-const userModel = require("../models/userModel")
+const userModel = require("../Controller/userController")
 const category = require("../models/categoryModel")
 const productModal = require("../models/productModel")
 const path = require("path")
