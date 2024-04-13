@@ -1,18 +1,26 @@
 const express = require("express");
-const controller = require("../Controller/userController")
+const controller= require("../Controller/userController")
 const bodyParser = require("body-parser")
 const userRoute = express();
 const session = require("express-session")
 const nocache = require("nocache");
-const coupenModal = require("../Models/coupenModel")
+const coupenModal = require("../models/coupenModel")
 var flash = require('connect-flash');
+
+
+const productController =  require("../Controller/productController")
+const wishListController = require("../Controller/wishListController")
+const cartController = require("../Controller/cartController")
+const coupenController = require("../Controller/coupenController")
+const walletController = require("../Controller/walletController")
+const orderController = require("../Controller/orderController")
 
 userRoute.set("views","views/user")
 
 userRoute.use(
     session({ 
       secret:"mysitesessionsecret",
-      resave: false,
+      resave: false, 
       saveUninitialized: true,
     })
 ); 
@@ -35,21 +43,19 @@ userRoute.post("/resend-otp",controller.resendOTP)
 userRoute.post("/otp-verification",controller.verifyOTP)
   
 userRoute.get("/login",controller.loadLogin)
-userRoute.post("/login",controller.verifyLogin) 
+userRoute.post("/login",controller.verifyLogin)  
 userRoute.get("/logout", controller.userLogout)
 
 //=============== Product list =================
 
-userRoute.get("/products",auth.isBlocked,controller.loadProductList)
-userRoute.get("/men",auth.isBlocked,controller.loadMen) 
-userRoute.get("/women",auth.isBlocked,controller.loadWomen)
-userRoute.get("/kids",auth.isBlocked,controller.loadKids) 
-userRoute.get("/product-details",auth.isBlocked,controller.loadProductDetails)
- 
+userRoute.get("/products",auth.isBlocked,productController.loadProductList)
+userRoute.get("/men",auth.isBlocked,productController.loadMen) 
+userRoute.get("/women",auth.isBlocked,productController.loadWomen)
+userRoute.get("/kids",auth.isBlocked,productController.loadKids) 
+userRoute.get("/product-details",auth.isBlocked,productController.loadProductDetails)
+
 //================ My account ===================   
  
-
-
 
 userRoute.get("/account",auth.isBlocked,auth.isLogin,controller.myAccount)  
 
@@ -59,44 +65,44 @@ userRoute.get("/edit-address/:id",auth.isBlocked,controller.loadEditAddress)
 userRoute.post("/edit-address",auth.isBlocked,controller.editAddress)
 userRoute.post("/delete-address",auth.isBlocked,controller.deleteAddress)
 
-userRoute.get("/wallet",auth.isBlocked,auth.isLogin,controller.loadWallet)  
+userRoute.get("/wallet",auth.isBlocked,auth.isLogin,walletController.loadWallet)  
 
 //===================== Cart=====================
 
-userRoute.post('/add-to-cart',controller.addTocart)
-userRoute.get("/cart",auth.isBlocked,auth.isLogin,controller.loadCart)
-userRoute.post("/update-cart",auth.isLogin,controller.updateCart)
-userRoute.post("/remove-item",auth.isLogin,controller.removeItem)
+userRoute.post('/add-to-cart',cartController.addTocart)
+userRoute.get("/cart",auth.isBlocked,auth.isLogin,cartController.loadCart)
+userRoute.post("/update-cart",auth.isLogin,cartController.updateCart)
+userRoute.post("/remove-item",auth.isLogin,cartController.removeItem)
 
 //===================== Checkout ================
  
-userRoute.get('/checkout',auth.isBlocked,controller.loadCheckout)
-userRoute.get('/checkout-verification',controller.checkOutVerification)
+userRoute.get('/checkout',auth.isBlocked,orderController.loadCheckout)
+userRoute.get('/checkout-verification',orderController.checkOutVerification)
 
 //===================== orders ==================
 
-userRoute.get("/order",auth.isBlocked,controller.loadOrderSuccess) 
-userRoute.post("/order",controller.order)
-userRoute.get("/order-invoice",controller.loadInvoice)
-userRoute.get("/order-details",auth.isBlocked,auth.isLogin,controller.orderDetails) 
-userRoute.post("/order-cancelation",controller.cancelRequest)
-userRoute.post("/request-return",controller.returnRequest)
+userRoute.get("/order",auth.isBlocked,orderController.loadOrderSuccess) 
+userRoute.post("/order",orderController.order)
+userRoute.get("/order-invoice",orderController.loadInvoice)
+userRoute.get("/order-details",auth.isBlocked,auth.isLogin,orderController.orderDetails) 
+userRoute.post("/order-cancelation",orderController.cancelRequest)
+userRoute.post("/request-return",orderController.returnRequest)
 
 //================== Razorpayment ==================
- 
-userRoute.post("/verify-payment",controller.verifyPayment)
-userRoute.post("/failed-payment",controller.failedPayment)
-userRoute.get("/paymen-failed",auth.isBlocked,controller.paymentFailed)
-userRoute.post("/retry-payment", controller.retryPayment);
+
+userRoute.post("/verify-payment",orderController.verifyPayment)
+userRoute.post("/failed-payment",orderController.failedPayment)
+userRoute.get("/paymen-failed",auth.isBlocked,orderController.paymentFailed)
+userRoute.post("/retry-payment", orderController.retryPayment);
 //===================== wishList =================
 
-userRoute.post("/wish-list",controller.addToWishList)
-userRoute.get("/my-wish-list",auth.isBlocked,controller.loadWishList)
-userRoute.post("/remove-from-wishlist",controller.removeWishList) 
+userRoute.post("/wish-list",wishListController.addToWishList)
+userRoute.get("/my-wish-list",auth.isBlocked,wishListController.loadWishList)
+userRoute.post("/remove-from-wishlist",wishListController.removeWishList) 
 
 //====================== coupens =================
 
-userRoute.post("/apply-coupen",controller.applyCoupen)
+userRoute.post("/apply-coupen",coupenController.applyCoupen)
 
 //=================== forgot password ============
 

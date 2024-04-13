@@ -2,15 +2,22 @@ const express = require("express");
 const adminController = require("../Controller/adminController")
 const bodyParser = require("body-parser")
 const adminRoute = express();
-const validate = require("../validation/validation")
 const multer = require("multer")
 const nocache = require("nocache");
-
-
 const path = require('path');
 adminRoute.set("views","views/admin")
 const auth = require("../middleware/authAdmin");
 adminRoute.use(nocache());
+
+
+const categoryController = require("../Controller/categoryController")
+const orderController = require("../Controller/orderController")
+const coupenController = require("../Controller/coupenController")
+const offerController = require("../Controller/offerController")
+const salesController = require("../Controller/salesController")
+const dashboardController = require("../Controller/dashboardController")
+const productController = require("../Controller/productController")
+
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -40,77 +47,78 @@ adminRoute.get("/logout",adminController.logout);
 adminRoute.get("/user",auth.isLogin,adminController.loadUser)
 adminRoute.post("/user",adminController.restrict)
 
-adminRoute.get("/category",auth.isLogin,adminController.loadCategory)
-adminRoute.post("/category",auth.isLogin,adminController.addCategory)
+adminRoute.get("/category",auth.isLogin,categoryController.loadCategory)
+adminRoute.post("/category",auth.isLogin,categoryController.addCategory)
 
-adminRoute.get("/editcategory",adminController.loadEditCategory)
-adminRoute.post("/editcategory",auth.isLogin,adminController.editCategory) 
+adminRoute.get("/editcategory",categoryController.loadEditCategory)
+adminRoute.post("/editcategory",auth.isLogin,categoryController.editCategory) 
 
-adminRoute.get("/updatecategory",auth.isLogin,adminController.loadUpdateCategory)
-adminRoute.post("/updatecategory",auth.isLogin,adminController.updateCategory)
+adminRoute.get("/updatecategory",auth.isLogin,categoryController.loadUpdateCategory)
+adminRoute.post("/updatecategory",auth.isLogin,categoryController.updateCategory)
+//---------product-----
 
-adminRoute.get("/addproduct",auth.isLogin,adminController.loadAddProduct)
-adminRoute.get("/load-subcategories",adminController.loadSubcategories)
+adminRoute.get("/addproduct",auth.isLogin,productController.loadAddProduct)
+adminRoute.get("/load-subcategories",productController.loadSubcategories)
 
-adminRoute.post("/addproduct",auth.isLogin,upload.array("avatar",4),adminController.addProduct)
+adminRoute.post("/addproduct",auth.isLogin,upload.array("avatar",4),productController.addProduct)
 
-adminRoute.get("/all-products",auth.isLogin,adminController.allProducts)
-adminRoute.post("/all-products",adminController.editProducts)
+adminRoute.get("/all-products",auth.isLogin,productController.allProducts)
+adminRoute.post("/all-products",productController.editProducts)
 
-adminRoute.get("/update-product",auth.isLogin,adminController.loadUpdateProduct)
-adminRoute.post("/update-product",auth.isLogin,upload.array("avatar",4),adminController.updateProduct)
-adminRoute.get("/delete-img/*",auth.isLogin,adminController.deleteimage)
+adminRoute.get("/update-product",auth.isLogin,productController.loadUpdateProduct)
+adminRoute.post("/update-product",auth.isLogin,upload.array("avatar",4),productController.updateProduct)
+adminRoute.get("/delete-img/*",auth.isLogin,productController.deleteimage)
 
 
 //=========================== order ========== 
 
-adminRoute.get("/orders",auth.isLogin,adminController.loadOrders)
-adminRoute.post("/order-status",auth.isLogin,adminController.orderStatus)
-adminRoute.post("/customer-Request",adminController.orderRequest)
+adminRoute.get("/orders",auth.isLogin,orderController.loadOrders)
+adminRoute.post("/order-status",auth.isLogin,orderController.orderStatus)
+adminRoute.post("/customer-Request",orderController.orderRequest)
 
 
 
 //====================== coupens =================
 
-adminRoute.get("/coupens",auth.isLogin,adminController.loadCoupenPage)
-adminRoute.post("/add-new-coupen",adminController.addNewCoupen)
-adminRoute.post("/delete-coupon",adminController.deleteCoupen)
-adminRoute.post("/load-edit-coupen",adminController.loadEditCoupen)
-adminRoute.post("/edit-coupen",adminController.editCoupen)
+adminRoute.get("/coupens",auth.isLogin,coupenController.loadCoupenPage)
+adminRoute.post("/add-new-coupen",coupenController.addNewCoupen)
+adminRoute.post("/delete-coupon",coupenController.deleteCoupen)
+adminRoute.post("/load-edit-coupen",coupenController.loadEditCoupen)
+adminRoute.post("/edit-coupen",coupenController.editCoupen)
 //===================  offer ======================================
 
-adminRoute.get("/offer",auth.isLogin,adminController.offer)
-adminRoute.post("/add-offer",adminController.addOffer) 
+adminRoute.get("/offer",auth.isLogin,offerController.offer)
+adminRoute.post("/add-offer",offerController.addOffer) 
 
-adminRoute.post("/delete-offer",adminController.deleteOffer)
-adminRoute.get("/load-edit-offer",auth.isLogin,adminController.loadEditOffer)
-adminRoute.post("/edit-offer",adminController.editOffer)
+adminRoute.post("/delete-offer",offerController.deleteOffer)
+adminRoute.get("/load-edit-offer",auth.isLogin,offerController.loadEditOffer)
+adminRoute.post("/edit-offer",offerController.editOffer)
 
 
 //========== category offer
 
-adminRoute.post("/apply-offer",adminController.applyOffer) 
-adminRoute.post("/remove-offer",adminController.removeOffer)
+adminRoute.post("/apply-offer",offerController.applyOffer) 
+adminRoute.post("/remove-offer",offerController.removeOffer)
 //==================== product Offer ==================
 
-adminRoute.post("/apply-product-offer",adminController.applyProductOffer) 
-adminRoute.post("/remove-product-offer",adminController.removeProductOffer) 
+adminRoute.post("/apply-product-offer",offerController.applyProductOffer) 
+adminRoute.post("/remove-product-offer",offerController.removeProductOffer) 
 
 //==================== sales report ===================
-adminRoute.get("/sales",auth.isLogin,adminController.loadSalesReport) 
-adminRoute.post("/monthly-report",adminController.monthlyReport) 
-adminRoute.get("/monthly-report",auth.isLogin,adminController.loadMonthlyReport) 
-adminRoute.get("/weekly-report",auth.isLogin,adminController.loadWeeklyReport) 
-adminRoute.get("/yearly-report",auth.isLogin,adminController.loadyearlyReport) 
-adminRoute.get("/daily-report",auth.isLogin,adminController.loadDailyReport) 
-adminRoute.post("/custom-date-report",adminController.cutomDatereport) 
-adminRoute.get("/custom-date-report",auth.isLogin,adminController.getCutomDatereport) 
+adminRoute.get("/sales",auth.isLogin,salesController.loadSalesReport) 
+adminRoute.post("/monthly-report",salesController.monthlyReport) 
+adminRoute.get("/monthly-report",auth.isLogin,salesController.loadMonthlyReport) 
+adminRoute.get("/weekly-report",auth.isLogin,salesController.loadWeeklyReport) 
+adminRoute.get("/yearly-report",auth.isLogin,salesController.loadyearlyReport) 
+adminRoute.get("/daily-report",auth.isLogin,salesController.loadDailyReport) 
+adminRoute.post("/custom-date-report",salesController.cutomDatereport) 
+adminRoute.get("/custom-date-report",auth.isLogin,salesController.getCutomDatereport) 
 
 
 //==================== dashboard ======================
 
 
-adminRoute.get("/dashboard",auth.isLogin,adminController.loadDashBoard) 
+adminRoute.get("/dashboard",auth.isLogin,dashboardController.loadDashBoard) 
 
 
 

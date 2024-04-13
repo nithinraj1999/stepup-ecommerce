@@ -1,13 +1,13 @@
 const otpGenerator = require('otp-generator')
-const userModel = require('../Models/userModel')
-const categoryModal = require('../Models/categoryModel')
-const otpModel = require('../Models/otpModel')
+const userModel = require('../models/userModel')
+const categoryModal = require('../models/categoryModel')
+const otpModel = require('../models/otpModel')
 const nodemailer = require('nodemailer')
-const productModel = require('../Models/productModel')
-const cartModal = require('../Models/cartModal')
-const orderModal = require('../Models/orderModel')
-const wishListModel = require('../Models/wishListModel')
-const walletModel = require('../Models/walletModel')
+const productModel = require('../models/productModel')
+const cartModal = require('../models/cartModal')
+const orderModal = require('../models/orderModel')
+const wishListModel = require('../models/wishListModel')
+const walletModel = require('../models/walletModel')
 const Swal = require('sweetalert2')
 const mongoose = require('mongoose')
 const { v4: uuidv4 } = require('uuid')
@@ -15,11 +15,11 @@ const Razorpay = require('razorpay')
 require('dotenv').config()
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
-const coupenModel = require('../Models/coupenModel')
+const coupenModel = require('../models/coupenModel')
 const moment = require('moment')
 const path = require('path')
 const ejs = require('ejs')
-const puppeteer = require('puppeteer')
+const puppeteer = require('puppeteer') 
 const express = require('express')
 const app = express()
 var instance = new Razorpay({
@@ -41,12 +41,7 @@ const securePassword = async (password) => {
 
 const loadHomePage = (req, res) => {
     try {
-        let isLoggedIn
-        if (req.session.user_id) {
-            isLoggedIn = true
-        } else {
-            isLoggedIn = false
-        }
+        const isLoggedIn = req.session.user_id ? true : false;
         if (req.session.user_id) {
             res.render('home', { isLoggedIn })
         } else {

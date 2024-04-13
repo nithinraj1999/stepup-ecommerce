@@ -1,19 +1,20 @@
-const userModel = require("../Models/userModel")
-const category = require("../Models/categoryModel")
-const productModal = require("../Models/productModel")
+const userModel = require("../models/userModel")
+const category = require("../models/categoryModel")
+const productModal = require("../models/productModel")
 const path = require("path")
 const sharp = require("sharp")
 const Swal = require("sweetalert2")
-const categoryModel = require("../Models/categoryModel")
-const orderModel = require("../Models/orderModel")
-const walletModel = require("../Models/walletModel")
-const coupenModel = require("../Models/coupenModel")
-const offerModel = require("../Models/offer")
+const categoryModel = require("../models/categoryModel")
+const orderModel = require("../models/orderModel")
+const walletModel = require("../models/walletModel")
+const coupenModel = require("../models/coupenModel")
+const offerModel = require("../models/offer")
 const { table } = require("console")
 
 
 const express = require("express")
 const app = express()
+
 
 app.set("view engine", "ejs")
 app.set(path.join(__dirname, "views", "admin"))
@@ -573,10 +574,6 @@ const loadCoupenPage = async (req, res) => {
     }
 }
 
-
-
-
-
 const addNewCoupen = async (req, res) => {
     try {
         const {
@@ -605,7 +602,6 @@ const addNewCoupen = async (req, res) => {
     }
 }  
 
-
 const deleteCoupen = async (req, res) => {
     try {
         const { couponId } = req.body
@@ -629,7 +625,6 @@ const loadEditCoupen = async (req,res)=>{
     console.error(error);
   }
 }
-
 
 const editCoupen = async (req, res) => {
     try {
