@@ -387,6 +387,7 @@ const loadKids = async (req, res) => {
 const loadProductDetails = async (req, res) => {
     try {
         const userId = req.session.user_id
+        const isLoggedIn = req.session.user_id ? true : false
         const find = await productModel
             .findOne({ _id: req.query.id })
             .populate({
@@ -399,13 +400,13 @@ const loadProductDetails = async (req, res) => {
             })
             .populate('offer')
         const wishList = await wishListModel.findOne({ userId: userId })
-        res.render('productDetails', { find, wishList })
+        res.render('productDetails', { find, wishList ,isLoggedIn})
     } catch (error) {
         console.error(error)
-    }
+    } 
 }
-
-
+ 
+ 
 
 //---------------------------  admin side -------
 

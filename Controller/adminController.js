@@ -1,4 +1,4 @@
-const userModel = require("../Controller/userController")
+const userModel = require("../models/userModel")
 const category = require("../models/categoryModel")
 const productModal = require("../models/productModel")
 const path = require("path")
@@ -50,7 +50,7 @@ const verifyLogin = async (req,res)=>{
         res.render("adminLogin")
      }
 }catch(error){
-  console.log(error.message);
+  console.log(error);
 }
 }
 
@@ -933,7 +933,7 @@ const loadDailyReport = async (req, res) => {
 const cutomDatereport = async (req, res) => {
     try {
         const { startDate, endDate } = req.body
-        console.log(req.body)
+    
         res.redirect(
             `/admin/custom-date-report?startDate=${startDate}&endDate=${endDate}`
         )

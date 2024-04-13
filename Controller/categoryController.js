@@ -113,7 +113,7 @@ const updateCategory = async(req,res)=>{
         } 
     }catch(error){
         console.error(error);
-    }
+    } 
   
 }
 
