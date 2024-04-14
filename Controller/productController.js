@@ -403,10 +403,10 @@ const loadProductDetails = async (req, res) => {
         res.render('productDetails', { find, wishList ,isLoggedIn})
     } catch (error) {
         console.error(error)
-    } 
+    }
 }
- 
- 
+
+
 
 //---------------------------  admin side -------
 
