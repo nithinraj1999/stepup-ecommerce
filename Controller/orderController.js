@@ -57,13 +57,55 @@ function generateUniqueID(length) {
 
 const checkOutVerification = async (req, res) => {
     try {
+        const productWithQtyInCart = req.body
         const userId = req.session.user_id
-        const cartData = await cartModal
-            .findOne({ userId: userId })
-            .populate('product.productId')
-        for (const item of cartData.product) {
-            const product = item.productId
 
+        
+
+        const productWithQtyInDb = []
+
+        const cartData = await cartModal
+        .findOne({ userId: userId }) 
+        .populate('product.productId') 
+        
+        cartData.product.forEach((element)=>{
+            productId = element.productId._id.toHexString()
+            quantity = element.quantity.toString()
+            productWithQtyInDb.push({productId,quantity})
+        }) 
+
+        console.log(productWithQtyInCart);
+        console.log(productWithQtyInDb);
+
+
+        if (productWithQtyInCart.length !== productWithQtyInDb.length) {
+            return false;
+        }
+    
+        // Sort arrays based on some common property to ensure order doesn't affect comparison
+        productWithQtyInCart.sort((a, b) => a.productId.localeCompare(b.productId));
+        productWithQtyInDb.sort((a, b) => a.productId.localeCompare(b.productId));
+    
+        // Compare each element of the arrays
+        let notMatch = 0
+        for (let i = 0; i < productWithQtyInCart.length; i++) {
+            if (productWithQtyInCart[i].productId !== productWithQtyInDb[i].productId || productWithQtyInCart[i].quantity !== productWithQtyInDb[i].quantity) {
+                notMatch++
+            } 
+        }
+        if(notMatch ===0){
+            console.log("equal");
+        }else{
+            console.log("not equal");
+            return res.json({warningMessage:"Something went Wrong"})
+        }
+    
+        // If all elements are equal, return true
+
+ 
+        for (const item of cartData.product) { 
+            const product = item.productId
+ 
             if (item.quantity > product.quantity) {
                 console.error(
                     `Error: Quantity of product '${product.name}' is insufficient.`

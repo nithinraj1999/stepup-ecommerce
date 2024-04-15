@@ -77,7 +77,7 @@ userRoute.post("/remove-item",auth.isLogin,cartController.removeItem)
 //===================== Checkout ================
  
 userRoute.get('/checkout',auth.isBlocked,orderController.loadCheckout)
-userRoute.get('/checkout-verification',orderController.checkOutVerification)
+userRoute.post('/checkout-verification',orderController.checkOutVerification)
 
 //===================== orders ==================
 

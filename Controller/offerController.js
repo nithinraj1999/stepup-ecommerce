@@ -40,6 +40,7 @@ const addOffer = async (req,res)=>{
 
 const applyOffer = async(req,res)=>{
 try{
+
   const {categoryId,selectedOfferId} = req.body
   await categoryModal.updateOne({_id:categoryId},{$set:{offer:selectedOfferId}})
   res.json({success:true})
