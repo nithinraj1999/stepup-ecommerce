@@ -380,7 +380,6 @@
                       <input type="number" required class="form-control w-25" id="quantity" name="quantity" min="0"  value="1">
                   </div>
                  
-                    
 
             </div>
 
@@ -405,8 +404,8 @@
             
             <div class="row g-3">
               <div class="col">
-                <label for="exampleFormControlTextarea1" class="form-label">Product image 1</label>
-                <input type="file" class="form-control" required name="avatar" multiple onchange="displaySelectedImages(event)">
+                <label for="exampleFormControlTextarea1" class="form-label">Choose images :</label>
+                <input type="file" required name="avatar" multiple onchange="displaySelectedImages(event)">
             </div>
               <div class="image-preview" id="imagePreview">
                 <!-- Selected images will be displayed here -->
@@ -457,20 +456,34 @@
       }
 
       function displaySelectedImages(event) {
-        const previewContainer = document.getElementById('imagePreview');
-        previewContainer.innerHTML = ''; // Clear previous selected images
+        var preview = document.getElementById('imagePreview');
+        preview.innerHTML = ''; // Clear previous preview
 
-        const files = event.target.files;
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const reader = new FileReader();
+        var files = event.target.files;
 
-            reader.onload = function() {
-                const img = document.createElement('img');
-                img.src = reader.result;
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+            var reader = new FileReader();
 
-                previewContainer.appendChild(img); // Append each image to the preview container
-            }
+            reader.onload = function (e) {
+                var img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'preview-image';
+
+                var deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.className = 'delete-button';
+                deleteButton.onclick = function () {
+                    this.parentNode.remove(); // Remove the image preview when the delete button is clicked
+                };
+
+                var container = document.createElement('div');
+                container.className = 'image-container';
+                container.appendChild(img);
+                container.appendChild(deleteButton);
+
+                preview.appendChild(container);
+            };
 
             reader.readAsDataURL(file);
         }

@@ -99,7 +99,7 @@ const addTocart = async (req, res) => {
                 message: 'Item added/updated to cart successfully',
             })
         } else {
-            const find = await cartModal.find({
+            const find = await cartModal.find({userId:userId,
                 'product.productId': productId,
             })
             const subtotal = await cartModal.aggregate([

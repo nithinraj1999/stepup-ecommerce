@@ -39,7 +39,7 @@ userRoute.get("/signup",controller.loadsignup)
 userRoute.post("/signup",controller.signup) 
 
 userRoute.get("/load-otp",controller.loadOTP)
-userRoute.post("/resend-otp",controller.resendOTP)
+userRoute.post("/resend-otp",controller.resendOTP) 
 userRoute.post("/otp-verification",controller.verifyOTP)
   
 userRoute.get("/login",controller.loadLogin)

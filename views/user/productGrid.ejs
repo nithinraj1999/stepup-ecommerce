@@ -295,7 +295,6 @@
                                                 }
                                                 %>
                                                
-                                                
                                                 <div class="product-action">
                                                     <% if (i?.quantity <=0) {%>
                                                         <a href="" class="btn-product btn-cart addToCartBtn" onclick="outOfStock()" ><span>OUT OF STOCK</span></a>
@@ -729,9 +728,6 @@
                 if (!isNaN(offerPrice)) {
                     productPrice=offerPrice
                  } 
-                
-                console.log("product price"+productPrice);
-
          
                 const data = {
                     productId:this.getAttribute('data-product-id'),

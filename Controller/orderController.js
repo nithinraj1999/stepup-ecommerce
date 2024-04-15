@@ -23,13 +23,17 @@ const loadCheckout = async (req, res) => {
         const cartData = await cartModal
             .findOne({ userId: id })
             .populate('product.productId')
+
+      
+
         const wallet = await walletModel.findOne({ userId: id })
         const coupens = await coupenModel.find({})
         res.render('checkout', { find, cartData, wallet, coupens })
     } catch (error) {
         console.error(error) 
     } 
-}
+} 
+
 
 const loadOrderSuccess = async (req, res) => {
     try{
@@ -57,7 +61,6 @@ const checkOutVerification = async (req, res) => {
         const cartData = await cartModal
             .findOne({ userId: userId })
             .populate('product.productId')
-
         for (const item of cartData.product) {
             const product = item.productId
 

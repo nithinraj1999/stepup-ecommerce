@@ -80,7 +80,9 @@ const signup = async (req, res) => {
             res.render('otp-verification', { email })
         } else {
             if (user.isVerified === true) {
-                res.render('login')
+                req.flash('message', 'email already exist.please login')
+                const message = req.flash('message')
+                res.render('login',{message:message})
             } else if (user.isVerified === false) {
                 await otp(email)
                 res.render('otp-verification', { email })
