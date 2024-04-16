@@ -180,7 +180,8 @@
 										</h3><!-- End .product-title -->
 									</div><!-- End .product -->
 								</td>
-								<td class="price-col">₹ <%=productItem?.productId?.price %></td>
+                                <% const price =  productItem?.productId?.sellingPrice ? productItem?.productId?.sellingPrice : productItem?.productId?.price %>
+								<td class="price-col">₹ <%=price %></td>
                                 <td class="action-col">
 									<button class="btn btn-block btn-outline-primary-2" onclick="addToCart('<%=productItem?.productId._id %>','<%=productItem?.productId?.price %>')"><i class="icon-cart-plus"></i>Add to Cart</button>
 								</td>

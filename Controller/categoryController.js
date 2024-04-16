@@ -8,7 +8,7 @@ const offerModel = require("../models/offer")
 
 const loadCategory = (req,res)=>{
     try{
-        res.render("category")
+        res.render("category", {alertMessage: null})
     }catch(error){
         console.error(error);
     }
@@ -29,7 +29,8 @@ const addCategory = async (req,res)=>{
             description:description
         })
         await categoryCollection.save()
-       res.render("category", {alertMessage: null});
+    //    res.render("category", {alertMessage: null});
+    res.redirect("/admin/category")
         }else{
         
          res.render("category", {exist:"Category Already Exists"});

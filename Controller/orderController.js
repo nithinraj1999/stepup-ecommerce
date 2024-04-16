@@ -9,7 +9,7 @@ const orderModal = require('../models/orderModel')
 const path = require('path')
 const ejs = require('ejs')
 const puppeteer = require('puppeteer') 
-
+const crypto = require('crypto')
 
 var instance = new Razorpay({
     key_id: process.env.KEY_ID,

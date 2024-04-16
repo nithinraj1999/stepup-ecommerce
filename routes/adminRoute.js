@@ -89,7 +89,6 @@ adminRoute.post("/edit-coupen",coupenController.editCoupen)
 
 adminRoute.get("/offer",auth.isLogin,offerController.offer)
 adminRoute.post("/add-offer",offerController.addOffer) 
-
 adminRoute.post("/delete-offer",offerController.deleteOffer)
 adminRoute.get("/load-edit-offer",auth.isLogin,offerController.loadEditOffer)
 adminRoute.post("/edit-offer",offerController.editOffer)

@@ -136,7 +136,7 @@ const editCoupen = async (req, res) => {
         const coupen = await coupenModel.findOne({
             coupenCode: coupenCodeUpperCase,
         })
-        if (!coupen) {
+     
             await coupenModel.updateOne(
                 { _id: coupenId },
                 {
@@ -151,9 +151,7 @@ const editCoupen = async (req, res) => {
                 }
             )
             res.json({ success: true })
-        } else {
-            res.json({ message: 'Coupen alredy exist', alreadyExist: true })
-        }
+       
     } catch (error) {
         console.error(error)
     }

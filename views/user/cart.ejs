@@ -191,13 +191,15 @@
                                                     
 												</div><!-- End .product -->
 											</td>
+                                            <% const price = productItem?.productId?.sellingPrice ? productItem?.productId?.sellingPrice : productItem?.productId?.price %>
+                                            
                                            
-											<td class="price-col" id="product-price">₹ <%=productItem?.price %> </td>
+											<td class="price-col" id="product-price">₹ <%=price %> </td>
                                       
 											<td class="quantity-col">
                                                 <div class="cart-product-quantity">
                                                
-                                                    <input type="number" class="form-control quantity-of-product-in-cart" data-product-id ="<%=productItem?.productId?._id %>" id="quantity<%=productItem?.productId?._id %>" onchange= " updateProduct('<%=productItem?.productId?._id %>',this.value,'<%=productItem?.productId?.price %>')"  value="<%=productItem?.quantity || 1 %>" min="1" max="<%=productItem?.productId?.quantity || 1 %>" step="1" data-decimals="0" required>
+                                                    <input type="number" class="form-control quantity-of-product-in-cart" data-product-id ="<%=productItem?.productId?._id %>" id="quantity<%=productItem?.productId?._id %>" onchange= " updateProduct('<%=productItem?.productId?._id %>',this.value,'<%=price %>')"  value="<%=productItem?.quantity || 1 %>" min="1" max="<%=productItem?.productId?.quantity || 1 %>" step="1" data-decimals="0" required>
                                                 </div><!-- End .cart-product-quantity -->
                                             </td>
 											<td class="total-col" id="total-col-id-<%=productItem.productId._id %>">₹ <%=productItem?.total %></td>

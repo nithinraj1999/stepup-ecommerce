@@ -1,6 +1,7 @@
 
 
 const cartModal = require("../models/cartModal")
+const productModal = require("../models/productModel")
 
 
 const loadCart = async (req, res) => {
@@ -37,7 +38,7 @@ const loadCart = async (req, res) => {
             for (const item of cart.product) {
                 const quantity = item.quantity
                 // const productPrice = item.productId.price; // Assuming "price" is the field in your product schema containing the product price
-                const productPrice = item.price
+                const productPrice = item.productId.sellingPrice ? item.productId.sellingPrice : item.productId.price
                 const total = quantity * productPrice
 
                 // Update the total for the current product in the cart
@@ -74,13 +75,18 @@ const loadCart = async (req, res) => {
     }
 }
 
+
+
 const addTocart = async (req, res) => {
     try {
         const userId = req.session.user_id
         const { productPrice, productId } = req.body
-        const price = parseInt(productPrice)
+        // const price = parseInt(productPrice)
         let userCart = await cartModal.findOne({ userId: userId })
-        // console.log(price);
+        let product = await productModal.findOne({_id:productId})
+
+        const price = product.sellingPrice? product.sellingPrice :product.price
+        
         if (!userCart) {
             userCart = new cartModal({
                 userId: userId,
@@ -171,9 +177,10 @@ const updateCart = async (req, res) => {
     try {
         const id = req.session.user_id
         const { productId, quantity, productPrice } = req.body
-
+      
         const total = quantity * productPrice
-        let warningMsg
+       
+        let warningMsg 
 
         await cartModal.updateOne(
             { userId: id, 'product.productId': productId },

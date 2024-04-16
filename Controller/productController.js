@@ -71,7 +71,7 @@ const loadProductList = async (req, res) => {
                 },
             })
             .populate('offer')
-            .sort(sortOptions)
+            .sort(sortOptions) 
             .skip(startIndex)
             .limit(limit)
 
@@ -415,6 +415,7 @@ const loadProductDetails = async (req, res) => {
 const loadAddProduct = async (req,res)=>{
     try{
         const find = await categoryModal.distinct("subcategory")
+        
         res.render("addProduct",{find})
     }catch(error){
         console.error(error);
@@ -479,8 +480,9 @@ const addProduct = async (req,res)=>{
     }catch(error){
       console.log(error); 
     }
-    const find = await categoryModal.distinct("subcategory")
-     res.render("addProduct",{find})
+    // const find = await categoryModal.distinct("subcategory")
+    //  res.render("addProduct",{find})
+    res.redirect("/admin/addproduct")
 }
 
 const allProducts = async (req, res) => {
@@ -512,9 +514,10 @@ const editProducts = async (req,res)=>{
      const id = req.query.id 
      const {action} = req.body
     if(action == "list"){
-     
+
       const find = await productModel.findOne({_id:id})
       if(find.list==true){
+        console.log(selling);
          await productModel.updateOne({_id:id},{$set:{list:false}})
          res.redirect("/admin/all-products")
       }else {

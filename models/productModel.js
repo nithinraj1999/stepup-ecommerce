@@ -37,6 +37,9 @@ const productSchema = mongoose.Schema({
         ref:"offer",
         
     },
+    sellingPrice:{
+      type:Number
+    },
     product_image:[
         {
                 filename:{
@@ -46,14 +49,14 @@ const productSchema = mongoose.Schema({
                     path: {
                     type:String,
                     required:true
-                },
+                },  
                     resizedFile: {
                     type:String,
                     required:true,
                    
                     }
         }
-    ]
+    ] 
 })
 
  
