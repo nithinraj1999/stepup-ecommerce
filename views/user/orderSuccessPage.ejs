@@ -74,33 +74,11 @@
         <h1>Order Successful!</h1>
         <p>Your order has been placed successfully. Thank you for shopping with us!</p>
         <div class="button-container">
-            <a href="/account" class="button" id="view-order-btn" onclick="goToOrderList()">View Order</a>
+            <a href="/my-orders" class="button" id="view-order-btn">View Order</a>
             <a href="/products" class="button" id="continue-shopping-btn">Continue Shopping</a>
         </div>
     </div>
 
-    <script>
-       function goToOrderList() {
-            axios.get("/account")
-                .then(response => {
-                    // Navigate to the target page
-                    document.open();
-                    document.write(response.data);
-                    document.close();
-                    // Once the content is loaded, scroll to the order section
-                    scrollToOrderSection();
-                })
-                .catch(error => {
-                    console.error(error);
-                });
-        }
-
-        function scrollToOrderSection() {
-            const orderListContainer = document.getElementById("order-list-container");
-            if (orderListContainer) {
-                orderListContainer.scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-    </script>
+   
 </body>
 </html>

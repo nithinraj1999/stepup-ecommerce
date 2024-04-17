@@ -156,7 +156,7 @@
 	                		<aside class="col-md-4 col-lg-3">
 	                			<ul class="nav nav-dashboard flex-column mb-3 mb-md-0" role="tablist">
                                     <li class="nav-item">
-								        <a class="nav-link active" id="tab-account-link"  href="/account" aria-selected="true">Account Details</a>
+								        <a class="nav-link " id="tab-account-link"  href="/account" aria-selected="false">Account Details</a>
 								    </li>
                                     <li class="nav-item">
 								        <a class="nav-link" id="tab-address-link"  href="/address"  aria-selected="false">Adresses</a>
@@ -165,7 +165,7 @@
 								        <a class="nav-link " id="tab-dashboard-link" data-toggle="tab" href="#tab-dashboard" role="tab" aria-controls="tab-dashboard" aria-selected="false">Dashboard</a>
 								    </li> -->
 								    <li class="nav-item">
-								        <a class="nav-link" id="tab-orders-link"  href="/my-orders"  aria-selected="false">Orders</a>
+								        <a class="nav-link active" id="tab-orders-link"  href="/my-orders"  aria-selected="true">Orders</a>
 								    </li>
 								    <li class="nav-item">
 								        <a class="nav-link" id="tab-downloads-link"  href="/wallet"  aria-selected="false">Wallet</a>
@@ -184,41 +184,92 @@
 								    	From your account dashboard you can view your <a href="#tab-orders" class="tab-trigger-link link-underline">recent orders</a>, manage your <a href="#tab-address" class="tab-trigger-link">shipping and billing addresses</a>, and <a href="#tab-account" class="tab-trigger-link">edit your password and account details</a>.</p>
 								    </div><!-- .End .tab-pane -->
                                     
-								
+								    <div class="tab-pane fade show active" id="tab-orders" role="tabpanel" aria-labelledby="tab-orders-link">
+								    	
+
+                                        <% orders?.forEach((order) => { %>
+                                            <% order?.products?.forEach((product) => { %>
+                                                <div class="container-fluid" style="background-color: rgb(239, 239, 239);">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="row">
+                                                                        <div class="col-4"> 
+                                                                            <img src=" /uploads/<%= product.productImage %>" class="product-image" alt="Product Image">
+                                                                        </div>
+                                                                        <div class="col-8" style="padding-top: 25px;">
+                                                                            <h6><%= product?.name %></h6>
+                                                                            <% const formattedDate = order?.orderDate?.toLocaleDateString('en-US') %>
+                                                                    <p style="padding-left:100px;">Date: <%= formattedDate %></p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                               
+                                                                 <div class="col-md-2" style="padding-top: 25px;">
+                                                                    
+                                                                            <h6>₹ <%=product?.total %> %></h6>
+                                                                  
+                                                                  
+                                                                </div>
+                                                                
+                                                                <div class="col-md-2" style="padding-top: 25px;">
+                                                                <% if (order?.paymentStatus =="Failed"){ %>
+                                                                    <h6 style="color: red;"> Payment Failed</h6>
+                                                                <% }else{ %>
+                                                                    <h6> <%= product?.orderStatus %></h6>
+                                                                <% } %>  
+                                                                </div>
+                                                                <div class="col-md-2" style="padding-top: 25px;">
+
+                                                                    <button class="btn btn-primary" onclick="viewDetails('<%=order._id %>','<%=product._id %>')">View</button>
+                                                                   
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <br>
+                                            <% }) %>
+                                        <% }) %>
+                                                                      
+                                        <br>
+								    </div>
+
+
+                                    <nav aria-label="Page navigation">
+                                        <ul class="pagination justify-content-center">
+                                            <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                                                <a class="page-link page-link-prev" href="?page=<%= currentPage - 1 %>" aria-label="Previous" tabindex="-1" aria-disabled="<%= currentPage === 1 %>">
+                                                    <span aria-hidden="true"><i class="icon-long-arrow-left"></i></span>Prev
+                                                </a>
+                                            </li>
+                                            <% for (let i = 1; i <= totalPages; i++) { %>
+                                                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                                </li>
+                                            <% } %>
+                                            <li class="page-item">
+                                                <span class="page-link page-item-total">of <%= totalPages %></span>
+                                            </li>
+                                            <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                                                <a class="page-link page-link-next" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                                                    Next <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+
+                                    
 
                                   
 
-								    
-
 								  
 
-								    <div class="tab-pane fade show active" id="tab-account" role="tabpanel" aria-labelledby="tab-account-link">
-								    	<form action="#">
-			                				
-                                            
-                                            <label> Name *</label>
-                                            <input type="text" id="userName" class="form-control"pattern="^\S.*$" value="<%=find?.name %>" required>
-		                					<label>Email address *</label>
-		        							<input type="email" id="userEmail" class="form-control"  pattern="^\S.*$" value="<%=find?.email %>" required>
+								 
 
-                                            <label>Phone Number *</label>
-		        							<input type="tel" id="userPhone" class="form-control" pattern="[0-9]{10}" value="<%=find?.phone %>"  required>
-
-		            						<!-- <label>Current password (leave blank to leave unchanged)</label>
-		            						<input type="password" class="form-control">
-
-		            						<label>New password (leave blank to leave unchanged)</label>
-		            						<input type="password" class="form-control">
-
-		            						<label>Confirm new password</label>
-		            						<input type="password" class="form-control mb-2"> -->
-
-		                					<button type="submit" class="btn btn-outline-primary-2" onclick="editUserDetails('<%=find._id %>')">
-			                					<span>SAVE CHANGES</span>
-			            						<i class="icon-long-arrow-right"></i>
-			                				</button>
-			                			</form>
-								    </div><!-- .End .tab-pane -->
+								  
 								</div>
 	                		</div><!-- End .col-lg-9 -->
 	                	</div><!-- End .row -->

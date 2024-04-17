@@ -154,9 +154,9 @@
 	                <div class="container">
 	                	<div class="row">
 	                		<aside class="col-md-4 col-lg-3">
-	                			<ul class="nav nav-dashboard flex-column mb-3 mb-md-0" role="tablist">
+                                <ul class="nav nav-dashboard flex-column mb-3 mb-md-0" role="tablist">
                                     <li class="nav-item">
-								        <a class="nav-link active" id="tab-account-link"  href="/account" aria-selected="true">Account Details</a>
+								        <a class="nav-link " id="tab-account-link"  href="/account" aria-selected="false">Account Details</a>
 								    </li>
                                     <li class="nav-item">
 								        <a class="nav-link" id="tab-address-link"  href="/address"  aria-selected="false">Adresses</a>
@@ -168,8 +168,10 @@
 								        <a class="nav-link" id="tab-orders-link"  href="/my-orders"  aria-selected="false">Orders</a>
 								    </li>
 								    <li class="nav-item">
-								        <a class="nav-link" id="tab-downloads-link"  href="/wallet"  aria-selected="false">Wallet</a>
+								        <a class="nav-link active" id="tab-downloads-link"  href="/wallet"  aria-selected="true">Wallet</a>
 								    </li>
+								    
+								   
 								    <li class="nav-item">
 								        <a class="nav-link" href="/logout">Sign Out</a>
 								    </li>
@@ -178,47 +180,150 @@
 
 	                		<div class="col-md-8 col-lg-9">
 	                			<div class="tab-content">
-								    <div class="tab-pane fade " id="tab-dashboard" role="tabpanel" aria-labelledby="tab-dashboard-link">
-								    	<p>Hello <span class="font-weight-normal text-dark">User</span> (not <span class="font-weight-normal text-dark">User</span>? <a href="#">Log out</a>) 
-								    	<br>
-								    	From your account dashboard you can view your <a href="#tab-orders" class="tab-trigger-link link-underline">recent orders</a>, manage your <a href="#tab-address" class="tab-trigger-link">shipping and billing addresses</a>, and <a href="#tab-account" class="tab-trigger-link">edit your password and account details</a>.</p>
-								    </div><!-- .End .tab-pane -->
+								   
                                     
-								
+								  
 
                                   
 
-								    
+								    <div class="tab-pane fade show active" id="tab-downloads" role="tabpanel" aria-labelledby="tab-downloads-link">
+								    	
+                                        
+                                        <section>
+                                            <h2>Your Wallet</h2>
+                                            <p id="balance">Balance: ₹ <%=wallet?.balance %></p>
+                                        </section>
+                                    
+                                        <section>
+                                            <h2>Transaction History</h2>
+                                            <table id="transactionHistory">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Transaction Type</th>
+                                                        <th>Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% transactions.forEach(data => { %>
+                                                        <tr>
+                                                            <% const formattedDate = data.date.toLocaleDateString('en-US'); %>
+                                                            <td><%= formattedDate %></td>
+                                                            <% if (data.type == "Debit") { %>
+                                                                <td class="transaction-type-debit"><%= data.type %></td>
+                                                            <% } else { %>
+                                                                <td class="transaction-type-credit"><%= data.type %></td>
+                                                            <% } %>
+                                                            <td>₹ <%= data.amount %></td>
+                                                        </tr>
+                                                    <% }); %>
+                                                    
+                                                    <!-- Add more transaction rows as needed -->
+                                                </tbody>
+                                            </table>
+                                        </section>
 
-								  
 
-								    <div class="tab-pane fade show active" id="tab-account" role="tabpanel" aria-labelledby="tab-account-link">
-								    	<form action="#">
-			                				
-                                            
-                                            <label> Name *</label>
-                                            <input type="text" id="userName" class="form-control"pattern="^\S.*$" value="<%=find?.name %>" required>
-		                					<label>Email address *</label>
-		        							<input type="email" id="userEmail" class="form-control"  pattern="^\S.*$" value="<%=find?.email %>" required>
 
-                                            <label>Phone Number *</label>
-		        							<input type="tel" id="userPhone" class="form-control" pattern="[0-9]{10}" value="<%=find?.phone %>"  required>
 
-		            						<!-- <label>Current password (leave blank to leave unchanged)</label>
-		            						<input type="password" class="form-control">
+                <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-center">
+                  <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                      <a class="page-link page-link-prev" href="?page=<%= currentPage - 1 %>" aria-label="Previous" tabindex="-1" aria-disabled="<%= currentPage === 1 %>">
+                          <span aria-hidden="true"><i class="icon-long-arrow-left"></i></span>Prev
+                      </a>
+                  </li>
+                  <% for (let i = 1; i <= totalPages; i++) { %>
+                      <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                          <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                      </li>
+                  <% } %>
+                  <li class="page-item">
+                      <span class="page-link page-item-total">of <%= totalPages %></span>
+                  </li>
+                  <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                      <a class="page-link page-link-next" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                          Next <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>
+                      </a>
+                  </li>
+              </ul>
+          </nav>
+                                        
 
-		            						<label>New password (leave blank to leave unchanged)</label>
-		            						<input type="password" class="form-control">
-
-		            						<label>Confirm new password</label>
-		            						<input type="password" class="form-control mb-2"> -->
-
-		                					<button type="submit" class="btn btn-outline-primary-2" onclick="editUserDetails('<%=find._id %>')">
-			                					<span>SAVE CHANGES</span>
-			            						<i class="icon-long-arrow-right"></i>
-			                				</button>
-			                			</form>
+                                        <style>
+                                            body {
+                                                font-family: Arial, sans-serif;
+                                                margin: 20px;
+                                            }
+                                    
+                                            header {
+                                                background-color: #333;
+                                                color: #fff;
+                                                padding: 10px;
+                                                text-align: center;
+                                            }
+                                    
+                                            section {
+                                                margin: 20px 0;
+                                            }
+                                    
+                                            h2 {
+                                                border-bottom: 2px solid #333;
+                                                padding-bottom: 5px;
+                                            }
+                                    
+                                            #balance {
+                                                font-size: 20px;
+                                                color: #007bff;
+                                            }
+                                    
+                                            #transactionHistory {
+                                                margin-top: 20px;
+                                            }
+                                    
+                                            table {
+                                                width: 100%;
+                                                border-collapse: collapse;
+                                                margin-top: 10px;
+                                            }
+                                    
+                                            th, td {
+                                                border: 1px solid #ddd;
+                                                padding: 8px;
+                                                text-align: left;
+                                            }
+                                    
+                                            th {
+                                                background-color: #f2f2f2;
+                                            }
+                                    
+                                            .transaction-type-debit {
+                                                color: #ff4500;
+                                            }
+                                    
+                                            .transaction-type-credit {
+                                                color: #32cd32;
+                                            }
+                                        </style>
 								    </div><!-- .End .tab-pane -->
+
+								    <div class="tab-pane fade" id="tab-address" role="tabpanel" aria-labelledby="tab-address-link">
+								    	
+                                        <div class="card card-dashboard">
+                                           
+                                          </div>
+                                                       <!----------------- modal address--------------------------->
+                                        
+								    	<div class="row">
+                                           
+                                           <!-- modal2 -->
+                                       
+
+								    		
+								    	</div><!-- End .row -->
+								    </div><!-- .End .tab-pane -->
+
+								    
 								</div>
 	                		</div><!-- End .col-lg-9 -->
 	                	</div><!-- End .row -->

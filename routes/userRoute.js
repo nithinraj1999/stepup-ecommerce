@@ -66,6 +66,8 @@ userRoute.post("/edit-address",auth.isBlocked,controller.editAddress)
 userRoute.post("/delete-address",auth.isBlocked,controller.deleteAddress)
 
 userRoute.get("/wallet",auth.isBlocked,auth.isLogin,walletController.loadWallet)  
+userRoute.get("/address",auth.isBlocked,auth.isLogin,controller.address)  
+userRoute.get("/my-orders",auth.isBlocked,auth.isLogin,controller.myOrders) 
 
 //===================== Cart=====================
 
@@ -111,6 +113,9 @@ userRoute.post("/reset-password",controller.sendResetLink)
 userRoute.get("/reset",controller.loadResetPassword)
 userRoute.post("/reset",controller.resetPassword)
 userRoute.get("/send-reset-email",controller.sendResetEmail) 
+
+
+
 
 
 

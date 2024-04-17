@@ -156,10 +156,10 @@
 	                		<aside class="col-md-4 col-lg-3">
 	                			<ul class="nav nav-dashboard flex-column mb-3 mb-md-0" role="tablist">
                                     <li class="nav-item">
-								        <a class="nav-link active" id="tab-account-link"  href="/account" aria-selected="true">Account Details</a>
+								        <a class="nav-link " id="tab-account-link"  href="/account" aria-selected="false">Account Details</a>
 								    </li>
                                     <li class="nav-item">
-								        <a class="nav-link" id="tab-address-link"  href="/address"  aria-selected="false">Adresses</a>
+								        <a class="nav-link active" id="tab-address-link"  href="/address"  aria-selected="true">Adresses</a>
 								    </li>
 								    <!-- <li class="nav-item">
 								        <a class="nav-link " id="tab-dashboard-link" data-toggle="tab" href="#tab-dashboard" role="tab" aria-controls="tab-dashboard" aria-selected="false">Dashboard</a>
@@ -178,47 +178,167 @@
 
 	                		<div class="col-md-8 col-lg-9">
 	                			<div class="tab-content">
-								    <div class="tab-pane fade " id="tab-dashboard" role="tabpanel" aria-labelledby="tab-dashboard-link">
-								    	<p>Hello <span class="font-weight-normal text-dark">User</span> (not <span class="font-weight-normal text-dark">User</span>? <a href="#">Log out</a>) 
-								    	<br>
-								    	From your account dashboard you can view your <a href="#tab-orders" class="tab-trigger-link link-underline">recent orders</a>, manage your <a href="#tab-address" class="tab-trigger-link">shipping and billing addresses</a>, and <a href="#tab-account" class="tab-trigger-link">edit your password and account details</a>.</p>
-								    </div><!-- .End .tab-pane -->
+								   
                                     
-								
+							
 
                                   
 
-								    
+								
 
-								  
+								    <div class="tab-pane fade show active" id="tab-address" role="tabpanel" aria-labelledby="tab-address-link">
+								    	
+                                        <div class="card card-dashboard">
+                                            <div class="card-body">
+                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+                                                    ADD NEW ADDRESS
+                                                  </button>
+                                            </div>
+                                          </div>
+                                                       <!----------------- modal address--------------------------->
+                                          <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                              <div class="modal-content" style="padding: 20px;">
+                                                <div class="modal-header">
+                                                  <h5 class="modal-title" id="exampleModalLongTitle">Add Address</h5>
+                                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                  </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form>
+                                                        <div class="form-group">
+                                                          <label for="name">Name:</label>
+                                                          <input type="text" class="form-control" required pattern="^(?!\s*$).+" id="name" placeholder="Enter your name">
+                                                        </div>
+                                                        <div class="form-group">
+                                                          <label for="phone">Phone Number:</label>
+                                                          <input type="tel" class="form-control" required  pattern="[0-9]{10}" id="phone" placeholder="Enter your phone number">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="city">Building Name/House Name</label>
+                                                            <input type="text" class="form-control" required pattern="^(?!\s*$).+" id="building" placeholder="Enter your Building Name/House Name">
+                                                        </div>
 
-								    <div class="tab-pane fade show active" id="tab-account" role="tabpanel" aria-labelledby="tab-account-link">
-								    	<form action="#">
-			                				
+                                                        <div class="form-group">
+                                                          <label for="city">City:</label>
+                                                          <input type="text" class="form-control" required pattern="^(?!\s*$).+" id="city" placeholder="Enter your city">
+                                                        </div>
+                                                        
+                                                        <div class="form-group">
+                                                          <label for="district">District:</label>
+                                                          <input type="text" class="form-control" required pattern="^(?!\s*$).+" id="district" placeholder="Enter your district">
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                          <label for="state">State:</label>
+                                                          <input type="text" class="form-control" required pattern="^(?!\s*$).+" id="state" placeholder="Enter your state">
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label for="pincode">Pincode:</label>
+                                                            <input type="text" class="form-control" required  id="pincode" placeholder="Enter your pincode">
+                                                          </div>
+                                                          
+
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary" onclick="submitAddressForm()">Save Adress</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+
+								    	<div class="row">
+                                            <% find?.address?.forEach((address) => { %>
+                                                <div class="col-lg-6">
+                                                  <div class="card card-dashboard">
+                                                    <div class="card-body">
+                                                      <!-- Delete Button in Top Right Corner -->
+                                                      <button type="button" class="btn btn-danger delete-address" onclick="deleteAddress('<%= address._id %>')" style="position: absolute; top: 10px; right: 10px;">
+                                                        Delete <!-- Font Awesome trash icon -->
+                                                      </button>
                                             
-                                            <label> Name *</label>
-                                            <input type="text" id="userName" class="form-control"pattern="^\S.*$" value="<%=find?.name %>" required>
-		                					<label>Email address *</label>
-		        							<input type="email" id="userEmail" class="form-control"  pattern="^\S.*$" value="<%=find?.email %>" required>
+                                                      <p>
+                                                        <%= address.name %><br>
+                                                        <%= address.phone %><br>
+                                                        <%= address.building %><br>
+                                                        <%= address.city %>,<%= address.district %>,<%= address.state %><br>
+                                                        <%= address.pincode %><br>
+                                            
+                                                        <a href="#" data-toggle="modal" data-address-id="<%= address._id %>" class="edit-address" data-target="#modal2">
+                                                          Edit <i class="icon-edit"></i>
+                                                        </a>
+                                                      </p>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              <% }) %>
+                                           <!-- modal2 -->
+                                           <div class="modal fade" id="modal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                              <div class="modal-content" style="padding: 20px;">
+                                                <div class="modal-header">
+                                                  <h5 class="modal-title" id="exampleModalLongTitle">Edit Address</h5>
+                                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                  </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form>
+                                                        <div class="form-group">
+                                                          <label for="name">Name:</label>
+                                                          <input type="text" class="form-control" required pattern="^(?!\s*$).+" id="name2" >
+                                                        </div>
+                                                        <div class="form-group">
+                                                          <label for="phone">Phone Number:</label>
+                                                          <input type="tel" class="form-control" required  pattern="[0-9]{10}" id="phone2" >
+                                                        </div>
+                                                        <div class="form-group">
+                                                        <input type="hidden" class="form-control"  id="addressId" >
+                                                    </div>
+                                                        <div class="form-group">
+                                                            <label for="city">Building Name/House Name</label>
+                                                            <input type="text" class="form-control" required pattern="^(?!\s*$).+" id="building2" >
+                                                        </div>
 
-                                            <label>Phone Number *</label>
-		        							<input type="tel" id="userPhone" class="form-control" pattern="[0-9]{10}" value="<%=find?.phone %>"  required>
+                                                        <div class="form-group">
+                                                          <label for="city">City:</label>
+                                                          <input type="text" class="form-control" required pattern="^(?!\s*$).+" id="city2" >
+                                                        </div>
+                                                        
+                                                        <div class="form-group">
+                                                          <label for="district">District:</label>
+                                                          <input type="text" class="form-control" required pattern="^(?!\s*$).+" id="district2" >
+                                                        </div>
 
-		            						<!-- <label>Current password (leave blank to leave unchanged)</label>
-		            						<input type="password" class="form-control">
+                                                        <div class="form-group">
+                                                          <label for="state">State:</label>
+                                                          <input type="text" class="form-control" required pattern="^(?!\s*$).+" id="state2" >
+                                                        </div>
 
-		            						<label>New password (leave blank to leave unchanged)</label>
-		            						<input type="password" class="form-control">
+                                                        <div class="form-group">
+                                                            <label for="pincode">Pincode:</label>
+                                                            <input type="text" class="form-control" required  id="pincode2" >
+                                                          </div>
 
-		            						<label>Confirm new password</label>
-		            						<input type="password" class="form-control mb-2"> -->
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary"  onclick="updateAddress()" >Save Changes</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
 
-		                					<button type="submit" class="btn btn-outline-primary-2" onclick="editUserDetails('<%=find._id %>')">
-			                					<span>SAVE CHANGES</span>
-			            						<i class="icon-long-arrow-right"></i>
-			                				</button>
-			                			</form>
+								    		
+								    	</div><!-- End .row -->
 								    </div><!-- .End .tab-pane -->
+
+								    
 								</div>
 	                		</div><!-- End .col-lg-9 -->
 	                	</div><!-- End .row -->

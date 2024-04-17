@@ -1884,6 +1884,205 @@ const sendResetEmail = async (req, res) => {
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const address = async (req,res)=>{
+    try {
+        const userId = req.session.user_id
+        const find = await userModel.findOne({ _id: userId })
+        const wallet = await walletModel.findOne({ userId: userId })
+
+        // Sort wallet transactions by date in descending order
+        wallet.transactions.sort((a, b) => b.date - a.date)
+
+        const page = req.query.page || 1 // Get page number from query parameter
+        const limit = 10 // Number of transactions per page
+        const skip = (page - 1) * limit
+
+        const totalCount = wallet.transactions.length
+        const totalPages = Math.ceil(totalCount / limit)
+
+        const paginatedTransactions = wallet.transactions.slice(
+            skip,
+            skip + limit
+        )
+        const cart = await cartModal.findOne({ userId: userId })
+
+        const orders = await orderModal
+            .find({ userId: userId })
+            .populate({
+                path: 'products',
+                populate: [
+                    {
+                        path: 'productId',
+                        model: 'products',
+                        populate: {
+                            path: 'offer',
+                            model: 'offer',
+                        },
+                    },
+                    {
+                        path: 'productId',
+                        model: 'products',
+                        populate: {
+                            path: 'subcategory_id',
+                            model: 'Category',
+                            populate: {
+                                path: 'offer',
+                                model: 'offer',
+                            },
+                        },
+                    },
+                ],
+            })
+            .sort({ _id: -1 })
+
+        res.render('myAccountAddress', {
+            find,
+            orders,
+            wallet,
+            cart,
+            transactions: paginatedTransactions,
+            currentPage: page,
+            totalPages,
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).send('Internal Server Error')
+    }
+}
+
+
+// const myOrders  = async (req,res)=>{
+//     try {
+//         const userId = req.session.user_id
+//         const find = await userModel.findOne({ _id: userId })
+        
+
+//         // Sort wallet transactions by date in descending order
+       
+//         const cart = await cartModal.findOne({ userId: userId })
+
+//         const orders = await orderModal
+//             .find({ userId: userId })
+//             .populate({
+//                 path: 'products',
+//                 populate: [
+//                     {
+//                         path: 'productId',
+//                         model: 'products',
+//                         populate: {
+//                             path: 'offer',
+//                             model: 'offer',
+//                         },
+//                     },
+//                     {
+//                         path: 'productId',
+//                         model: 'products',
+//                         populate: {
+//                             path: 'subcategory_id',
+//                             model: 'Category',
+//                             populate: {
+//                                 path: 'offer',
+//                                 model: 'offer',
+//                             },
+//                         },
+//                     },
+//                 ],
+//             })
+//             .sort({ _id: -1 })
+
+//         res.render('myAccountOrders', {
+//             find,
+//             orders,
+           
+//             cart,
+            
+//         })
+//     } catch (error) {
+//         console.error(error)
+//         res.status(500).send('Internal Server Error')
+//     }
+// }
+
+
+const myOrders = async (req, res) => {
+    try {
+        const userId = req.session.user_id;
+        const find = await userModel.findOne({ _id: userId });
+        const cart = await cartModal.findOne({ userId: userId })
+        // Pagination variables
+        const page = parseInt(req.query.page) || 1; // Current page number, default is 1
+        const limit =  10; // Number of orders per page, default is 10
+
+        // Fetch total number of orders
+        const totalOrders = await orderModal.countDocuments({ userId: userId });
+
+        // Calculate the number of documents to skip
+        const skip = (page - 1) * limit;
+
+        // Fetch orders with pagination
+        const orders = await orderModal
+            .find({ userId: userId })
+            .populate({
+                path: 'products',
+                populate: [
+                    {
+                        path: 'productId',
+                        model: 'products',
+                        populate: {
+                            path: 'offer',
+                            model: 'offer',
+                        },
+                    },
+                    {
+                        path: 'productId',
+                        model: 'products',
+                        populate: {
+                            path: 'subcategory_id',
+                            model: 'Category',
+                            populate: {
+                                path: 'offer',
+                                model: 'offer',
+                            },
+                        },
+                    },
+                ],
+            })
+            .sort({ _id: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        res.render('myAccountOrders', {
+            find,
+            orders,
+            cart,
+            currentPage: page,
+            totalPages: Math.ceil(totalOrders / limit),
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
+
+
 module.exports = {
     loadHomePage,
     loadsignup,
@@ -1936,4 +2135,7 @@ module.exports = {
     loadResetPassword,
     sendResetEmail,
     loadWallet,
+    address,
+    myOrders
+   
 }
