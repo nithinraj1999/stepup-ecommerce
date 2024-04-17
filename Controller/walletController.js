@@ -1,10 +1,5 @@
 const walletModel = require('../models/walletModel')
-const userModel = require('../models/userModel')
-const orderModal = require('../models/orderModel')
-const cartModal = require("../models/cartModal")
-
-
-
+const cartModel = require("../models/cartModal")
 
 
 const loadWallet = async (req, res) => {
@@ -26,7 +21,7 @@ const loadWallet = async (req, res) => {
             skip,
             skip + limit
         )
-        const cart = await cartModal.findOne({ userId: userId })
+        const cart = await cartModel.findOne({ userId: userId })
 
        
 
