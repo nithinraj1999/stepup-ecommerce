@@ -364,6 +364,7 @@ const verifyPayment = async (req, res) => {
         hmac.update(
             payment.razorpay_order_id + '|' + payment.razorpay_payment_id
         )
+
         hmac = hmac.digest('hex')
 
         if (hmac == payment.razorpay_signature) {
@@ -392,6 +393,7 @@ const verifyPayment = async (req, res) => {
             } else {
                 res.json({ message: 'cannot find order document' })
             }
+            
         } else {
             console.log('signature isnt matching')
 

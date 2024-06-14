@@ -60,12 +60,12 @@ userRoute.get("/product-details",auth.isBlocked,productController.loadProductDet
 userRoute.get("/account",auth.isBlocked,auth.isLogin,controller.myAccount)  
 userRoute.post("/edit-user",auth.isBlocked,controller.editUser) 
 userRoute.post("/address",auth.isBlocked,controller.addAddress)
-userRoute.get("/edit-address/:id",auth.isBlocked,controller.loadEditAddress)
+userRoute.get("/account/edit-address/:id",auth.isBlocked,controller.loadEditAddress)
 userRoute.post("/edit-address",auth.isBlocked,controller.editAddress)
 userRoute.post("/delete-address",auth.isBlocked,controller.deleteAddress)
-userRoute.get("/wallet",auth.isBlocked,auth.isLogin,walletController.loadWallet)  
-userRoute.get("/address",auth.isBlocked,auth.isLogin,controller.address)  
-userRoute.get("/my-orders",auth.isBlocked,auth.isLogin,controller.myOrders) 
+userRoute.get("/account/wallet",auth.isBlocked,auth.isLogin,walletController.loadWallet)  
+userRoute.get("/account/address",auth.isBlocked,auth.isLogin,controller.address)  
+userRoute.get("/account/my-orders",auth.isBlocked,auth.isLogin,controller.myOrders) 
 
 //===================== Cart=====================
 

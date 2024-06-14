@@ -22,6 +22,7 @@ const ejs = require('ejs')
 const puppeteer = require('puppeteer') 
 const express = require('express')
 const app = express()
+
 var instance = new Razorpay({
     key_id: process.env.KEY_ID,
     key_secret: process.env.KEY_SECRET,
@@ -39,11 +40,12 @@ const securePassword = async (password) => {
     }
 }
 
-const loadHomePage = (req, res) => {
+const loadHomePage = async (req, res) => {
     try {
         const isLoggedIn = req.session.user_id ? true : false;
         if (req.session.user_id) {
-            res.render('home', { isLoggedIn })
+            const cart = await cartModal.findOne({userId:req.session.user_id})
+            res.render('home', { isLoggedIn,cart })
         } else {
             res.render('home', { isLoggedIn })
         }
@@ -2027,7 +2029,7 @@ const myOrders = async (req, res) => {
         const cart = await cartModal.findOne({ userId: userId })
         // Pagination variables
         const page = parseInt(req.query.page) || 1; // Current page number, default is 1
-        const limit =  10; // Number of orders per page, default is 10
+        const limit =  7; // Number of orders per page, default is 10
 
         // Fetch total number of orders
         const totalOrders = await orderModal.countDocuments({ userId: userId });

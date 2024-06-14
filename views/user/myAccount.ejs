@@ -12,21 +12,21 @@
     <meta name="description" content="Molla - Bootstrap eCommerce Template">
     <meta name="author" content="p-themes">
     <!-- Favicon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/icons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/icons/favicon-16x16.png">
-    <link rel="manifest" href="assets/images/icons/site.html">
-    <link rel="mask-icon" href="assets/images/icons/safari-pinned-tab.svg" color="#666666">
-    <link rel="shortcut icon" href="assets/images/icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/icons/favicon-16x16.png">
+    <link rel="manifest" href="/assets/images/icons/site.html">
+    <link rel="mask-icon" href="/assets/images/icons/safari-pinned-tab.svg" color="#666666">
+    <link rel="shortcut icon" href="/assets/images/icons/favicon.ico">
     <meta name="apple-mobile-web-app-title" content="Molla">
     <meta name="application-name" content="Molla">
     <meta name="msapplication-TileColor" content="#cc9966">
-    <meta name="msapplication-config" content="assets/images/icons/browserconfig.xml">
+    <meta name="msapplication-config" content="/assets/images/icons/browserconfig.xml">
     <meta name="theme-color" content="#ffffff">
     <!-- Plugins CSS File -->
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
     <!-- Main CSS File -->
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -159,16 +159,16 @@
 								        <a class="nav-link active" id="tab-account-link"  href="/account" aria-selected="true">Account Details</a>
 								    </li>
                                     <li class="nav-item">
-								        <a class="nav-link" id="tab-address-link"  href="/address"  aria-selected="false">Adresses</a>
+								        <a class="nav-link" id="tab-address-link"  href="/account/address"  aria-selected="false">Adresses</a>
 								    </li>
 								    <!-- <li class="nav-item">
 								        <a class="nav-link " id="tab-dashboard-link" data-toggle="tab" href="#tab-dashboard" role="tab" aria-controls="tab-dashboard" aria-selected="false">Dashboard</a>
 								    </li> -->
 								    <li class="nav-item">
-								        <a class="nav-link" id="tab-orders-link"  href="/my-orders"  aria-selected="false">Orders</a>
+								        <a class="nav-link" id="tab-orders-link"  href="/account/my-orders"  aria-selected="false">Orders</a>
 								    </li>
 								    <li class="nav-item">
-								        <a class="nav-link" id="tab-downloads-link"  href="/wallet"  aria-selected="false">Wallet</a>
+								        <a class="nav-link" id="tab-downloads-link"  href="/account/wallet"  aria-selected="false">Wallet</a>
 								    </li>
 								    <li class="nav-item">
 								        <a class="nav-link" href="/logout">Sign Out</a>
@@ -199,7 +199,7 @@
                                             <label> Name *</label>
                                             <input type="text" id="userName" class="form-control"pattern="^\S.*$" value="<%=find?.name %>" required>
 		                					<label>Email address *</label>
-		        							<input type="email" id="userEmail" class="form-control"  pattern="^\S.*$" value="<%=find?.email %>" required>
+		        							<input type="email" id="userEmail" class="form-control"  pattern="^\S.*$" value="<%=find?.email %>" disabled required>
 
                                             <label>Phone Number *</label>
 		        							<input type="tel" id="userPhone" class="form-control" pattern="[0-9]{10}" value="<%=find?.phone %>"  required>
@@ -719,14 +719,14 @@ document.addEventListener('click', async function(event) {
 
 
     <!-- Plugins JS File -->
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/jquery.hoverIntent.min.js"></script>
-    <script src="assets/js/jquery.waypoints.min.js"></script>
-    <script src="assets/js/superfish.min.js"></script>
-    <script src="assets/js/owl.carousel.min.js"></script>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/jquery.hoverIntent.min.js"></script>
+    <script src="/assets/js/jquery.waypoints.min.js"></script>
+    <script src="/assets/js/superfish.min.js"></script>
+    <script src="/assets/js/owl.carousel.min.js"></script>
     <!-- Main JS File -->
-    <script src="assets/js/main.js"></script>
+    <script src="/assets/js/main.js"></script>
 </body>
 
 

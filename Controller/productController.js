@@ -517,7 +517,7 @@ const editProducts = async (req,res)=>{
 
       const find = await productModel.findOne({_id:id})
       if(find.list==true){
-        console.log(selling);
+    
          await productModel.updateOne({_id:id},{$set:{list:false}})
          res.redirect("/admin/all-products")
       }else {
