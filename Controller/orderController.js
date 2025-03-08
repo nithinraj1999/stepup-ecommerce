@@ -8,7 +8,7 @@ const { v4: uuidv4 } = require('uuid')
 const orderModal = require('../models/orderModel')
 const path = require('path')
 const ejs = require('ejs')
-const puppeteer = require('puppeteer') 
+const puppeteer = require('puppeteer')
 const crypto = require('crypto')
 
 var instance = new Razorpay({
@@ -24,35 +24,29 @@ const loadCheckout = async (req, res) => {
             .findOne({ userId: id })
             .populate('product.productId')
 
-      
-
         const wallet = await walletModel.findOne({ userId: id })
         const coupens = await coupenModel.find({})
         res.render('checkout', { find, cartData, wallet, coupens })
     } catch (error) {
-        console.error(error) 
-    } 
-} 
-
+        console.error(error)
+    }
+}
 
 const loadOrderSuccess = async (req, res) => {
-    try{
+    try {
         res.render('orderSuccessPage')
-    }
-    catch(error){
-        console.error(error);
+    } catch (error) {
+        console.error(error)
     }
 }
 
 function generateUniqueID(length) {
-    try{
+    try {
         const uuid = uuidv4().replace(/-/g, '') // Remove dashes from the UUID
         return uuid.substring(0, length)
+    } catch (error) {
+        console.error(error)
     }
-    catch(error){
-        console.error(error);
-    }
-    
 }
 
 const checkOutVerification = async (req, res) => {
@@ -60,52 +54,57 @@ const checkOutVerification = async (req, res) => {
         const productWithQtyInCart = req.body
         const userId = req.session.user_id
 
-        
-
         const productWithQtyInDb = []
 
         const cartData = await cartModal
-        .findOne({ userId: userId }) 
-        .populate('product.productId') 
-        
-        cartData.product.forEach((element)=>{
+            .findOne({ userId: userId })
+            .populate('product.productId')
+
+        cartData.product.forEach((element) => {
             productId = element.productId._id.toHexString()
             quantity = element.quantity.toString()
-            productWithQtyInDb.push({productId,quantity})
-        }) 
+            productWithQtyInDb.push({ productId, quantity })
+        })
 
-        console.log(productWithQtyInCart);
-        console.log(productWithQtyInDb);
-
+        console.log(productWithQtyInCart)
+        console.log(productWithQtyInDb)
 
         if (productWithQtyInCart.length !== productWithQtyInDb.length) {
-            return false;
+            return false
         }
-    
+
         // Sort arrays based on some common property to ensure order doesn't affect comparison
-        productWithQtyInCart.sort((a, b) => a.productId.localeCompare(b.productId));
-        productWithQtyInDb.sort((a, b) => a.productId.localeCompare(b.productId));
-    
+        productWithQtyInCart.sort((a, b) =>
+            a.productId.localeCompare(b.productId)
+        )
+        productWithQtyInDb.sort((a, b) =>
+            a.productId.localeCompare(b.productId)
+        )
+
         // Compare each element of the arrays
         let notMatch = 0
         for (let i = 0; i < productWithQtyInCart.length; i++) {
-            if (productWithQtyInCart[i].productId !== productWithQtyInDb[i].productId || productWithQtyInCart[i].quantity !== productWithQtyInDb[i].quantity) {
+            if (
+                productWithQtyInCart[i].productId !==
+                    productWithQtyInDb[i].productId ||
+                productWithQtyInCart[i].quantity !==
+                    productWithQtyInDb[i].quantity
+            ) {
                 notMatch++
-            } 
+            }
         }
-        if(notMatch ===0){
-            console.log("equal");
-        }else{
-            console.log("not equal");
-            return res.json({warningMessage:"Something went Wrong"})
+        if (notMatch === 0) {
+            console.log('equal')
+        } else {
+            console.log('not equal')
+            return res.json({ warningMessage: 'Something went Wrong' })
         }
-    
+
         // If all elements are equal, return true
 
- 
-        for (const item of cartData.product) { 
+        for (const item of cartData.product) {
             const product = item.productId
- 
+
             if (item.quantity > product.quantity) {
                 console.error(
                     `Error: Quantity of product '${product.name}' is insufficient.`
@@ -341,18 +340,16 @@ const order = async (req, res) => {
 //=====================function to generate Razorpay ===================
 
 function generaterazorpay(orderId, totalPrice) {
-  try{
-    const options = instance.orders.create({
-      amount: totalPrice * 100,
-      currency: 'INR',
-      receipt: orderId,
-  })
-  return options
-  }
-  catch(error){
-    console.error(error);
-  }
-    
+    try {
+        const options = instance.orders.create({
+            amount: totalPrice * 100,
+            currency: 'INR',
+            receipt: orderId,
+        })
+        return options
+    } catch (error) {
+        console.error(error)
+    }
 }
 
 //======================================================================
@@ -393,7 +390,6 @@ const verifyPayment = async (req, res) => {
             } else {
                 res.json({ message: 'cannot find order document' })
             }
-            
         } else {
             console.log('signature isnt matching')
 
@@ -564,7 +560,6 @@ const returnRequest = async (req, res) => {
         console.error(error)
     }
 }
-
 const loadInvoice = async (req, res) => {
     try {
         const productId = req.query.productId // Use req.params for URL parameters
@@ -579,7 +574,7 @@ const loadInvoice = async (req, res) => {
             orderData,
         }
 
-        const ejsTemplate = path.resolve(__dirname, '../../views/user/invoice.ejs')
+        const ejsTemplate = path.resolve(__dirname, '../views/user/invoice.ejs')
         const ejsData = await ejs.renderFile(ejsTemplate, data)
 
         // Launch Puppeteer and generate PDF
@@ -604,10 +599,7 @@ const loadInvoice = async (req, res) => {
     }
 }
 
-
-
 // =========== admin side =========
-
 
 const loadOrders = async (req, res) => {
     const page = parseInt(req.query.page) || 1
@@ -615,7 +607,7 @@ const loadOrders = async (req, res) => {
     const skip = (page - 1) * limit
     try {
         const orders = await orderModal
-            .find({ paymentStatus:{$ne:"Failed"}})
+            .find({ paymentStatus: { $ne: 'Failed' } })
             .populate('userId')
             .sort({ _id: -1 })
             .skip(skip)
@@ -635,22 +627,19 @@ const loadOrders = async (req, res) => {
     }
 }
 
-
-const orderStatus = async(req,res) =>{
-  try{
-    const {currentStatus,orderId,productId} = req.body
-    const find = await orderModal.findOne({_id:orderId})
-    await orderModal.updateOne(
-      { "_id": orderId, "products._id": productId },
-      { $set: { "products.$.orderStatus": currentStatus } }
-    );  
-    res.json({success:true,currentStatus}) 
-  }
-  catch(error){ 
-    console.error(error);
-  }
-} 
- 
+const orderStatus = async (req, res) => {
+    try {
+        const { currentStatus, orderId, productId } = req.body
+        const find = await orderModal.findOne({ _id: orderId })
+        await orderModal.updateOne(
+            { _id: orderId, 'products._id': productId },
+            { $set: { 'products.$.orderStatus': currentStatus } }
+        )
+        res.json({ success: true, currentStatus })
+    } catch (error) {
+        console.error(error)
+    }
+}
 
 const orderRequest = async (req, res) => {
     try {
@@ -721,10 +710,6 @@ const orderRequest = async (req, res) => {
         console.error(error)
     }
 }
- 
-    
-
-
 
 module.exports = {
     loadCheckout,
@@ -741,8 +726,5 @@ module.exports = {
     loadInvoice,
     loadOrders,
     orderStatus,
-    orderRequest
-
-
-
+    orderRequest,
 }

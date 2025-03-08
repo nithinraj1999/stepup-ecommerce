@@ -2,8 +2,9 @@ const express = require("express");
 const multer  =require("multer")
 const path = require("path")
 const app = express();
+require('dotenv').config()
 const mongoose = require("mongoose");
-mongoose.connect("mongodb+srv://vnithinraj99:DDzgIwdJOSOfkzSQ@cluster0.izvom4q.mongodb.net/dummy");
+mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
 
 
 const userRoute = require("./routes/userRoute");
@@ -18,5 +19,4 @@ app.use(express.static(__dirname + "/public"));
 app.use("/",userRoute);
 app.use("/admin",adminRoute);
 
-
-app.listen(3000, () => console.log("Running....http://localhost:3000"));
+app.listen(process.env.PORT, () => console.log(`Running....http://localhost:${process.env.PORT}`)); 

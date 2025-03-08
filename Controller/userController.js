@@ -604,7 +604,8 @@ async function otp(email) {
             lowerCaseAlphabets: false,
             specialChars: false,
         })
-console.log(otp);
+        console.log(otp);
+        
         const otpDOC = new otpModel({
             email: email,
             otp: otp,
