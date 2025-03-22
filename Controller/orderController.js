@@ -10,7 +10,7 @@ const path = require('path')
 const ejs = require('ejs')
 const puppeteer = require('puppeteer')
 const crypto = require('crypto')
-
+const fs = require("fs")
 var instance = new Razorpay({
     key_id: process.env.KEY_ID,
     key_secret: process.env.KEY_SECRET,
@@ -42,7 +42,7 @@ const loadOrderSuccess = async (req, res) => {
 
 function generateUniqueID(length) {
     try {
-        const uuid = uuidv4().replace(/-/g, '') // Remove dashes from the UUID
+        const uuid = uuidv4().replace(/-/g, '') 
         return uuid.substring(0, length)
     } catch (error) {
         console.error(error)
@@ -73,7 +73,6 @@ const checkOutVerification = async (req, res) => {
             return false
         }
 
-        // Sort arrays based on some common property to ensure order doesn't affect comparison
         productWithQtyInCart.sort((a, b) =>
             a.productId.localeCompare(b.productId)
         )
@@ -81,7 +80,6 @@ const checkOutVerification = async (req, res) => {
             a.productId.localeCompare(b.productId)
         )
 
-        // Compare each element of the arrays
         let notMatch = 0
         for (let i = 0; i < productWithQtyInCart.length; i++) {
             if (
@@ -100,7 +98,6 @@ const checkOutVerification = async (req, res) => {
             return res.json({ warningMessage: 'Something went Wrong' })
         }
 
-        // If all elements are equal, return true
 
         for (const item of cartData.product) {
             const product = item.productId
@@ -238,7 +235,6 @@ const order = async (req, res) => {
                         productImage: productImage,
                     })
 
-                    //  await productModel.updateOne({_id:productId},{$inc:{quantity:-quantity}})
                 }
 
                 const order = new orderModal({
@@ -562,7 +558,7 @@ const returnRequest = async (req, res) => {
 }
 const loadInvoice = async (req, res) => {
     try {
-        const productId = req.query.productId // Use req.params for URL parameters
+        const productId = req.query.productId 
         const orderId = req.query.orderId
 
         const orderData = await orderModal
@@ -574,31 +570,54 @@ const loadInvoice = async (req, res) => {
             orderData,
         }
 
-        const ejsTemplate = path.resolve(__dirname, '../views/user/invoice.ejs')
-        const ejsData = await ejs.renderFile(ejsTemplate, data)
+        res.render('invoice.ejs',data)
+        // const ejsTemplate = path.resolve(__dirname, '../views/user/invoice.ejs')
+        // const ejsData = await ejs.renderFile(ejsTemplate, data)
 
-        // Launch Puppeteer and generate PDF
-        const browser = await puppeteer.launch({ headless: true })
-        const page = await browser.newPage()
-        await page.setContent(ejsData, { waitUntil: 'networkidle0' })
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-        })
+        // const browser = await puppeteer.launch({ headless: "new" })
+        // const page = await browser.newPage()
+        // await page.setContent(ejsData, { waitUntil: 'load' })
+        // const pdfBuffer = await page.pdf({
+        //     format: 'A4',
+        //     printBackground: true,
+        // })
 
-        // Close the browser
-        await browser.close()
-
-        // Set headers for inline display in the browser
-        res.set({
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': 'inline; filename=order_invoice.pdf',
-        }).send(pdfBuffer)
+        // await browser.close()
+        // res.set({
+        //     'Content-Type': 'application/pdf',
+        //     'Content-Disposition': 'inline; filename=order_invoice.pdf',
+        // }).send(pdfBuffer)
     } catch (error) { 
         console.error(error)
     }
 }
 
+
+const downloadInvoice = async (req,res)=>{
+    const productId = req.query.productId 
+    const orderId = req.query.orderId
+    const browser = await puppeteer.launch();
+const page = await browser.newPage();
+await page.goto(`http://localhost:${process.env.PORT}/order-invoice?orderId=${orderId}&productId=${productId}`, {
+  waitUntil: 'networkidle2',
+});
+
+const filePath = path.join(__dirname,`../invoice.pdf`);
+    await page.pdf({ path: filePath, format: "A4", printBackground: true });
+    await browser.close();
+
+    res.download(filePath, `invoice.pdf`, (err) => {
+        if (err) {
+          console.error("File download error:", err);
+          res.status(500).send("Error downloading invoice");
+        }
+  
+        fs.unlinkSync(filePath);
+      });
+  
+
+
+}
 // =========== admin side =========
 
 const loadOrders = async (req, res) => {
@@ -727,4 +746,5 @@ module.exports = {
     loadOrders,
     orderStatus,
     orderRequest,
+    downloadInvoice
 }

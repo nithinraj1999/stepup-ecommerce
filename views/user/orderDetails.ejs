@@ -258,12 +258,12 @@ function requestForReturn(productId,orderId){
 }
 
 function invoice (orderId,productId){
-    window.location.href = `/order-invoice?orderId=${orderId}&productId=${productId}`
+    window.location.href = `/download-invoice?orderId=${orderId}&productId=${productId}`
 }
 
 
 
-
+ 
 //-----------------------
 
 function razorpayPayment(order){

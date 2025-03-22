@@ -2,10 +2,6 @@
 const category = require("../models/categoryModel")
 const offerModel = require("../models/offer")
 
-
-
-
-
 const loadCategory = (req,res)=>{
     try{
         res.render("category", {alertMessage: null})

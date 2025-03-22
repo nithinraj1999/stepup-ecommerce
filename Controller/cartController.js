@@ -7,7 +7,6 @@ const productModal = require("../models/productModel")
 const loadCart = async (req, res) => {
     try {
         const userId = req.session.user_id
-        // const cart = await cartModal.findOne({userId:userId}).populate("product.productId")
         const cart = await cartModal.findOne({ userId: userId }).populate({
             path: 'product',
             populate: [
@@ -37,11 +36,9 @@ const loadCart = async (req, res) => {
         if (cart && cart.product) {
             for (const item of cart.product) {
                 const quantity = item.quantity
-                // const productPrice = item.productId.price; // Assuming "price" is the field in your product schema containing the product price
                 const productPrice = item.productId.sellingPrice ? item.productId.sellingPrice : item.productId.price
                 const total = quantity * productPrice
 
-                // Update the total for the current product in the cart
                 await cartModal.updateOne(
                     { userId: userId, 'product.productId': item.productId },
                     { $set: { 'product.$.total': total } }
@@ -81,7 +78,6 @@ const addTocart = async (req, res) => {
     try {
         const userId = req.session.user_id
         const { productPrice, productId } = req.body
-        // const price = parseInt(productPrice)
         let userCart = await cartModal.findOne({ userId: userId })
         let product = await productModal.findOne({_id:productId})
 

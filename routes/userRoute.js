@@ -80,10 +80,12 @@ userRoute.get('/checkout',auth.isBlocked,orderController.loadCheckout)
 userRoute.post('/checkout-verification',orderController.checkOutVerification)
 
 //===================== orders ==================
-
+ 
 userRoute.get("/order",auth.isBlocked,orderController.loadOrderSuccess) 
 userRoute.post("/order",orderController.order)
 userRoute.get("/order-invoice",orderController.loadInvoice)
+userRoute.get("/download-invoice",orderController.downloadInvoice)
+
 userRoute.get("/order-details",auth.isBlocked,auth.isLogin,orderController.orderDetails) 
 userRoute.post("/order-cancelation",orderController.cancelRequest)
 userRoute.post("/request-return",orderController.returnRequest)

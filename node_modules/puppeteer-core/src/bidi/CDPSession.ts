@@ -5,6 +5,7 @@
  */
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping.js';
 
+import type {CommandOptions} from '../api/CDPSession.js';
 import {CDPSession} from '../api/CDPSession.js';
 import type {Connection as CdpConnection} from '../cdp/Connection.js';
 import {TargetCloseError, UnsupportedOperation} from '../common/Errors.js';
@@ -20,7 +21,7 @@ export class BidiCdpSession extends CDPSession {
   static sessions = new Map<string, BidiCdpSession>();
 
   #detached = false;
-  readonly #connection: BidiConnection | undefined = undefined;
+  readonly #connection?: BidiConnection;
   readonly #sessionId = Deferred.create<string>();
   readonly frame: BidiFrame;
 
@@ -40,11 +41,11 @@ export class BidiCdpSession extends CDPSession {
     } else {
       (async () => {
         try {
-          const session = await connection.send('cdp.getSession', {
+          const {result} = await connection.send('goog:cdp.getSession', {
             context: frame._id,
           });
-          this.#sessionId.resolve(session.result.session!);
-          BidiCdpSession.sessions.set(session.result.session!, this);
+          this.#sessionId.resolve(result.session!);
+          BidiCdpSession.sessions.set(result.session!, this);
         } catch (error) {
           this.#sessionId.reject(error as Error);
         }
@@ -59,31 +60,44 @@ export class BidiCdpSession extends CDPSession {
     return undefined;
   }
 
+  override get detached(): boolean {
+    return this.#detached;
+  }
+
   override async send<T extends keyof ProtocolMapping.Commands>(
     method: T,
-    params?: ProtocolMapping.Commands[T]['paramsType'][0]
+    params?: ProtocolMapping.Commands[T]['paramsType'][0],
+    options?: CommandOptions,
   ): Promise<ProtocolMapping.Commands[T]['returnType']> {
     if (this.#connection === undefined) {
       throw new UnsupportedOperation(
-        'CDP support is required for this feature. The current browser does not support CDP.'
+        'CDP support is required for this feature. The current browser does not support CDP.',
       );
     }
     if (this.#detached) {
       throw new TargetCloseError(
-        `Protocol error (${method}): Session closed. Most likely the page has been closed.`
+        `Protocol error (${method}): Session closed. Most likely the page has been closed.`,
       );
     }
     const session = await this.#sessionId.valueOrThrow();
-    const {result} = await this.#connection.send('cdp.sendCommand', {
-      method: method,
-      params: params,
-      session,
-    });
+    const {result} = await this.#connection.send(
+      'goog:cdp.sendCommand',
+      {
+        method: method,
+        params: params,
+        session,
+      },
+      options?.timeout,
+    );
     return result.result;
   }
 
   override async detach(): Promise<void> {
-    if (this.#connection === undefined || this.#detached) {
+    if (
+      this.#connection === undefined ||
+      this.#connection.closed ||
+      this.#detached
+    ) {
       return;
     }
     try {
@@ -91,10 +105,17 @@ export class BidiCdpSession extends CDPSession {
         sessionId: this.id(),
       });
     } finally {
-      BidiCdpSession.sessions.delete(this.id());
-      this.#detached = true;
+      this.onClose();
     }
   }
+
+  /**
+   * @internal
+   */
+  onClose = (): void => {
+    BidiCdpSession.sessions.delete(this.id());
+    this.#detached = true;
+  };
 
   override id(): string {
     const value = this.#sessionId.value();

@@ -53,10 +53,10 @@ const applyOffer = async (req, res) => {
             })
             .populate('offer')
 
-        let sellingPrice // Define sellingPrice outside the loop
+        let sellingPrice 
 
         products.forEach((product) => {
-            let price = product?.price // Initialize price with default value
+            let price = product?.price 
             const productId = product?._id
             const productName = product?.name
             if (
@@ -64,8 +64,8 @@ const applyOffer = async (req, res) => {
                     product?.subcategory_id?.offer?.status) ||
                 (product?.offer && product?.offer?.status)
             ) {
-                let categoryOfferPrice = undefined // Initialize with undefined
-                let productOfferPrice = undefined // Initialize with undefined
+                let categoryOfferPrice = undefined 
+                let productOfferPrice = undefined 
 
                 if (
                     product?.subcategory_id?.offer &&
@@ -83,23 +83,20 @@ const applyOffer = async (req, res) => {
                         product?.price -
                         (product?.price * product?.offer?.percentage) / 100
                 }
-                // Check if either offer price is defined
                 if (
                     categoryOfferPrice !== undefined ||
                     productOfferPrice !== undefined
                 ) {
-                    // Handle the case where either offer price is undefined
+               
                     if (categoryOfferPrice === undefined) {
                         price = productOfferPrice
                     } else if (productOfferPrice === undefined) {
                         price = categoryOfferPrice
                     } else {
-                        // Both offer prices are defined, choose the lower one
                         price = Math.min(categoryOfferPrice, productOfferPrice)
                     }
                 }
             }
-            // Assign the calculated price to sellingPrice for each product
             sellingPrice = price
             async function updateSellingPrice() {
                 const product = await productModel
@@ -114,7 +111,6 @@ const applyOffer = async (req, res) => {
          
         })
 
-        // await productModel.updateMany({},{set:{sellingPrice:sellingPrice}})
         res.json({ success: true })
     } catch (error) {
         console.error(error)
@@ -125,10 +121,9 @@ const deleteOffer = async (req, res) => {
     try {
         const { offerId } = req.body
         await offerModel.deleteOne({ _id: offerId })
-        // await productModel.updateMany({offer:offerId},{$unset:{offer:"",sellingPrice:""}})
 
         const offer = await productModel
-            .find({ subcategory_id: { $exists: true } }) // Filter where subcategory_id is not null
+            .find({ subcategory_id: { $exists: true } }) 
             .populate({
                 path: 'subcategory_id',
                 match: { offer: offerId },
@@ -146,8 +141,8 @@ const deleteOffer = async (req, res) => {
         const filteredOfferIds = filteredOffers.map((offer) => offer._id)
 
         await productModel.updateMany(
-            { _id: { $in: filteredOfferIds } }, // Filter by IDs of filtered documents
-            { $unset: { sellingPrice: '' } } // Unset the selling price field
+            { _id: { $in: filteredOfferIds } }, 
+            { $unset: { sellingPrice: '' } } 
         )
 
         await categoryModal.updateMany(
@@ -219,10 +214,10 @@ const removeOffer = async (req, res) => {
             })
             .populate('offer')
 
-        let sellingPrice // Define sellingPrice outside the loop
+        let sellingPrice 
 
         products.forEach((product) => {
-            let price = product?.price // Initialize price with default value
+            let price = product?.price 
             const productId = product?._id
             const productName = product?.name
             let categoryOfferPrice
@@ -232,8 +227,8 @@ const removeOffer = async (req, res) => {
                     product?.subcategory_id?.offer?.status) ||
                 (product?.offer && product?.offer?.status)
             ) {
-                categoryOfferPrice = undefined // Initialize with undefined
-                productOfferPrice = undefined // Initialize with undefined
+                categoryOfferPrice = undefined 
+                productOfferPrice = undefined 
 
                 if (
                     product?.subcategory_id?.offer &&
@@ -252,23 +247,19 @@ const removeOffer = async (req, res) => {
                         (product?.price * product?.offer?.percentage) / 100
                 }
 
-                // Check if either offer price is defined
                 if (
                     categoryOfferPrice !== undefined ||
                     productOfferPrice !== undefined
                 ) {
-                    // Handle the case where either offer price is undefined
                     if (categoryOfferPrice === undefined) {
                         price = productOfferPrice
                     } else if (productOfferPrice === undefined) {
                         price = categoryOfferPrice
                     } else {
-                        // Both offer prices are defined, choose the lower one
                         price = Math.min(categoryOfferPrice, productOfferPrice)
                     }
                 }
             }
-            // Assign the calculated price to sellingPrice for each product
             sellingPrice = price
             async function updateSellingPrice() {
                 if (!productOfferPrice && !categoryOfferPrice) {
@@ -313,10 +304,10 @@ const applyProductOffer = async (req, res) => {
             })
             .populate('offer')
 
-        let sellingPrice // Define sellingPrice outside the loop
+        let sellingPrice 
 
         products.forEach((product) => {
-            let price = product?.price // Initialize price with default value
+            let price = product?.price
             const productId = product?._id
             const productName = product?.name
             if (
@@ -324,8 +315,8 @@ const applyProductOffer = async (req, res) => {
                     product?.subcategory_id?.offer?.status) ||
                 (product?.offer && product?.offer?.status)
             ) {
-                let categoryOfferPrice = undefined // Initialize with undefined
-                let productOfferPrice = undefined // Initialize with undefined
+                let categoryOfferPrice = undefined 
+                let productOfferPrice = undefined 
 
                 if (
                     product?.subcategory_id?.offer &&
@@ -344,23 +335,19 @@ const applyProductOffer = async (req, res) => {
                         (product?.price * product?.offer?.percentage) / 100
                 }
 
-                // Check if either offer price is defined
                 if (
                     categoryOfferPrice !== undefined ||
                     productOfferPrice !== undefined
                 ) {
-                    // Handle the case where either offer price is undefined
                     if (categoryOfferPrice === undefined) {
                         price = productOfferPrice
                     } else if (productOfferPrice === undefined) {
                         price = categoryOfferPrice
                     } else {
-                        // Both offer prices are defined, choose the lower one
                         price = Math.min(categoryOfferPrice, productOfferPrice)
                     }
                 }
             }
-            // Assign the calculated price to sellingPrice for each product
             sellingPrice = price
             async function updateSellingPrice() {
                 await productModel.updateOne(
@@ -397,10 +384,10 @@ const removeProductOffer = async (req, res) => {
             })
             .populate('offer')
 
-        let sellingPrice // Define sellingPrice outside the loop
+        let sellingPrice 
 
         products.forEach((product) => {
-            let price = product?.price // Initialize price with default value
+            let price = product?.price 
             const productId = product?._id
             const productName = product?.name
             let categoryOfferPrice
@@ -410,8 +397,8 @@ const removeProductOffer = async (req, res) => {
                     product?.subcategory_id?.offer?.status) ||
                 (product?.offer && product?.offer?.status)
             ) {
-                categoryOfferPrice = undefined // Initialize with undefined
-                productOfferPrice = undefined // Initialize with undefined
+                categoryOfferPrice = undefined 
+                productOfferPrice = undefined 
 
                 if (
                     product?.subcategory_id?.offer &&
@@ -430,31 +417,21 @@ const removeProductOffer = async (req, res) => {
                         (product?.price * product?.offer?.percentage) / 100
                 }
 
-                // Check if either offer price is defined
                 if (
                     categoryOfferPrice !== undefined ||
                     productOfferPrice !== undefined
                 ) {
-                    // Handle the case where either offer price is undefined
                     if (categoryOfferPrice === undefined) {
                         price = productOfferPrice
                     } else if (productOfferPrice === undefined) {
                         price = categoryOfferPrice
                     } else {
-                        // Both offer prices are defined, choose the lower one
                         price = Math.min(categoryOfferPrice, productOfferPrice)
                     }
                 }
             }
-            // Assign the calculated price to sellingPrice for each product
             sellingPrice = price
-            //   async function updateSellingPrice(){
-            //       await productModel.updateOne(
-            //           { _id: productId },
-            //           { $set: { sellingPrice: sellingPrice } }
-            //       )
-            //   }
-            //   updateSellingPrice()
+
 
             async function updateSellingPrice() {
                 if (!productOfferPrice && !categoryOfferPrice) {
