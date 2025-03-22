@@ -598,7 +598,7 @@ const downloadInvoice = async (req,res)=>{
     const orderId = req.query.orderId
     const browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox','--explicitly-allowed-ports=6000']
     });
     const page = await browser.newPage();
 await page.goto(`http://localhost:${process.env.PORT}/order-invoice?orderId=${orderId}&productId=${productId}`, {
