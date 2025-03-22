@@ -596,8 +596,11 @@ const loadInvoice = async (req, res) => {
 const downloadInvoice = async (req,res)=>{
     const productId = req.query.productId 
     const orderId = req.query.orderId
-    const browser = await puppeteer.launch();
-const page = await browser.newPage();
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    const page = await browser.newPage();
 await page.goto(`http://localhost:${process.env.PORT}/order-invoice?orderId=${orderId}&productId=${productId}`, {
   waitUntil: 'networkidle2',
 });
