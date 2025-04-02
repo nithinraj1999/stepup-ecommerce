@@ -205,7 +205,7 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <% transactions.forEach(data => { %>
+                                                    <% transactions?.forEach(data => { %>
                                                         <tr>
                                                             <% const formattedDate = data.date.toLocaleDateString('en-US'); %>
                                                             <td><%= formattedDate %></td>

@@ -660,18 +660,20 @@ const myAccount = async (req, res) => {
         const userId = req.session.user_id
         const find = await userModel.findOne({ _id: userId })
         const wallet = await walletModel.findOne({ userId: userId })
+        if(wallet){
 
+        }
         // Sort wallet transactions by date in descending order
-        wallet.transactions.sort((a, b) => b.date - a.date)
+        wallet?.transactions?.sort((a, b) => b.date - a.date)
 
         const page = req.query.page || 1 // Get page number from query parameter
         const limit = 10 // Number of transactions per page
         const skip = (page - 1) * limit
 
-        const totalCount = wallet.transactions.length
+        const totalCount = wallet?.transactions?.length
         const totalPages = Math.ceil(totalCount / limit)
 
-        const paginatedTransactions = wallet.transactions.slice(
+        const paginatedTransactions = wallet?.transactions?.slice(
             skip,
             skip + limit
         )
@@ -1910,16 +1912,16 @@ const address = async (req,res)=>{
         const wallet = await walletModel.findOne({ userId: userId })
 
         // Sort wallet transactions by date in descending order
-        wallet.transactions.sort((a, b) => b.date - a.date)
+        wallet?.transactions?.sort((a, b) => b.date - a.date)
 
         const page = req.query.page || 1 // Get page number from query parameter
         const limit = 10 // Number of transactions per page
         const skip = (page - 1) * limit
 
-        const totalCount = wallet.transactions.length
+        const totalCount = wallet?.transactions?.length
         const totalPages = Math.ceil(totalCount / limit)
 
-        const paginatedTransactions = wallet.transactions.slice(
+        const paginatedTransactions = wallet?.transactions?.slice(
             skip,
             skip + limit
         )

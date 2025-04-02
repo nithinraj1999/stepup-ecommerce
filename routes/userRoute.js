@@ -68,12 +68,12 @@ userRoute.get("/account/address",auth.isBlocked,auth.isLogin,controller.address)
 userRoute.get("/account/my-orders",auth.isBlocked,auth.isLogin,controller.myOrders) 
 
 //===================== Cart=====================
-
+ 
 userRoute.post('/add-to-cart',cartController.addTocart)
 userRoute.get("/cart",auth.isBlocked,auth.isLogin,cartController.loadCart)
 userRoute.post("/update-cart",auth.isLogin,cartController.updateCart)
 userRoute.post("/remove-item",auth.isLogin,cartController.removeItem)
-
+ 
 //===================== Checkout ================
  
 userRoute.get('/checkout',auth.isBlocked,orderController.loadCheckout)

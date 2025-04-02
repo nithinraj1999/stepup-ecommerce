@@ -683,6 +683,7 @@ function editUserDetails(userID){
     axios.post("/edit-user",details)
     .then(response=>{
         console.log(response.data.message);
+        window.location.reload()
     })
     .catch(error=>{
         console.error(error);
