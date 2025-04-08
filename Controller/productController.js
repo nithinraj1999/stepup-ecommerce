@@ -10,7 +10,7 @@ const loadProductList = async (req, res) => {
     try {
         const userId = req.session.user_id
         const isLoggedIn = !!req.session.user_id
-        const page = parseInt(req.query.page) || 1 // Current page number
+        const page = parseInt(req.query.page) || 1 
         const limit = 6
         const path = req.path
         const filter = {
@@ -24,7 +24,6 @@ const loadProductList = async (req, res) => {
         }
         const { category, brand: manufacturer, sort, search } = req.query
 
-        // If brand filter is applied
         if (manufacturer && Array.isArray(manufacturer)) {
             filter.manufacturer = { $in: manufacturer }
         } else if (manufacturer) {
@@ -44,7 +43,7 @@ const loadProductList = async (req, res) => {
         }
         if (search) {
             filter.$or = [
-                { name: { $regex: search, $options: 'i' } }, // Case-insensitive search
+                { name: { $regex: search, $options: 'i' } }, 
                 { manufacturer: { $regex: search, $options: 'i' } },
             ]
         }
@@ -106,7 +105,7 @@ const loadMen = async (req, res) => {
         const userId = req.session.user_id
         const isLoggedIn = req.session.user_id ? true : false
         const { category, brand: manufacturer, sort, search } = req.query
-        const page = parseInt(req.query.page) || 1 // Current page number
+        const page = parseInt(req.query.page) || 1 
         const limit = 6
         const query = {
             list: true,
@@ -137,7 +136,7 @@ const loadMen = async (req, res) => {
 
         if (search) {
             query.$or = [
-                { name: { $regex: search, $options: 'i' } }, // Case-insensitive search
+                { name: { $regex: search, $options: 'i' } }, 
                 { manufacturer: { $regex: search, $options: 'i' } },
             ]
         }
@@ -195,7 +194,7 @@ const loadWomen = async (req, res) => {
         const userId = req.session.user_id
         const isLoggedIn = req.session.user_id ? true : false
         const { category, brand: manufacturer, sortBy, search } = req.query
-        const page = parseInt(req.query.page) || 1 // Current page number
+        const page = parseInt(req.query.page) || 1 
         const limit = 6
 
         const query = {
@@ -225,7 +224,7 @@ const loadWomen = async (req, res) => {
         }
         if (search) {
             query.$or = [
-                { name: { $regex: search, $options: 'i' } }, // Case-insensitive search
+                { name: { $regex: search, $options: 'i' } }, 
                 { manufacturer: { $regex: search, $options: 'i' } },
             ]
         }
@@ -292,7 +291,7 @@ const loadKids = async (req, res) => {
         const isLoggedIn = req.session.user_id ? true : false
         const { category, brand: manufacturer, sort, search } = req.query
 
-        const page = parseInt(req.query.page) || 1 // Current page number
+        const page = parseInt(req.query.page) || 1 
         const limit = 6
 
         const query = {
@@ -323,7 +322,7 @@ const loadKids = async (req, res) => {
         }
         if (search) {
             query.$or = [
-                { name: { $regex: search, $options: 'i' } }, // Case-insensitive search
+                { name: { $regex: search, $options: 'i' } }, 
                 { manufacturer: { $regex: search, $options: 'i' } },
             ]
         }
@@ -335,7 +334,6 @@ const loadKids = async (req, res) => {
             sortOptions['price'] = 1
         }
 
-        // const totalPages = Math.ceil(productsCount / limit)
         const path = req.path
         const startIndex = (page - 1) * limit
 
@@ -460,7 +458,7 @@ const addProduct = async (req,res)=>{
                 };
             } catch (error) { 
                 console.error('Error processing and saving image:', error);
-                return null; // Exclude failed images
+                return null; 
             }
         }))
 
@@ -480,8 +478,7 @@ const addProduct = async (req,res)=>{
     }catch(error){
       console.log(error); 
     }
-    // const find = await categoryModal.distinct("subcategory")
-    //  res.render("addProduct",{find})
+   
     res.redirect("/admin/addproduct")
 }
 
@@ -571,7 +568,7 @@ const updateProduct = async(req,res)=>{
           }; 
       } catch (error) {
           console.error('Error processing and saving image:', error);
-          return null; // Exclude failed images
+          return null; 
       }
   }))
     if(find){

@@ -7,11 +7,10 @@ const loadWallet = async (req, res) => {
         const userId = req.session.user_id
         const wallet = await walletModel.findOne({ userId: userId })
 
-        // Sort wallet transactions by date in descending order
         wallet?.transactions?.sort((a, b) => b.date - a.date)
 
-        const page = req.query.page || 1 // Get page number from query parameter
-        const limit = 10 // Number of transactions per page
+        const page = req.query.page || 1 
+        const limit = 10 
         const skip = (page - 1) * limit
 
         const totalCount = wallet?.transactions?.length
