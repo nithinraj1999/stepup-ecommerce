@@ -7,7 +7,7 @@ const nocache = require("nocache");
 const coupenModal = require("../models/coupenModel")
 var flash = require('connect-flash');
 
-
+ 
 const productController =  require("../Controller/productController")
 const wishListController = require("../Controller/wishListController")
 const cartController = require("../Controller/cartController")
@@ -117,7 +117,7 @@ userRoute.get("/send-reset-email",controller.sendResetEmail)
 
 
 
-
+ 
 
  
 module.exports = userRoute

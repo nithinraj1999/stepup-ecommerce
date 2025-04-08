@@ -808,7 +808,7 @@ function faildPayment(payment,order){
     axios.post("/failed-payment",data)
     .then(response =>{
         console.log(response.data);
-        window.location.href = "/paymen-failed";
+        // window.location.href = "/paymen-failed";
     })
     .then(error=>{
         console.error(error);
