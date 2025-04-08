@@ -9,7 +9,7 @@ adminRoute.set("views","views/admin")
 const auth = require("../middleware/authAdmin");
 adminRoute.use(nocache());
 
-
+ 
 const categoryController = require("../Controller/categoryController")
 const orderController = require("../Controller/orderController")
 const coupenController = require("../Controller/coupenController")
@@ -24,17 +24,15 @@ const storage = multer.diskStorage({
         cb(null, path.join(__dirname, '../public/uploads'));
     },
     filename: function (req, file, cb) {
-        // Use the original filename and add a unique identifier
         const uniqueIdentifier = Date.now();
         const originalFileNameWithoutExtension = path.parse(file.originalname).name;
         const uniqueFilename = `${originalFileNameWithoutExtension}-${uniqueIdentifier}${path.extname(file.originalname)}`
-        
         cb(null, uniqueFilename);
     },
 });
 
 const upload = multer({ storage:storage}); 
-
+ 
 
 
 adminRoute.use(bodyParser.json());
@@ -118,17 +116,5 @@ adminRoute.get("/custom-date-report",auth.isLogin,salesController.getCutomDatere
 
 
 adminRoute.get("/dashboard",auth.isLogin,dashboardController.loadDashBoard) 
-
-
-
-
-
-
-
-
-
-
-
-
 
 module.exports = adminRoute     
