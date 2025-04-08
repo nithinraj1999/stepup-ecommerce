@@ -25,6 +25,4 @@ node_modules
 *.sw?
 .env
 
-
-
 .prettierrc

@@ -40,7 +40,6 @@ const verifyLogin = async (req,res)=>{
     if(find) {
        if(find.password == password){
         req.session.admin_id = find._id
-        // res.render("adminDashboard")
         res.redirect("/admin/dashboard")
         }else{
         res.render("adminLogin")
@@ -982,7 +981,6 @@ const loadDashBoard = async (req, res) => {
       const delivered = await orderModel.find({ "products": { $elemMatch: { orderStatus: "Delivered" } } }).count()
 
       const currentYear = new Date().getFullYear();
-      // Get orders for the current year
       const orders = await orderModel.find({
           orderDate: {
               $gte: new Date(`${currentYear}-01-01`),
@@ -990,34 +988,33 @@ const loadDashBoard = async (req, res) => {
           }
       });  
   
-      // Calculate total earnings for each month
-      const monthlyEarnings = Array(12).fill(0); // Initialize array for 12 months with zeros
+      const monthlyEarnings = Array(12).fill(0); 
       orders.forEach(order => {
-          const month = order.orderDate.getMonth(); // Month is zero-based (0 for January)
+          const month = order.orderDate.getMonth(); 
           monthlyEarnings[month] += order.subTotal;
       });
 
       const topSellingProducts = await orderModel.aggregate([
-        { $unwind: "$products" }, // Unwind the products array
+        { $unwind: "$products" }, 
         {
             $group: {
                 _id: "$products.productId",
                 totalQuantity: { $sum: "$products.quantity" }
             }
-        }, // Group by productId and sum the quantities
-        { $sort: { totalQuantity: -1 } }, // Sort by totalQuantity in descending order
-        { $limit: 10 }, // Limit to top 10 selling products
+        }, 
+        { $sort: { totalQuantity: -1 } }, 
+        { $limit: 10 },
         {
             $lookup: {
-                from: "products", // The name of the collection to join with
-                localField: "_id", // The field from the input documents
-                foreignField: "_id", // The field from the documents of the "products" collection
-                as: "product" // The output array field
+                from: "products", 
+                localField: "_id",
+                foreignField: "_id",
+                as: "product" 
             }
         },
         {
             $addFields: {
-                productName: { $arrayElemAt: ["$product.name", 0] } // Extract the name from the product array
+                productName: { $arrayElemAt: ["$product.name", 0] } 
             }
         },
         {
@@ -1080,17 +1077,16 @@ const loadDashBoard = async (req, res) => {
                   totalQuantity: { $sum: "$products.quantity" }
               }
           },
-          { $sort: { totalQuantity: -1 } } // Sort by brand name
+          { $sort: { totalQuantity: -1 } } 
       ]);
 
 
 
 
 
-      // Calculate average monthly earnings
       const totalEarnings = monthlyEarnings.reduce((total, earnings) => total + earnings, 0);
       const averageMonthlyEarnings = totalEarnings / 12;
-      const roundedAverageMonthlyEarnings = Math.round(averageMonthlyEarnings * 100) / 100; // Round to 2 decimal places
+      const roundedAverageMonthlyEarnings = Math.round(averageMonthlyEarnings * 100) / 100; 
 
       res.render('dashboard', {
           totalRevenue,
