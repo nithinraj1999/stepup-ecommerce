@@ -65,9 +65,7 @@
                             <li>
                                 <a href="#">Links</a>
                                 <ul>
-                                    <!-- <li><a href="tel:#"><i class="icon-phone"></i>Call: +0123 456 789</a></li> -->
                                     <li><a href="/my-wish-list"><i class="icon-heart-o"></i>Wishlist </a></li>
-                                    <!-- <li><a href="about.html">About Us</a></li> -->
                                     <li><a href="/account">My account</a></li>
                                     <li><a href="/logout"><i class="icon-user"></i>Logout</a></li>
                                 </ul>
@@ -212,18 +210,8 @@
 								</table><!-- End .table table-wishlist -->
 
 	                			<div class="cart-bottom">
-			            			<div class="cart-discount">
-			            				<form action="#">
-			            					<div class="input-group">
-				        						<input type="text" class="form-control" required placeholder="coupon code">
-				        						<div class="input-group-append">
-													<button class="btn btn-outline-primary-2" type="submit"><i class="icon-long-arrow-right"></i></button>
-												</div><!-- .End .input-group-append -->
-			        						</div><!-- End .input-group -->
-			            				</form>
-			            			</div><!-- End .cart-discount -->
 
-			            			<a href="#" class="btn btn-outline-dark-2"><span>UPDATE CART</span><i class="icon-refresh"></i></a>
+
 		            			</div><!-- End .cart-bottom -->
 	                		</div><!-- End .col-lg-9 -->
 	                		<aside class="col-lg-3">
@@ -236,45 +224,9 @@
 	                							<td>Subtotal:</td>
 	                							<td id="subTotal">₹<%=subTotal?.subTotal %></td>
 	                						</tr><!-- End .summary-subtotal -->
-	                						<tr class="summary-shipping">
-	                							<td>Shipping:</td>
-	                							<td>&nbsp;</td>  
-	                						</tr>
 
-	                						<tr class="summary-shipping-row">
-	                							<td>
-													<div class="custom-control custom-radio">
-														<input type="radio" id="free-shipping" name="shipping" class="custom-control-input">
-														<label class="custom-control-label" for="free-shipping">Free Shipping</label>
-													</div><!-- End .custom-control -->
-	                							</td>
-	                							<td>$0.00</td>
-	                						</tr><!-- End .summary-shipping-row -->
 
-	                						<tr class="summary-shipping-row">
-	                							<td>
-	                								<div class="custom-control custom-radio">
-														<input type="radio" id="standart-shipping" name="shipping" class="custom-control-input">
-														<label class="custom-control-label" for="standart-shipping">Standart:</label>
-													</div><!-- End .custom-control -->
-	                							</td>
-	                							<td>$0.00</td>
-	                						</tr><!-- End .summary-shipping-row -->
 
-	                						<tr class="summary-shipping-row">
-	                							<td>
-	                								<div class="custom-control custom-radio">
-														<input type="radio" id="express-shipping" name="shipping" class="custom-control-input">
-														<label class="custom-control-label" for="express-shipping">Express:</label>
-													</div><!-- End .custom-control -->
-	                							</td>
-	                							<td>$0.00</td>
-	                						</tr><!-- End .summary-shipping-row -->
-
-	                						<tr class="summary-shipping-estimate">
-	                							<td>Estimate for Your Country<br> <a href="dashboard.html">Change address</a></td>
-	                							<td>&nbsp;</td>
-	                						</tr><!-- End .summary-shipping-estimate -->
 
 	                						<tr class="summary-total">
 	                							<td>Total:</td>
@@ -285,9 +237,9 @@
 
 	                				<!-- <a href="/checkout" class="btn btn-outline-primary-2 btn-order btn-block"on >PROCEED TO CHECKOUT</a> -->
                                     <a href="" class="btn btn-outline-primary-2 btn-order btn-block" onclick="proceedTocheckOut(event)">PROCEED TO CHECKOUT</a>
-	                			</div><!-- End .summary -->
+	                			</div>
 
-		            			<a href="category.html" class="btn btn-outline-dark-2 btn-block mb-3"><span>CONTINUE SHOPPING</span><i class="icon-refresh"></i></a>
+		            			<a href="/products" class="btn btn-outline-dark-2 btn-block mb-3"><span>CONTINUE SHOPPING</span><i class="icon-refresh"></i></a>
 	                		</aside><!-- End .col-lg-3 -->
 	                	</div><!-- End .row -->
 	                </div><!-- End .container -->
@@ -553,11 +505,6 @@ function updateProduct(productId,quantity,productPrice){
                 subTotal.innerHTML = `₹ ${response.data.subTotal}`;
                 cartTotal.innerHTML = `₹ ${response.data.subTotal}`;
             }
-            // if (response.data.warningMsg == true ){
-            //     console.log("working the msg");
-            //     // Update the content of the specific <p> tag
-            //     document.getElementById(`max-qty-msg${productId}`).innerText= "New Maximum Quantity Message";
-            // }
         window.location.reload()
     }) 
     .catch(error =>{
@@ -598,12 +545,10 @@ function removeProductFromCart(productId) {
 
 
 function proceedTocheckOut(event) {
-    event.preventDefault(); // Prevent the default behavior of the anchor link or button
+    event.preventDefault();
     const products = [];
 
-// Iterate through each product item in the cart
 document.querySelectorAll('.quantity-of-product-in-cart').forEach((input, index) => {
-    // Check if the index is even
     if (index % 2 === 0) {
         const quantity = input.value;
         const productId = input.getAttribute("data-product-id");
