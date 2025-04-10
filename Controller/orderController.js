@@ -571,22 +571,6 @@ const loadInvoice = async (req, res) => {
         }
 
         res.render('invoice.ejs',data)
-        // const ejsTemplate = path.resolve(__dirname, '../views/user/invoice.ejs')
-        // const ejsData = await ejs.renderFile(ejsTemplate, data)
-
-        // const browser = await puppeteer.launch({ headless: "new" })
-        // const page = await browser.newPage()
-        // await page.setContent(ejsData, { waitUntil: 'load' })
-        // const pdfBuffer = await page.pdf({
-        //     format: 'A4',
-        //     printBackground: true,
-        // })
-
-        // await browser.close()
-        // res.set({
-        //     'Content-Type': 'application/pdf',
-        //     'Content-Disposition': 'inline; filename=order_invoice.pdf',
-        // }).send(pdfBuffer)
     } catch (error) { 
         console.error(error)
     }
