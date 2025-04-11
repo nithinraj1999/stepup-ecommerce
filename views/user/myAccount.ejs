@@ -161,9 +161,7 @@
                                     <li class="nav-item">
 								        <a class="nav-link" id="tab-address-link"  href="/account/address"  aria-selected="false">Adresses</a>
 								    </li>
-								    <!-- <li class="nav-item">
-								        <a class="nav-link " id="tab-dashboard-link" data-toggle="tab" href="#tab-dashboard" role="tab" aria-controls="tab-dashboard" aria-selected="false">Dashboard</a>
-								    </li> -->
+								
 								    <li class="nav-item">
 								        <a class="nav-link" id="tab-orders-link"  href="/account/my-orders"  aria-selected="false">Orders</a>
 								    </li>
@@ -203,15 +201,6 @@
 
                                             <label>Phone Number *</label>
 		        							<input type="tel" id="userPhone" class="form-control" pattern="[0-9]{10}" value="<%=find?.phone %>"  required>
-
-		            						<!-- <label>Current password (leave blank to leave unchanged)</label>
-		            						<input type="password" class="form-control">
-
-		            						<label>New password (leave blank to leave unchanged)</label>
-		            						<input type="password" class="form-control">
-
-		            						<label>Confirm new password</label>
-		            						<input type="password" class="form-control mb-2"> -->
 
 		                					<button type="submit" class="btn btn-outline-primary-2" onclick="editUserDetails('<%=find._id %>')">
 			                					<span>SAVE CHANGES</span>
@@ -662,15 +651,6 @@ function deleteAddress(addressId) {
 //-------------------------------------------
 
 
-
-    // function showDetails(identifier) {
-    //     var detailsContainer = document.getElementById(identifier + '_details');
-    //     if (detailsContainer.style.display === 'none') {
-    //         detailsContainer.style.display = 'block';
-    //     } else {
-    //         detailsContainer.style.display = 'none';
-    //     }
-    // }
 
 
 function editUserDetails(userID){
