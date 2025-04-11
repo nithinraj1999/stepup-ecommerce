@@ -142,6 +142,8 @@
                 <h6 style="color: red; margin-top: 33px;"> Payment Failed</h6>
                 <% }else{ %>
                 <p style="margin-top: 33px;">Status : <%=product?.orderStatus %></p>
+                <p>payment method: <span class="badge bg-success"> <%= order && order.paymentMethod %></span></p>
+
                 <% } %> 
             </div>
             <div class="col-md-2 action-buttons">
@@ -172,9 +174,11 @@
                 <button class="btn btn-primary"style="margin-top: 26px;" onclick="invoice('<%=order._id %>','<%=product._id %>')">invoice</button>
                 <% } %>
             </div>
-        </div>
-    </div>
 
+        </div>
+
+    </div>
+   
     <!-- List of related products -->
     <div class="container-fluid related-products">
         <h2>Other items in this order</h2>
@@ -269,21 +273,21 @@ function invoice (orderId,productId){
 function razorpayPayment(order){
     
     var options = {
-    "key": "rzp_test_EXuX7ue9wXyfnc", // Enter the Key ID generated from the Dashboard
-    "amount": order.razorpayInstance.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+    "key": "rzp_test_EXuX7ue9wXyfnc",
+    "amount": order.razorpayInstance.amount,
     "currency": "INR",
-    "name": "StepUp", //your business name
+    "name": "StepUp", 
     "description": "Test Transaction",
     "image": "https://example.com/your_logo",
-    "order_id": order.razorpayInstance.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+    "order_id": order.razorpayInstance.id,
    
     "handler": function (response){
       verifyPayment(response,order)
 },
-    "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information especially their phone number
-        "name": "Gaurav Kumar", //your customer's name
+    "prefill": { 
+        "name": "Gaurav Kumar",
         "email": "gaurav.kumar@example.com",
-        "contact": "9000090000" //Provide the customer's phone number for better conversion rates 
+        "contact": "9000090000" 
     },
     "notes": {
         "address": "Razorpay Corporate Office"
