@@ -1,11 +1,10 @@
 const express = require("express");
-const multer  =require("multer")
 const path = require("path")
 const app = express();
 require('dotenv').config()
 const mongoose = require("mongoose");
 mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
-
+ 
 
 const userRoute = require("./routes/userRoute");
 const adminRoute = require("./routes/adminRoute");
