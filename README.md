@@ -88,7 +88,7 @@ PORT=port_to_run_server
 npm start
 ```
 
-App runs at: http://localhost:process.env.PORT
+App runs at: http://localhost:<your PORT from .env> (e.g., http://localhost:5000)
 
 ---
 
