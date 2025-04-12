@@ -2,15 +2,15 @@ const productModel = require('../models/productModel')
 const wishListModel = require('../models/wishListModel')
 const cartModal = require('../models/cartModal')
 const categoryModal = require('../models/categoryModel')
-const path = require("path")
-const offerModel  = require("../models/offer")
-const sharp = require("sharp")
-
+const path = require('path')
+const offerModel = require('../models/offer')
+const sharp = require('sharp')
+const fs = require('fs')
 const loadProductList = async (req, res) => {
     try {
         const userId = req.session.user_id
         const isLoggedIn = !!req.session.user_id
-        const page = parseInt(req.query.page) || 1 
+        const page = parseInt(req.query.page) || 1
         const limit = 6
         const path = req.path
         const filter = {
@@ -43,7 +43,7 @@ const loadProductList = async (req, res) => {
         }
         if (search) {
             filter.$or = [
-                { name: { $regex: search, $options: 'i' } }, 
+                { name: { $regex: search, $options: 'i' } },
                 { manufacturer: { $regex: search, $options: 'i' } },
             ]
         }
@@ -70,7 +70,7 @@ const loadProductList = async (req, res) => {
                 },
             })
             .populate('offer')
-            .sort(sortOptions) 
+            .sort(sortOptions)
             .skip(startIndex)
             .limit(limit)
 
@@ -105,7 +105,7 @@ const loadMen = async (req, res) => {
         const userId = req.session.user_id
         const isLoggedIn = req.session.user_id ? true : false
         const { category, brand: manufacturer, sort, search } = req.query
-        const page = parseInt(req.query.page) || 1 
+        const page = parseInt(req.query.page) || 1
         const limit = 6
         const query = {
             list: true,
@@ -136,7 +136,7 @@ const loadMen = async (req, res) => {
 
         if (search) {
             query.$or = [
-                { name: { $regex: search, $options: 'i' } }, 
+                { name: { $regex: search, $options: 'i' } },
                 { manufacturer: { $regex: search, $options: 'i' } },
             ]
         }
@@ -194,7 +194,7 @@ const loadWomen = async (req, res) => {
         const userId = req.session.user_id
         const isLoggedIn = req.session.user_id ? true : false
         const { category, brand: manufacturer, sortBy, search } = req.query
-        const page = parseInt(req.query.page) || 1 
+        const page = parseInt(req.query.page) || 1
         const limit = 6
 
         const query = {
@@ -224,7 +224,7 @@ const loadWomen = async (req, res) => {
         }
         if (search) {
             query.$or = [
-                { name: { $regex: search, $options: 'i' } }, 
+                { name: { $regex: search, $options: 'i' } },
                 { manufacturer: { $regex: search, $options: 'i' } },
             ]
         }
@@ -291,7 +291,7 @@ const loadKids = async (req, res) => {
         const isLoggedIn = req.session.user_id ? true : false
         const { category, brand: manufacturer, sort, search } = req.query
 
-        const page = parseInt(req.query.page) || 1 
+        const page = parseInt(req.query.page) || 1
         const limit = 6
 
         const query = {
@@ -322,7 +322,7 @@ const loadKids = async (req, res) => {
         }
         if (search) {
             query.$or = [
-                { name: { $regex: search, $options: 'i' } }, 
+                { name: { $regex: search, $options: 'i' } },
                 { manufacturer: { $regex: search, $options: 'i' } },
             ]
         }
@@ -398,69 +398,83 @@ const loadProductDetails = async (req, res) => {
             })
             .populate('offer')
         const wishList = await wishListModel.findOne({ userId: userId })
-        res.render('productDetails', { find, wishList ,isLoggedIn})
+        res.render('productDetails', { find, wishList, isLoggedIn })
     } catch (error) {
         console.error(error)
     }
 }
 
-
-
 //---------------------------  admin side -------
 
+const loadAddProduct = async (req, res) => {
+    try {
+        const find = await categoryModal.distinct('subcategory')
 
-
-const loadAddProduct = async (req,res)=>{
-    try{
-        const find = await categoryModal.distinct("subcategory")
-        
-        res.render("addProduct",{find})
-    }catch(error){
-        console.error(error);
+        res.render('addProduct', { find })
+    } catch (error) {
+        console.error(error)
     }
-  
 }
 
-const loadSubcategories = async (req,res)=>{
-    try{
-        const {mainCategory} = req.query
-        const subcategory = await categoryModal.distinct("subcategory",{name:mainCategory})
-      
-        res.status(200).json({ message: "Subcategories loaded successfully",subcategory});
-    }catch(error){
-        console.error(error);
+const loadSubcategories = async (req, res) => {
+    try {
+        const { mainCategory } = req.query
+        const subcategory = await categoryModal.distinct('subcategory', {
+            name: mainCategory,
+        })
+
+        res.status(200).json({
+            message: 'Subcategories loaded successfully',
+            subcategory,
+        })
+    } catch (error) {
+        console.error(error)
     }
- 
 }
 
 //========================================Add product with image=============================
-const addProduct = async (req,res)=>{
+const addProduct = async (req, res) => {
+    try {
+        const {
+            name,
+            manufacturer,
+            price,
+            description,
+            subcategory,
+            maincategory,
+            quantity,
+        } = req.body
+        const find = await categoryModal.findOne({
+            name: maincategory,
+            subcategory: subcategory,
+        })
+        const subcategory_id = find._id
+        const productImages = await Promise.all(
+            req.files.map(async (file) => {
+                try {
+                    console.log('promise is working')
+                    const resizedFilename = `resized-${file.filename}`
+                    const resizedPath = path.join(
+                        __dirname,
+                        '../public/uploads',
+                        resizedFilename
+                    )
 
-    try{
-      const {name,manufacturer,price,description,subcategory,maincategory,quantity} = req.body
-      const  find  = await categoryModal.findOne({name:maincategory,subcategory:subcategory})
-      const subcategory_id = find._id 
-      const productImages = await Promise.all(req.files.map(async (file) => {
-            try {
-                console.log("promise is working");
-                const resizedFilename = `resized-${ file.filename }`
-                const resizedPath = path.join(__dirname, '../public/uploads',resizedFilename)
-                                 
-                await sharp(file.path)
-                    .resize({ height: 500, width: 550, fit: 'fill' })
-                    .toFile(resizedPath);
- 
-                return {
-                    filename: file.filename,
-                    path: file.path,
-                    resizedFile: resizedFilename,
+                    await sharp(file.path)
+                        .resize({ height: 500, width: 550, fit: 'fill' })
+                        .toFile(resizedPath)
 
-                };
-            } catch (error) { 
-                console.error('Error processing and saving image:', error);
-                return null; 
-            }
-        }))
+                    return {
+                        filename: file.filename,
+                        path: file.path,
+                        resizedFile: resizedFilename,
+                    }
+                } catch (error) {
+                    console.error('Error processing and saving image:', error)
+                    return null
+                }
+            })
+        )
 
         const productCollection = new productModel({
             name: name,
@@ -471,162 +485,215 @@ const addProduct = async (req,res)=>{
             quantity: quantity,
             product_image: productImages,
         })
-        
-       
-      const save =await productCollection.save() 
 
-    }catch(error){
-      console.log(error); 
+        
+        const save = await productCollection.save()
+    } catch (error) {
+        console.log(error)
     }
-   
-    res.redirect("/admin/addproduct")
+
+    res.redirect('/admin/addproduct')
 }
 
 const allProducts = async (req, res) => {
-  try {
-    const ITEMS_PER_PAGE = 8; 
-    const page = parseInt(req.query.page) || 1;
-    const totalProductsCount = await productModel.countDocuments();
-    const totalPages = Math.ceil(totalProductsCount / ITEMS_PER_PAGE);
-    const skip = (page - 1) * ITEMS_PER_PAGE;
-
-    const find = await productModel
-      .find({})
-      .populate("subcategory_id")
-      .populate("offer")
-      .skip(skip)
-      .limit(ITEMS_PER_PAGE);
-
-    const offer = await offerModel.find({});
-
-    res.render("allProducts", { find, offer, totalPages, currentPage: page });
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const editProducts = async (req,res)=>{
-
-  try{
-     const id = req.query.id 
-     const {action} = req.body
-    if(action == "list"){
-
-      const find = await productModel.findOne({_id:id})
-      if(find.list==true){
-    
-         await productModel.updateOne({_id:id},{$set:{list:false}})
-         res.redirect("/admin/all-products")
-      }else {
-         await productModel.updateOne({_id:id},{$set:{list:true}})
-         res.redirect("/admin/all-products")
-      }
-    }else if(action =="update"){
-      res.redirect(`/admin/update-product?id=${id}`)
-    }
-    }catch(error){
-    console.log(error);
-    }
-  
-}
-
-const loadUpdateProduct = async (req,res)=>{
-
-  try{
-      const id  = req.query.id
-      const subcategory = await categoryModal.distinct("subcategory")
-      const find = await productModel.findOne({_id:id}).populate("subcategory_id")
-      res.render("updateProducts",{find,subcategory})
-  }catch(error){
-      console.log(error);
-  }
-}
-
-const updateProduct = async(req,res)=>{
- 
     try {
+        const ITEMS_PER_PAGE = 8
+        const page = parseInt(req.query.page) || 1
+        const totalProductsCount = await productModel.countDocuments()
+        const totalPages = Math.ceil(totalProductsCount / ITEMS_PER_PAGE)
+        const skip = (page - 1) * ITEMS_PER_PAGE
 
-    const { id } = req.query;
-    const { name, manufacturer, price, description, maincategory, subcategory,quantity } = req.body;
+        const find = await productModel
+            .find({})
+            .populate('subcategory_id')
+            .populate('offer')
+            .skip(skip)
+            .limit(ITEMS_PER_PAGE)
 
-    const find= await categoryModal.findOne({name:maincategory,subcategory:subcategory})
-    const productImages = await Promise.all(req.files.map(async (file) => {
-      try {
-          console.log("promise is working");
-          const resizedFilename = `resized-${ file.filename }`
-          const resizedPath = path.join(__dirname, '../public/uploads',resizedFilename)
+        const offer = await offerModel.find({})
 
-          await sharp(file.path)
-              .resize({ height: 500, width: 550, fit: 'fill' })
-              .toFile(resizedPath);
-
-          return {
-              filename: file.filename,
-              path: file.path,
-              resizedFile: resizedFilename,
-
-          }; 
-      } catch (error) {
-          console.error('Error processing and saving image:', error);
-          return null; 
-      }
-  }))
-    if(find){
-
-      const updatedFields = {
-        name: name,
-        manufacturer: manufacturer,
-        price: price,
-        description: description,
-        subcategory_id: find._id,
-        quantity: quantity
-      };
-  
-      if (productImages && productImages.length > 0) {
-        updatedFields.product_image = productImages;
-      }
-  
-      // Update the product
-      const result = await productModel.updateOne({ _id: id }, { $set: updatedFields });
-  
-    }else{
-      const subcategory1 = await categoryModal.distinct("subcategory")
-      const find2 = await productModel.findOne({_id:id}).populate("subcategory_id")
-      res.render("updateProducts",{find:find2,subcategory:subcategory1})
-    }
-    
-      const subcategory1 = await categoryModal.distinct("subcategory")
-      const find2 = await productModel.findOne({_id:id}).populate("subcategory_id")
-      res.render("updateProducts",{find:find2,subcategory:subcategory1})
-  } catch (error) {
-    console.log(error); 
-    res.status(500).send("Internal Server Error");
-  }
-};
-
-const deleteimage = async (req,res)=>{
-    try{
-        const {product_id,img_id} = req.query
-        await productModel.updateOne(
-        {_id:product_id},
-        {
-          $pull:{
-            product_image:{
-              _id:img_id
-            }}
+        res.render('allProducts', {
+            find,
+            offer,
+            totalPages,
+            currentPage: page,
         })
-        const find = await productModel.find({})
-        res.redirect(`/admin/update-product?id=${product_id}`)
-    }catch(error){
-        console.error(error);
+    } catch (error) {
+        console.log(error)
     }
-  
-
 }
 
+const editProducts = async (req, res) => {
+    try {
+        const id = req.query.id
+        const { action } = req.body
+        if (action == 'list') {
+            const find = await productModel.findOne({ _id: id })
+            if (find.list == true) {
+                await productModel.updateOne(
+                    { _id: id },
+                    { $set: { list: false } }
+                )
+                res.redirect('/admin/all-products')
+            } else {
+                await productModel.updateOne(
+                    { _id: id },
+                    { $set: { list: true } }
+                )
+                res.redirect('/admin/all-products')
+            }
+        } else if (action == 'update') {
+            res.redirect(`/admin/update-product?id=${id}`)
+        }
+    } catch (error) {
+        console.log(error)
+    }
+}
 
+const loadUpdateProduct = async (req, res) => {
+    try {
+        const id = req.query.id
+        const subcategory = await categoryModal.distinct('subcategory')
+        const find = await productModel
+            .findOne({ _id: id })
+            .populate('subcategory_id')
+        res.render('updateProducts', { find, subcategory })
+    } catch (error) {
+        console.log(error)
+    }
+}
 
+const updateProduct = async (req, res) => {
+    try {
+        const { id } = req.query
+        const {
+            name,
+            manufacturer,
+            price,
+            description,
+            maincategory,
+            subcategory,
+            quantity,
+        } = req.body
 
+        const find = await categoryModal.findOne({
+            name: maincategory,
+            subcategory: subcategory,
+        })
+        const productImages = await Promise.all(
+            req.files.map(async (file) => {
+                try {
+                    console.log('promise is working')
+                    const resizedFilename = `resized-${file.filename}`
+                    const resizedPath = path.join(
+                        __dirname,
+                        '../public/uploads',
+                        resizedFilename
+                    )
+
+                    await sharp(file.path)
+                        .resize({ height: 500, width: 550, fit: 'fill' })
+                        .toFile(resizedPath)
+
+                    return {
+                        filename: file.filename,
+                        path: file.path,
+                        resizedFile: resizedFilename,
+                    }
+                } catch (error) {
+                    console.error('Error processing and saving image:', error)
+                    return null
+                }
+            })
+        )
+        if (find) {
+            const updatedFields = {
+                name: name,
+                manufacturer: manufacturer,
+                price: price,
+                description: description,
+                subcategory_id: find._id,
+                quantity: quantity,
+            }
+
+            if (productImages && productImages.length > 0) {
+                updatedFields.product_image = productImages
+            }
+
+            // Update the product
+            const result = await productModel.updateOne(
+                { _id: id },
+                { $set: updatedFields }
+            )
+        } else {
+            const subcategory1 = await categoryModal.distinct('subcategory')
+            const find2 = await productModel
+                .findOne({ _id: id })
+                .populate('subcategory_id')
+            res.render('updateProducts', {
+                find: find2,
+                subcategory: subcategory1,
+            })
+        }
+
+        const subcategory1 = await categoryModal.distinct('subcategory')
+        const find2 = await productModel
+            .findOne({ _id: id })
+            .populate('subcategory_id')
+        res.render('updateProducts', { find: find2, subcategory: subcategory1 })
+    } catch (error) {
+        console.log(error)
+        res.status(500).send('Internal Server Error')
+    }
+}
+
+const deleteimage = async (req, res) => {
+    try {
+        const { product_id, img_id } = req.query
+        const product = await productModel.findOne(
+            { _id: product_id, 'product_image._id': img_id },
+            { 'product_image.$': 1 }
+        )
+        const imageName = product?.product_image?.[0]?.filename
+
+        const imagePath = path.join(
+            __dirname,
+            '..',
+            'public',
+            'uploads',
+            `resized-${imageName}`
+        )
+        const originalImagePath = path.join(
+            __dirname,
+            '..',
+            'public',
+            'uploads',
+            `${imageName}`
+        )
+
+       await fs.unlink(imagePath, (err) => {
+            if (err) {
+                console.error('Error  deleting resized image:', err)
+                return
+            }
+            console.log(`resized ${imageName} deleted successfully`)
+        })
+
+        await productModel.updateOne(
+            { _id: product_id },
+            {
+                $pull: {
+                    product_image: {
+                        _id: img_id,
+                    },
+                },
+            }
+        )
+        res.redirect(`/admin/update-product?id=${product_id}`)
+    } catch (error) {
+        console.error(error)
+    }
+}
 
 module.exports = {
     loadProductList,
@@ -642,6 +709,5 @@ module.exports = {
     editProducts,
     loadUpdateProduct,
     updateProduct,
-    deleteimage
-
+    deleteimage,
 }
