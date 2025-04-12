@@ -306,6 +306,7 @@ const myAccount = async (req, res) => {
             transactions: paginatedTransactions,
             currentPage: page,
             totalPages,
+            isLoggedIn:true
         })
     } catch (error) {
         console.error(error)
@@ -570,6 +571,8 @@ const address = async (req, res) => {
             transactions: paginatedTransactions,
             currentPage: page,
             totalPages,
+            isLoggedIn:true
+
         })
     } catch (error) {
         console.error(error)
@@ -627,6 +630,8 @@ const myOrders = async (req, res) => {
             cart,
             currentPage: page,
             totalPages: Math.ceil(totalOrders / limit),
+            isLoggedIn:true
+
         })
     } catch (error) {
         console.error(error)

@@ -30,6 +30,8 @@ const loadWallet = async (req, res) => {
             transactions: paginatedTransactions,
             currentPage: page,
             totalPages,
+            isLoggedIn:true
+
         })
     } catch (error) {
         console.error(error)
