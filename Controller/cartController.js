@@ -66,7 +66,7 @@ const loadCart = async (req, res) => {
         )
         const subTotal = await cartModal.findOne({ userId: userId })
 
-        res.render('cart', { find, subTotal })
+        res.render('cart', { find, subTotal,isLoggedIn :true })
     } catch (error) {
         console.error(error)
     }
