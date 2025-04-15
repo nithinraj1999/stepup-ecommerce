@@ -26,7 +26,7 @@ const loadCheckout = async (req, res) => {
 
         const wallet = await walletModel.findOne({ userId: id })
         const coupens = await coupenModel.find({})
-        res.render('checkout', { find, cartData, wallet, coupens })
+        res.render('checkout', { find, cartData, wallet, coupens,isLoggedIn:true })
     } catch (error) {
         console.error(error)
     }
