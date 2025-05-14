@@ -53,8 +53,11 @@
                                                         <br>
                                                         <br>
                                                     <% if(productItem?.productId?.quantity == productItem?.quantity) { %>
-                                                    <p style="color: red;" id="max-qty-msg<%=productItem?.productId?._id %>">Maximum Quantity Reached</p>
-                                                    <% } %>
+                                                    <p style="color: red;" id="max-qty-msg<%=productItem?.productId?._id %>">You've added all available stock for this product</p>
+                                                    <% } else if(productItem?.quantity == 10){%>
+                                                     <p style="color: red;" id="max-qty-msg<%=productItem?.productId?._id %>">You've reached the maximum quantity allowed for this product</p>
+
+                                                        <% } %>
 													</h3><!-- End .product-title -->
                                                     
 												</div><!-- End .product -->
@@ -67,8 +70,8 @@
 											<td class="quantity-col">
                                                 <div class="cart-product-quantity">
                                                
-                                                    <input type="number" class="form-control quantity-of-product-in-cart" data-product-id ="<%=productItem?.productId?._id %>" id="quantity<%=productItem?.productId?._id %>" onchange= " updateProduct('<%=productItem?.productId?._id %>',this.value,'<%=price %>')"  value="<%=productItem?.quantity || 1 %>" min="1" max="<%=productItem?.productId?.quantity || 1 %>" step="1" data-decimals="0" required>
-                                                </div><!-- End .cart-product-quantity -->
+                                                    <input type="number" class="form-control quantity-of-product-in-cart" data-product-id ="<%=productItem?.productId?._id %>" id="quantity<%=productItem?.productId?._id %>" onchange= " updateProduct('<%=productItem?.productId?._id %>',this.value,'<%=price %>')"  value="<%=productItem?.quantity || 1 %>" min="1" max="<%=productItem?.productId?.quantity<=10?productItem?.productId?.quantity:10  %>" step="1" data-decimals="0" required>
+                                                </div>
                                             </td>
 											<td class="total-col" id="total-col-id-<%=productItem.productId._id %>">₹ <%=productItem?.total %></td>
 											<td class="remove-col"><button class="btn-remove" onclick="removeProductFromCart('<%=productItem.productId._id %>')" ><i class="icon-close"></i></button></td>
