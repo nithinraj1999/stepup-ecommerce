@@ -25,6 +25,11 @@ const CoupenSchema = mongoose.Schema({
         type:Number,
         required:true
     },
+    maxPurchaseAmount:{
+        type:Number,
+        required:true
+    },
+
     users:[{
         userID:{
             type:mongoose.Schema.Types.ObjectId,

@@ -23,10 +23,11 @@ const applyCoupen = async (req, res) => {
                 subTotal: subTotal,
             })
         } else { 
-            const { discount, validUntill, minPurchaseAmount } = coupen
+            const { discount, validUntill, minPurchaseAmount,maxPurchaseAmount } = coupen
 
             if (
                 subTotal >= minPurchaseAmount &&
+                subTotal <= maxPurchaseAmount &&
                 new Date(validUntill) > Date.now()
             ) {
                 await cartModal.updateOne(
@@ -78,6 +79,7 @@ const addNewCoupen = async (req, res) => {
             validUntil,
             discountPercentage,
             minTotalPrice,
+            maxTotalPrice
         } = req.body
 
         const coupenCodeUpperCase = couponCode.toUpperCase()
@@ -88,6 +90,7 @@ const addNewCoupen = async (req, res) => {
             minPurchaseAmount: minTotalPrice,
             validFrom: validFrom,
             validUntill: validUntil,
+            maxPurchaseAmount:maxTotalPrice
         })
         await coupen.save()
 
@@ -131,6 +134,7 @@ const editCoupen = async (req, res) => {
             validUntill,
             discount,
             minPrice,
+            maxTotalPrice2
         } = req.body
         const coupenCodeUpperCase = coupenCode.toUpperCase()
         const coupen = await coupenModel.findOne({
@@ -147,6 +151,7 @@ const editCoupen = async (req, res) => {
                         validUntill: validUntill,
                         discount: discount,
                         minPurchaseAmount: minPrice,
+                        maxPurchaseAmount:maxTotalPrice2
                     },
                 }
             )
