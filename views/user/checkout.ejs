@@ -669,9 +669,10 @@ function faildPayment(payment,order){
         order,
     }
 
+
     axios.post("/failed-payment",data)
     .then(response =>{
-        console.log(response.data);
+    console.log("res.....",payment);
         // window.location.href = "/paymen-failed";
     })
     .then(error=>{

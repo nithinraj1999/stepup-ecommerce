@@ -275,52 +275,114 @@
     alert("this wiill delete the category")
    }
 
-   function action(status,orderId,productId){
-    const data = {
-      currentStatus:status,
-      orderId:orderId,
-      productId:productId
-    }
+  //  function action(status,orderId,productId){
+  //   const data = {
+  //     currentStatus:status,
+  //     orderId:orderId,
+  //     productId:productId
+  //   }
 
-    axios.post("/admin/order-status",data)
-    .then(response =>{
-      console.log(response.data);
-      document.getElementById(`product${productId}order${orderId}`).innerText = response.data.currentStatus;
-      const button = document.getElementById(`button${productId}`);
-      if (button) {
-        switch (status) {
+  //   axios.post("/admin/order-status",data)
+  //   .then(response =>{
+  //     console.log(response.data);
+  //     document.getElementById(`product${productId}order${orderId}`).innerText = response.data.currentStatus;
+  //     const button = document.getElementById(`button${productId}`);
+  //     if (button) {
+  //       switch (status) {
           
-          case 'Packed':
-            button.innerText = 'Proceed To Ship';
-            button.value = 'Shipped';
-            button.onclick = () => action('Shipped', orderId, productId);
+  //         case 'Packed':
+  //           button.innerText = 'Proceed To Ship';
+  //           button.value = 'Shipped';
+  //           button.onclick = () => action('Shipped', orderId, productId);
 
-             button.style.backgroundColor = '#ff6600'
-            break;
-          case 'Shipped':
-            button.innerText = 'Proceed To Delivery';
-            button.value = 'Delivered';
-            button.onclick = () => action('Delivered', orderId, productId);
-             button.style.backgroundColor = '#66ccff'
-            break;
-          case 'Delivered':
-            button.innerText = 'Product Delivered';
-            button.value = '';  // Optionally, clear the value if needed
-            button.onclick = null;  // Optionally, remove the click event if needed
-            button.style.backgroundColor = '#36ee4c'
-            break;
+  //            button.style.backgroundColor = '#ff6600'
+  //           break;
+  //         case 'Shipped':
+  //           button.innerText = 'Proceed To Delivery';
+  //           button.value = 'Delivered';
+  //           button.onclick = () => action('Delivered', orderId, productId);
+  //            button.style.backgroundColor = '#66ccff'
+  //           break;
+  //         case 'Delivered':
+  //           button.innerText = 'Product Delivered';
+  //           button.value = '';  // Optionally, clear the value if needed
+  //           button.onclick = null;  // Optionally, remove the click event if needed
+  //           button.style.backgroundColor = '#36ee4c'
+  //           break;
           
-          default:
-            break;
-        }
-      }
-    })
-    .catch(error=>{
-      console.error(error);
-    })
-   }
+  //         default:
+  //           break;
+  //       }
+  //     }
+  //   })
+  //   .catch(error=>{
+  //     console.error(error);
+  //   })
+  //  }
 
 //-----------------------  return Request ------------------------
+
+function action(status, orderId, productId) {
+  Swal.fire({
+    title: `Proceed to ${status}?`,
+    text: "Are you sure you want to continue?",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, proceed!',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const data = {
+        currentStatus: status,
+        orderId: orderId,
+        productId: productId
+      };
+
+      axios.post("/admin/order-status", data)
+        .then(response => {
+          console.log(response.data);
+
+          // Update status text
+          document.getElementById(`product${productId}order${orderId}`).innerText = response.data.currentStatus;
+
+          const button = document.getElementById(`button${productId}`);
+          if (button) {
+            switch (status) {
+              case 'Packed':
+                button.innerText = 'Proceed To Ship';
+                button.value = 'Shipped';
+                button.onclick = () => action('Shipped', orderId, productId);
+                button.style.backgroundColor = '#ff6600';
+                break;
+
+              case 'Shipped':
+                button.innerText = 'Proceed To Delivery';
+                button.value = 'Delivered';
+                button.onclick = () => action('Delivered', orderId, productId);
+                button.style.backgroundColor = '#66ccff';
+                break;
+
+              case 'Delivered':
+                button.innerText = 'Product Delivered';
+                button.value = '';
+                button.onclick = null;
+                button.style.backgroundColor = '#36ee4c';
+                break;
+
+              default:
+                break;
+            }
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          Swal.fire('Error', 'Something went wrong. Try again.', 'error');
+        });
+    }
+  });
+}
 
 function request(status,orderId,productId){
   const data = {
